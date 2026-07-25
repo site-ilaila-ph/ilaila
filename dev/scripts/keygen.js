@@ -7,8 +7,6 @@ import crypto from "node:crypto";
 import editDotenv from "edit-dotenv";
 import { fileURLToPath } from "node:url";
 
-const logger = loggerFrom({ console, indent: "\t" });
-
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const envPath = join(root, ".env.development");
 

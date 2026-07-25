@@ -1,52 +1,55 @@
-"use strict";
+import { error } from "node:console";
+import Stream from "node:stream";
 
-function loggerFrom({ console, indent = 4 }) {
-  const originalConsoleLog = console.log;
-  const originalConsoleWarn = console.warn;
-  const originalConsoleError = console.error;
-
+export function loggerFrom({ indent = 4 }) {
   let indentCount = 0;
-  let indentString;
+  const indentStr = typeof indent === "number" ? " ".repeat(indent) : indent;
+  const getCurrentIndent = () => indentStr.repeat(indentCount);
 
-  if (typeof indent === "number") {
-    indentString = " ".repeat(indent);
-  } else {
-    indentString = indent;
-  }
+  /** @param {Stream.Writable} stream */
+  const createWriter = (stream) => (message) => stream.write(message);
 
-  const logger = {};
+  const writers = {
+    log: createWriter(process.stdout),
+    warn: createWriter(process.stdout),
+    error: createWriter(process.stderr),
+  };
 
-  logger.log = (function (message) {
-    originalConsoleLog(indentString.repeat(indentCount) + "\x1b[36m" + message + "\x1b[0m");
-  }).bind(logger);
+  const createLogMethod = (writer, colorCode) => (message) => {
+    writer(`${getCurrentIndent()}\x1b[${colorCode}m${message}\x1b[0m\n`);
+  };
 
-  logger.warn = (function (message) {
-    originalConsoleWarn(indentString.repeat(indentCount) + "\x1b[33m" + message + "\x1b[0m");
-  }).bind(logger);
+  const createAsIsMethod = (writer) => (message) => {
+    writer(`${getCurrentIndent()}${message}`);
+  };
 
-  logger.error = (function (message) {
-    originalConsoleError(indentString.repeat(indentCount) + "\x1b[31m" + message + "\x1b[0m");
-  }).bind(logger);
+  const asIs = {
+    log: createAsIsMethod(writers.log),
+    warn: createAsIsMethod(writers.warn),
+    error: createAsIsMethod(writers.error),
+  };
 
-  logger.indent = (function() { indentCount++; }).bind(logger);
-  logger.dedent = (function() { indentCount = Math.max(indentCount-1, 0); }).bind(logger);
+  return {
+    log: createLogMethod(writers.log, "36"),
+    warn: createLogMethod(writers.warn, "33"),
+    error: createLogMethod(writers.error, "31"),
+    asIs,
 
-  /**
-   * @template T
-   * @param {() => T} fn 
-   * @returns {T}
-   */
-  logger.block = (function(fn) {
-    this.indent();
-    try {
-      return fn();
-    }
-    finally {
-      this.dedent();
-    }
-  }).bind(logger);
+    indent() {
+      indentCount++;
+    },
 
-  return logger;
+    dedent() {
+      indentCount = Math.max(indentCount - 1, 0);
+    },
+
+    block(fn) {
+      this.indent();
+      try {
+        return fn();
+      } finally {
+        this.dedent();
+      }
+    },
+  };
 }
-
-export { loggerFrom }

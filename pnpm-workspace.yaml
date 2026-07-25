@@ -1,5 +1,6 @@
 allowBuilds:
   '@prisma/engines': true
+  node-pty: true
   prisma: true
   sharp: true
   unrs-resolver: true

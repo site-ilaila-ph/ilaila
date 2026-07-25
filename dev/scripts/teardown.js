@@ -14,11 +14,10 @@ async function main() {
     const nodeModulesRemovalPromise = rm(join(projectRoot, 'node_modules'), { recursive: true, force: true });
     const pnpmStoreRemovalPromise = rm(join(projectRoot, '.pnpm-store'), { recursive: true, force: true });
     const nextCacheRemovalPromise = rm(join(projectRoot, '.next'), { recursive: true, force: true });
-    const pnpmLockRemovalPromise = rm(join(projectRoot, 'pnpm-lock.yaml'), { force: true });
     const generatedSourceRemovalPromise = rm(join(projectRoot, 'src/generated'), { recursive: true, force: true });
 
     try {
-      await Promise.all([nodeModulesRemovalPromise, pnpmStoreRemovalPromise, nextCacheRemovalPromise, pnpmLockRemovalPromise, generatedSourceRemovalPromise]);
+      await Promise.all([nodeModulesRemovalPromise, pnpmStoreRemovalPromise, nextCacheRemovalPromise, generatedSourceRemovalPromise]);
     }
     catch (e) {
       logger.error("Something went wrong whilst cleaning up.");
