@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Prisma Development Server",
+      "type": "shell",
+      "command": "pnpm dev:prisma",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": {
+        "owner": "prisma",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Loaded Prisma config",
+          "endsPattern": "postgres://.*"
+        }
+      }
+    },
+    {
+      "label": "Application Setup",
+      "type": "shell",
+      "dependsOn": ["Start Prisma Development Server"]
+    },    
+  ]
+}

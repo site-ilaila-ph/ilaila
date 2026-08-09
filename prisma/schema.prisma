@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma" // Required in v7
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  // timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  id           String   @id
+  userName     String?
+  email        String   @unique
+  passwordHash String
+  isAdmin      Boolean  @default(false)
+
+  reviews          Review[]
+  bookmarks        Bookmark[]
+  businessesPosted Business[] // only ever non-empty for admins
+}
+
+model Food {
+  id                   String      @id
+  name                 String
+  images               FoodImage[]
+  tags                 FoodTag[]
+  description          String
+  history              String
+  preparation          String
+  recipe               String
+  culturalSignificance String
+  isHeritage           Boolean
+
+  businesses BusinessFood[]
+}
+
+model FoodTag {
+  id     String @id
+  value  String
+  foodId String
+  food   Food   @relation(fields: [foodId], references: [id])
+}
+
+model FoodImage {
+  id          String @id
+  foodId      String
+  food        Food   @relation(fields: [foodId], references: [id])
+  description String
+}
+
+model Business {
+  id          String  @id
+  name        String
+  description String
+  history     String?
+  isPublished Boolean @default(true) // lets an admin unpublish/draft a listing without deleting it
+
+  // who posted it — always an admin
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  // location
+  address   String
+  latitude  Float
+  longitude Float
+  hours     String // consider a structured OperatingHours[] model later if per-day hours are needed
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images    BusinessImage[]
+  tags      BusinessTag[]
+  menuItems MenuItem[]
+  reviews   Review[]
+  bookmarks Bookmark[]
+  foods     BusinessFood[]
+}
+
+model BusinessImage {
+  id          String   @id
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  description String
+}
+
+model BusinessTag {
+  id         String   @id
+  value      String
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+}
+
+model MenuItem {
+  id          String   @id
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  name        String
+  description String?
+  price       Decimal
+  isAvailable Boolean  @default(true)
+  dietaryTags String[] // e.g. "vegetarian", "halal", "dairy-free"
+}
+
+// Links a Business to the Food items it serves (food/[name] -> linked businesses)
+model BusinessFood {
+  id         String   @id
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  foodId     String
+  food       Food     @relation(fields: [foodId], references: [id])
+
+  @@unique([businessId, foodId])
+}
+
+model Review {
+  id          String   @id
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id])
+  text        String
+  foodQuality Int // 1-5
+  service     Int // 1-5
+  ambiance    Int // 1-5
+  value       Int // 1-5
+  upvotes     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, businessId])
+}
+
+// bookmarking a business.
+model Bookmark {
+  id         String   @id
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, businessId])
+}

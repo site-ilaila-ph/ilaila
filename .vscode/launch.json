@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Project",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev:next",
+      "preLaunchTask": "Application Setup",
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Debug Project (Client-Side)",
+        "pattern": "Local:\\s+http://localhost:(\\d{4})",
+      }
+    },
+    {
+      "name": "Debug Project (Client-Side)",
+      "type": "chrome",
+      "request": "launch",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/dev/tmp/chrome-dev-user",
+      "url": "http://localhost:3000",
+      "sourceMaps": true,
+    }
+  ]
+}

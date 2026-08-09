@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        // base ignore.
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+
+        // normally we should not be editing these files.
+        // ".github": true,
+        // ".pnpm-store": true,
+        // "node_modules": true,
+        // ".next": true
+    },
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+}
