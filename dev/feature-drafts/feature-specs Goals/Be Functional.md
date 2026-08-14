@@ -1,0 +1,1 @@
+The website defines the functional behavior, parameters, and operational rules for a functional module or script. It focuses strictly on what the system does rather than internal implementation details.
