@@ -164,7 +164,7 @@ function AttachmentTrigger<TAs extends React.ElementType = "button">({
   render,
   type,
   ...props
-}: PolymorphicComponentProps<{ type?: string }, TAs>) {
+}: PolymorphicComponentProps<{ type?: "button" | "submit" | "reset" }, TAs>) {
   throwIfUsingRenderProp({ render })
   const Component = as ?? "button"
   return <Component data-slot="attachment-trigger" type={type ?? "button"} className={cn("absolute inset-0 z-10 outline-none", className)} {...props} />

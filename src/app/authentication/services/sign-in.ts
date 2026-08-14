@@ -3,7 +3,7 @@ import schema from "../validation/schemas/sign-in";
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import db from "@/lib/server/db";
-import cache from "@/lib/server/caching/cache";
+import { cache } from "@/lib/server/cache";
 import { verify } from "../lib/password";
 import z from "zod";
 import { ServerError } from "@/lib/server/errors";
@@ -44,7 +44,11 @@ export default async function signIn({
   const sessionId = crypto.randomBytes(32).toString("hex");
   const sessionTtlSeconds = 12 * 60 * 60;
 
-  await cache.set(sessionId, user.id, sessionTtlSeconds);
+  await cache({
+    key: ["session", "via-id", sessionId],
+    fn: async () => user.id,
+    ttlSeconds: sessionTtlSeconds,
+  });
   cookieStore.set("SESSION_TOKEN", sessionId, {
     httpOnly: true,
     path: "/",
