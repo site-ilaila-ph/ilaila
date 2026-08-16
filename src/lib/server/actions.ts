@@ -24,7 +24,7 @@ export type SensitiveActionFailure = {
 }
 
 export type InsensitiveActionFailure = {
-    success: false;
+    success: false; 
     type: "insensitive",
     hint?: string;
     message?: string;

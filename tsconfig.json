@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "dev/modules/logger.,ts"  ],
+, "dev/modules/logger.,ts", ".next/dev/validator.ts"  ],
   "exclude": ["node_modules", "src/generated"]
 }
