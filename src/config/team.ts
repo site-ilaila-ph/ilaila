@@ -71,7 +71,7 @@ const team = {
       },
       {
         name: "Padilla, Godfrey M.",
-        github: "",
+        github: "Godfrey245",
       },
       {
         name: "Moriente, Ken Cristan C.",
