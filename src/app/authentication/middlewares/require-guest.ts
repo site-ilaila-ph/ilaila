@@ -1,6 +1,6 @@
 import { ApplicationMiddleware, createMiddleware } from "@/lib/server/middleware";
 import { AuthMiddlewareFactoryOptions } from "./types";
-import { getSessionId } from "@/lib/server/session";
+import { getSessionId } from "@/app/authentication/services/session";
 import { NextResponse } from "next/server";
 import { REDIRECT_ROUTE_FOR_AUTHENTICATED_USERS } from "@/config/auth";
 

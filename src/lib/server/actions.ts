@@ -38,25 +38,36 @@ export type AnySerializablePrimitive = string | number | boolean | null;
 export type AnySerializable = AnySerializablePrimitive | AnySerializable[] | { [key: string]: AnySerializable };
 export type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
-export type AsyncServiceFunction<TParams = any, TReturn = any> = (
-  params: TParams
+export type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
+  params: TParams,
+  deps: TDeps
 ) => Promise<TReturn>;
 
-export type AnyAsyncServiceFunction = AsyncServiceFunction<any, any>
+export type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>
 
-export type ServerActionBusinessConstraint<TParams> = (
-  params: TParams
+export type ServerActionBusinessConstraint<TParams, TDeps = any> = (
+  params: TParams,
+  deps: TDeps
 ) => void | Promise<void>;
 
-export type AnyServiceActionBusinessConstraint = ServerActionBusinessConstraint<any>;
+export type AnyServiceActionBusinessConstraint = ServerActionBusinessConstraint<any, any>;
+
+export interface DependencyBuilder<TAccumulated> {
+  extend<TAdditional>(
+    fn: (accumulated: TAccumulated) => TAdditional
+  ): DependencyBuilder<Omit<TAccumulated, keyof TAdditional> & TAdditional>;
+  build(): TAccumulated;
+}
 
 export interface ServiceFunctionToServerActionOptions<
   TFn extends AsyncServiceFunction,
-  TSchema extends z.ZodType<Parameters<TFn>[0]>
+  TSchema extends z.ZodType<Parameters<TFn>[0]>,
+  TDeps = Parameters<TFn>[1]
 > {
   serviceFn: TFn;
   schema: TSchema;
-  constraints?: ServerActionBusinessConstraint<Parameters<TFn>[0]>[];
+  constraints?: ServerActionBusinessConstraint<Parameters<TFn>[0], TDeps>[];
+  dependencies?: TDeps | DependencyBuilder<TDeps>;
 }
 
 export type AnyServiceFunctionToServerActionOptions = ServiceFunctionToServerActionOptions<AnyAsyncServiceFunction, AnyParameterSchema>;
@@ -77,11 +88,12 @@ export type InferFunctionCoercedServerActionResultData<TFn extends AnyFunctionCo
 
 export default function toServerAction<
   TFn extends AsyncServiceFunction,
-  TSchema extends z.ZodType<Parameters<TFn>[0]>
+  TSchema extends z.ZodType<Parameters<TFn>[0]>,
+  TDeps = Parameters<TFn>[1]
 >(
-  options: ServiceFunctionToServerActionOptions<TFn, TSchema>
+  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>
 ): FunctionCoercedServerAction<TFn, TSchema> {
-  const { serviceFn, schema, constraints = [] } = options;
+  const { serviceFn, schema, constraints = [], dependencies } = options;
 
   return async (
     input: z.input<TSchema>
@@ -99,12 +111,24 @@ export default function toServerAction<
 
     const validParams = parsed.data as Parameters<TFn>[0];
 
+    // Resolve dependencies
+    let resolvedDeps: any = undefined;
+    if (dependencies) {
+      if (typeof dependencies === "object" && dependencies !== null && "build" in dependencies && typeof (dependencies as any).build === "function") {
+        resolvedDeps = (dependencies as DependencyBuilder<any>).build();
+      } else if (typeof dependencies === "function") {
+        resolvedDeps = (dependencies as any)();
+      } else {
+        resolvedDeps = dependencies;
+      }
+    }
+
     try {
       for (const constraint of constraints) {
-        await constraint(validParams);
+        await constraint(validParams, resolvedDeps);
       }
 
-      const data = await serviceFn(validParams);
+      const data = await serviceFn(validParams, resolvedDeps);
 
       return {
         success: true,
@@ -123,6 +147,7 @@ export default function toServerAction<
             return {
                 success: false,
                 type: 'sensitive',
+                
                 hint: error.hint
             };
         }

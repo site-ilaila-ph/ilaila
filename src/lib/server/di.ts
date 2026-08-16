@@ -1,15 +1,31 @@
 export interface DependencyBuilder<TAccumulated> {
   extend<TAdditional>(
-    fn: (accumulated: TAccumulated) => TAdditional
+    fn: (accumulated: TAccumulated) => TAdditional,
   ): DependencyBuilder<Omit<TAccumulated, keyof TAdditional> & TAdditional>;
   build(): TAccumulated;
 }
 
+export interface IndependentDependencyBuilder<
+  TAccumulatedSnapshot,
+  TAdditionalMerged,
+> {
+  extend<TAdditional>(
+    fn: (accumulated: TAccumulatedSnapshot) => TAdditional,
+  ): keyof TAdditional & keyof TAdditionalMerged extends never
+    ? IndependentDependencyBuilder<
+        TAccumulatedSnapshot,
+        TAdditionalMerged & TAdditional
+      >
+    : never;
+
+  build(): Promise<TAccumulatedSnapshot & TAdditionalMerged>;
+}
+
 export type AnyDependencyExtension = (accumulated: unknown) => unknown;
 
-class DependencyBuilderImplementation<TAccumulated>
-  implements DependencyBuilder<TAccumulated>
-{
+class DependencyBuilderImplementation<
+  TAccumulated,
+> implements DependencyBuilder<TAccumulated> {
   private _dependencyExtensions: AnyDependencyExtension[];
 
   public constructor(extensions: AnyDependencyExtension[] = []) {
@@ -17,7 +33,7 @@ class DependencyBuilderImplementation<TAccumulated>
   }
 
   public extend<TAdditional>(
-    fn: (accumulated: TAccumulated) => TAdditional
+    fn: (accumulated: TAccumulated) => TAdditional,
   ): DependencyBuilder<Omit<TAccumulated, keyof TAdditional> & TAdditional> {
     return new DependencyBuilderImplementation<
       Omit<TAccumulated, keyof TAdditional> & TAdditional

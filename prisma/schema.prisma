@@ -10,7 +10,7 @@ datasource db {
 model User {
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
-  id               String     @id
+  id               String     @id @default(cuid())
   userName         String?
   email            String     @unique
   passwordHash     String
@@ -32,7 +32,7 @@ model Session {
 }
 
 model Food {
-  id                   String         @id
+  id                   String         @id @default(cuid())
   name                 String
   description          String
   history              String
@@ -46,21 +46,21 @@ model Food {
 }
 
 model FoodTag {
-  id     String @id
+  id     String @id @default(cuid())
   value  String
   foodId String
   food   Food   @relation(fields: [foodId], references: [id])
 }
 
 model FoodImage {
-  id          String @id
+  id          String @id @default(cuid())
   foodId      String
   description String
   food        Food   @relation(fields: [foodId], references: [id])
 }
 
 model Business {
-  id          String          @id
+  id          String          @id @default(cuid())
   name        String
   description String
   history     String?
@@ -82,21 +82,21 @@ model Business {
 }
 
 model BusinessImage {
-  id          String   @id
+  id          String   @id @default(cuid())
   businessId  String
   description String
   business    Business @relation(fields: [businessId], references: [id])
 }
 
 model BusinessTag {
-  id         String   @id
+  id         String   @id @default(cuid())
   value      String
   businessId String
   business   Business @relation(fields: [businessId], references: [id])
 }
 
 model MenuItem {
-  id          String   @id
+  id          String   @id @default(cuid())
   businessId  String
   name        String
   description String?
@@ -107,7 +107,7 @@ model MenuItem {
 }
 
 model BusinessFood {
-  id         String   @id
+  id         String   @id @default(cuid())
   businessId String
   foodId     String
   business   Business @relation(fields: [businessId], references: [id])
@@ -117,7 +117,7 @@ model BusinessFood {
 }
 
 model Review {
-  id          String   @id
+  id          String   @id @default(cuid())
   userId      String
   businessId  String
   text        String
@@ -135,7 +135,7 @@ model Review {
 }
 
 model Bookmark {
-  id         String   @id
+  id         String   @id @default(cuid())
   userId     String
   businessId String
   createdAt  DateTime @default(now())

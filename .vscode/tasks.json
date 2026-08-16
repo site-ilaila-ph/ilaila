@@ -4,14 +4,40 @@
     {
       "label": "Start Prisma Development Server",
       "type": "shell",
-      "command": "pnpm dev:prisma",
+      "command": "pnpm db:dev",
       "isBackground": true,
       "presentation": {
         "echo": true,
         "reveal": "always",
         "focus": false,
         "panel": "dedicated",
-        "clear": true
+        "clear": true,
+        "close": true,
+        "group": "prisma"
+      },
+      "problemMatcher": {
+        "owner": "prisma",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Loaded Prisma config",
+          "endsPattern": "postgres://.*"
+        }
+      }
+    },
+        {
+      "label": "Stop Prisma Development Server",
+      "type": "shell",
+      "command": "pnpm db:stop",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "close": true,
+        "clear": true,
+        "group": "prisma"
       },
       "problemMatcher": {
         "owner": "prisma",
@@ -24,9 +50,36 @@
       }
     },
     {
+      "label": "Reset Prisma Development Server Data",
+      "type": "shell",
+      "command": ["pnpm", "db:reset"],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "close": true,
+        "clear": true,
+        "group": "prisma"
+      }
+    },
+    {
+      "label": "Run Prisma",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Start Prisma Development Server", "Reset Prisma Development Server Data", ],
+    },
+    {
       "label": "Application Setup",
       "type": "shell",
-      "dependsOn": ["Start Prisma Development Server"]
-    },    
+      "dependsOrder": "parallel",
+      "dependsOn": ["Run Prisma"]
+    },
+    {
+      "label": "Application Teardown",
+      "type": "shell",
+      "dependsOrder": "parallel",
+      "dependsOn": ["Stop Prisma Development Server"]
+    }
   ]
 }

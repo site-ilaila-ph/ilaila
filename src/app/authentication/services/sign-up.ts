@@ -1,7 +1,7 @@
 import schema from "../validation/schemas/sign-up";
 
 import crypto from "node:crypto";
-import db from "@/lib/server/db";
+import { acquireDb } from "@/lib/server/db";
 import { hash } from "@/app/authentication/lib/password";
 import type { UserWithNoSensitiveDetails } from "../lib/types";
 import z from "zod";
@@ -16,6 +16,7 @@ export default async function signUp({
   const passwordHash = await hash(password);
 
   try {
+    const db = acquireDb();
     const user = await db.user.create({
       data: {
         id: crypto.randomUUID(),

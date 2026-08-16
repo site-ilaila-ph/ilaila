@@ -3,7 +3,7 @@ name: Conditional Vercel Deploy
 on:
   push:
     branches:
-      - main # Change this to your default branch
+      - main
 
 jobs:
   database-migration:

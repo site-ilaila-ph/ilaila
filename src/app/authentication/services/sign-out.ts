@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { invalidate } from "@/lib/server/cache";
+import { acquireCacheManager } from "@/lib/server/cache";
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
 
 export default async function signOut({}) {
@@ -7,7 +7,8 @@ export default async function signOut({}) {
   const sessionToken = cookieStore.get(SESSION_TOKEN_COOKIE_NAME)?.value ?? null;
 
   if (sessionToken) {
-    await invalidate(["session", "via-id", sessionToken]);
+    const cache = acquireCacheManager();
+    await cache.invalidate({ key: ["session", "via-id", sessionToken] });
     cookieStore.delete(SESSION_TOKEN_COOKIE_NAME);
   }
 };

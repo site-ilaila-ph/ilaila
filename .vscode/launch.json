@@ -5,12 +5,15 @@
       "name": "Run Project",
       "type": "node-terminal",
       "request": "launch",
-      "command": "pnpm dev:next",
+      "command": "pnpm app:dev",
       "preLaunchTask": "Application Setup",
+      "postDebugTask": "Application Teardown",
+      "cascadeTerminateToConfigurations": ["Start Prisma Development Server"],
       "serverReadyAction": {
         "action": "startDebugging",
         "name": "Debug Project (Client-Side)",
         "pattern": "Local:\\s+http://localhost:(\\d{4})",
+        "killOnServerStop": true
       }
     },
     {

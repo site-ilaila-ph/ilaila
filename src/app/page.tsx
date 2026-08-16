@@ -1,4 +1,4 @@
-import { getSessionId } from "@/lib/server/session";
+import { getSessionId } from "@/app/authentication/services/session";
 import { redirect } from "next/navigation";
 
 export default async function RootPage() {

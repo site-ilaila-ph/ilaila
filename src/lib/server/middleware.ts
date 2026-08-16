@@ -36,7 +36,7 @@ interface ApplicationMiddlewareOptions {
 
 type MonolithicMiddleware = NextProxy;
 
-function createMiddleware<P extends Params>(
+function acquireMiddleware<P extends Params>(
   handler: ApplicationMiddlewareHandler<P>,
   { paths }: ApplicationMiddlewareOptions,
 ): ApplicationMiddleware<P> {
@@ -76,7 +76,7 @@ function toMonolithic(
   };
 }
 
-export { createMiddleware, toMonolithic };
+export { acquireMiddleware as createMiddleware, toMonolithic };
 export type {
   ApplicationMiddleware,
   ApplicationMiddlewareHandler,
