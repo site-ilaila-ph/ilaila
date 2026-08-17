@@ -41,7 +41,7 @@ const MOCK_FOODS: Record<string, FoodItem> = {
   "sinigang-sa-sampalok": {
     id: "food-2",
     name: "Sinigang sa Sampalok",
-    description: "A comforting sour soup made with pork ribs, tamarind broth, and fresh regional garden vegetables.",
+    description: "A comforting sour soup made with pork ribs, tamarind broth, and fresh regional garden vegetable s.",
     history: "Traditional sour stew adapted across various islands utilizing native souring agents like tamarind, batuan, and kamias.",
     preparation: "Boil pork until tender, create the sour broth using fresh tamarind pulp, and add vegetables based on cooking time.",
     recipe: "Pork ribs, tamarind broth base, radish, kangkong, string beans, eggplant, tomatoes, green chili.",
