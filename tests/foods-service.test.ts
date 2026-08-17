@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { PrismaClient } from "@/generated/prisma/client";
 import { getAllFood, getFoodById } from "@/app/foods/services/food.service";
 
 describe("food service", () => {
@@ -7,8 +8,20 @@ describe("food service", () => {
       {
         id: "food-1",
         name: "Adobong Baboy at Manok",
-        images: [{ id: "img-1", foodId: "food-1", description: "main" }],
-        tags: [{ id: "tag-1", value: "heritage", foodId: "food-1" }],
+        images: [
+          {
+            id: "img-1",
+            foodId: "food-1",
+            description: "main",
+          },
+        ],
+        tags: [
+          { 
+            id: "tag-1",
+            value: "heritage",
+            foodId: "food-1",
+          },
+        ],
       },
     ];
 
@@ -16,7 +29,7 @@ describe("food service", () => {
       food: {
         findMany: vi.fn().mockResolvedValue(foodItems),
       },
-    } as any;
+    } as unknown as Pick<PrismaClient, "food">;
 
     const result = await getAllFood(mockDb);
 
@@ -26,6 +39,7 @@ describe("food service", () => {
         tags: true,
       },
     });
+
     expect(result).toEqual(foodItems);
   });
 
@@ -39,26 +53,45 @@ describe("food service", () => {
       recipe: "pork, chicken, vinegar",
       culturalSignificance: "Beloved heritage food",
       isHeritage: true,
-      images: [{ id: "img-1", foodId: "food-1", description: "main" }],
-      tags: [{ id: "tag-1", value: "heritage", foodId: "food-1" }],
-      businesses: [{
-        id: "bf-1",
-        businessId: "biz-1",
-        foodId: "food-1",
-        business: { id: "biz-1", name: "Aling Nena's" },
-      }],
+      images: [
+        {
+          id: "img-1",
+          foodId: "food-1",
+          description: "main",
+        },
+      ],
+      tags: [
+        {
+          id: "tag-1",
+          value: "heritage",
+          foodId: "food-1",
+        },
+      ],
+      businesses: [
+        {
+          id: "bf-1",
+          businessId: "biz-1",
+          foodId: "food-1",
+          business: {
+            id: "biz-1",
+            name: "Aling Nena's",
+          },
+        },
+      ],
     };
 
     const mockDb = {
       food: {
         findUnique: vi.fn().mockResolvedValue(foodItem),
       },
-    } as any;
+    } as unknown as Pick<PrismaClient, "food">;
 
     const result = await getFoodById("food-1", mockDb);
 
     expect(mockDb.food.findUnique).toHaveBeenCalledWith({
-      where: { id: "food-1" },
+      where: {
+        id: "food-1",
+      },
       include: {
         images: true,
         tags: true,
@@ -69,6 +102,7 @@ describe("food service", () => {
         },
       },
     });
+
     expect(result).toEqual(foodItem);
   });
 });

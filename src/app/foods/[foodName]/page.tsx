@@ -16,7 +16,7 @@ interface FoodItem {
   businesses?: { id: string; name: string }[];
   images?: { id: string; url: string; altText?: string }[];
   tags?: { id: string; name: string }[];
-}
+} 
 
 const MOCK_FOODS: Record<string, FoodItem> = {
   "adobong-baboy-at-manok": {
