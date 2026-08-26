@@ -343,7 +343,7 @@ export default function SanPedroPage() {
                   A flower woven into identity
                 </h2>
                 <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
-                  Sampaguita has long been part of San Pedro's cultural and economic story—from garlands sold along the streets to locally made products and the city's annual Sampaguita Festival. Known as the "Sampaguita Capital of the Philippines," the flower continues to shape the city's heritage and community pride.
+                  Sampaguita has long been part of San Pedros cultural and economic story—from garlands sold along the streets to locally made products and the citys annual Sampaguita Festival. Known as the Sampaguita Capital of the Philippines the flower continues to shape the citys heritage and community pride.
                 </p>
                 <div className="mt-8 space-y-4">
                   <div className="flex items-start gap-4">
@@ -352,7 +352,7 @@ export default function SanPedroPage() {
                     </span>
                     <div>
                       <h4 className="font-semibold text-[color:var(--foreground)]">Garlands & Street Culture</h4>
-                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Traditional sampaguita garlands remain iconic along San Pedro's streets</p>
+                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Traditional sampaguita garlands remain iconic along San Pedros streets</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -399,7 +399,7 @@ export default function SanPedroPage() {
               A taste of San Pedro
             </h2>
             <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
-              From old neighborhood panciterias to everyday merienda, San Pedro's food culture reflects its history as a close-knit community where tradition and flavor are passed down through generations.
+              From old neighborhood panciterias to everyday merienda, San Pedros food culture reflects its history as a close-knit community where tradition and flavor are passed down through generations.
             </p>
           </div>
 
@@ -414,7 +414,7 @@ export default function SanPedroPage() {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[color:var(--foreground)]">Pancit Maciang</h3>
                 <p className="mt-3 text-sm text-[color:var(--text-secondary)] leading-6">
-                  A San Pedro institution dating back to the 1950s. Known for its distinctive noodles, egg, and ketchup/lechon-style toppings, Pancit Maciang represents the city's culinary heritage and neighborhood dining tradition.
+                  A San Pedro institution dating back to the 1950s. Known for its distinctive noodles, egg, and ketchup/lechon-style toppings, Pancit Maciang represents the citys culinary heritage and neighborhood dining tradition.
                 </p>
                 <span className="mt-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
                   Since 1950s
@@ -432,7 +432,7 @@ export default function SanPedroPage() {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-[color:var(--foreground)]">Neighborhood Panciterias</h3>
                 <p className="mt-3 text-sm text-[color:var(--text-secondary)] leading-6">
-                  Small, local noodle shops where families gather for quick meals and conversation. These humble establishments are the backbone of San Pedro's everyday food culture and community gathering spaces.
+                  Small, local noodle shops where families gather for quick meals and conversation. These humble establishments are the backbone of San Pedros everyday food culture and community gathering spaces.
                 </p>
                 <span className="mt-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
                   Community Staple
@@ -469,7 +469,7 @@ export default function SanPedroPage() {
                   <h3 className="text-2xl font-bold text-[color:var(--foreground)]">Sampaguita Festival</h3>
                   <p className="mt-3 text-sm text-[color:var(--primary)] font-semibold">May 22–30 (Annual)</p>
                   <p className="mt-4 text-base leading-7 text-[color:var(--text-secondary)]">
-                    The city's most significant celebration, dedicated to reviving and honoring San Pedro's sampaguita heritage. The festival features parades, cultural performances, local product showcases, and community gatherings that celebrate the flower that defines the city's identity.
+                    The citys most significant celebration, dedicated to reviving and honoring San Pedros sampaguita heritage. The festival features parades, cultural performances, local product showcases, and community gatherings that celebrate the flower that defines the citys identity.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <span className="inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
