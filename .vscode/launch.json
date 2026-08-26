@@ -8,7 +8,6 @@
       "command": "pnpm app:dev",
       "preLaunchTask": "Application Setup",
       "postDebugTask": "Application Teardown",
-      "cascadeTerminateToConfigurations": ["Start Prisma Development Server"],
       "serverReadyAction": {
         "action": "startDebugging",
         "name": "Debug Project (Client-Side)",

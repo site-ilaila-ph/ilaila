@@ -20,8 +20,8 @@
         "pattern": { "regexp": "^$" },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Loaded Prisma config",
-          "endsPattern": "postgres://.*"
+          "beginsPattern": "\\$ tsx scripts/prisma-dev\\.mts",
+          "endsPattern": "prisma-dev ready!"
         }
       }
     },
@@ -50,24 +50,10 @@
       }
     },
     {
-      "label": "Reset Prisma Development Server Data",
-      "type": "shell",
-      "command": ["pnpm", "db:reset"],
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "dedicated",
-        "close": true,
-        "clear": true,
-        "group": "prisma"
-      }
-    },
-    {
       "label": "Run Prisma",
       "type": "shell",
       "dependsOrder": "sequence",
-      "dependsOn": ["Start Prisma Development Server", "Reset Prisma Development Server Data", ],
+      "dependsOn": ["Start Prisma Development Server"],
     },
     {
       "label": "Application Setup",

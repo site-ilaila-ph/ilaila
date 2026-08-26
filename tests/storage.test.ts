@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { acquireStorageManager } from "@/lib/server/storage";
+import { acquireStorageManager } from "@/lib/live";
 
 describe("Storage Abstraction Layer", () => {
   it("should upload, retrieve head, list, and delete files using memory storage fallback", async () => {

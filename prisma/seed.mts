@@ -1,5 +1,13 @@
-import { acquireDb } from "@/lib/server/db";
-import { hash } from "@/app/authentication/lib/password";
+import { acquireDb } from "@/lib/live";
+import { hash } from "@/app/auth/lib/password";
+import 'dotenv/config'; // Loads default .env
+import { config } from 'dotenv';
+import path from 'path';
+
+// load local .env if not in production.
+if (process.env.NODE_ENV !== "production") {
+  config({ path: path.join(path.dirname(import.meta.dirname), '.env.development') });
+}
 
 async function main() {
   const client = acquireDb();

@@ -1,8 +1,13 @@
 allowBuilds:
+  '@embedded-postgres/windows-x64': true
+  '@prisma/client': set this to true or false
   '@prisma/engines': true
+  better-sqlite3: set this to true or false
   cpu-features: true
+  esbuild: true
   node-pty: true
   prisma: true
+  protobufjs: set this to true or false
   sharp: true
   ssh2: true
   unrs-resolver: true
