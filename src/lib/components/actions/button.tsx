@@ -2,7 +2,7 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import type * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 import { Separator } from "../layout/separator"
 import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "../component-polymorphism"
 

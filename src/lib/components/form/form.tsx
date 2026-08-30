@@ -19,7 +19,7 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
-import cn from "@/lib/utilities/cn";
+import { cn } from "@/lib/client";
 import { Button } from "../actions/button";
 import { FieldSet } from "./field";
 import { Card } from "../display/card";

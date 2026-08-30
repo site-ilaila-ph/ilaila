@@ -8,17 +8,63 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "./input-group";
-import useHasPointer from "../../hooks/use-has-pointer";
+import { useHasPointer } from "@/lib/hooks";
 
 type SpecializedInputProps = Omit<
   React.ComponentProps<typeof NativeInput>,
   "type"
 >;
 
-export const TextInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, forwardedRef) => <NativeInput ref={forwardedRef} type="text" {...props} />
+/**
+ * Factory for input variants that are nothing more than
+ * `<NativeInput type="..." {...props} />`. Keeps displayName wiring
+ * and forwardRef boilerplate in one place instead of repeated per type.
+ */
+function createSimpleInput(
+  type: string,
+  displayName: string,
+  extraProps: Partial<React.ComponentProps<typeof NativeInput>> = {}
+) {
+  const Component = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
+    (props, ref) => (
+      <NativeInput ref={ref} type={type} {...extraProps} {...props} />
+    )
+  );
+  Component.displayName = displayName;
+  return Component;
+}
+
+// --- TIER 1: SIMPLE TEXT-LIKE VARIANTS ---
+export const TextInput = createSimpleInput("text", "TextInput");
+export const EmailInput = createSimpleInput("email", "EmailInput", {
+  inputMode: "email",
+});
+export const NumberInput = createSimpleInput("number", "NumberInput");
+export const HiddenInput = createSimpleInput("hidden", "HiddenInput", {
+  className: "hidden",
+});
+
+// --- TIER 2: STANDARD TEXT VARIANTS ---
+export const TelInput = createSimpleInput("tel", "TelInput", {
+  inputMode: "tel",
+});
+export const UrlInput = createSimpleInput("url", "UrlInput", {
+  inputMode: "url",
+});
+export const TimeInput = createSimpleInput("time", "TimeInput");
+export const DatetimeLocalInput = createSimpleInput(
+  "datetime-local",
+  "DatetimeLocalInput"
 );
-TextInput.displayName = "TextInput";
+export const MonthInput = createSimpleInput("month", "MonthInput");
+export const WeekInput = createSimpleInput("week", "WeekInput");
+export const CheckboxInput = createSimpleInput("checkbox", "CheckboxInput");
+export const RadioInput = createSimpleInput("radio", "RadioInput");
+export const RangeInput = createSimpleInput("range", "RangeInput");
+export const ColorInput = createSimpleInput("color", "ColorInput");
+export const FileInput = createSimpleInput("file", "FileInput"); // was mis-named "ColorInput" in the original
+
+// --- CUSTOM VARIANTS (real logic beyond swapping `type`) ---
 
 export const PasswordInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
   function PasswordInput(props, ref) {
@@ -108,34 +154,6 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, SpecializedInput
 );
 PasswordInput.displayName = "PasswordInput";
 
-export const EmailInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="email" inputMode="email" {...props} />
-);
-EmailInput.displayName = "EmailInput";
-
-export const NumberInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="number" {...props} />
-);
-NumberInput.displayName = "NumberInput";
-
-export const HiddenInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="hidden" {...props} className="hidden" />
-);
-HiddenInput.displayName = "HiddenInput";
-
-
-// --- TIER 2: STANDARD TEXT VARIANTS ---
-
-export const TelInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="tel" inputMode="tel" {...props} />
-);
-TelInput.displayName = "TelInput";
-
-export const UrlInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="url" inputMode="url" {...props} />
-);
-UrlInput.displayName = "UrlInput";
-
 export const SearchInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
   (props, ref) => {
     return (
@@ -149,7 +167,6 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SpecializedInputPr
     );
   }
 );
-
 SearchInput.displayName = "SearchInput";
 
 export const DateInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
@@ -162,13 +179,13 @@ export const DateInput = React.forwardRef<HTMLInputElement, SpecializedInputProp
         // Auto-format MM/DD/YYYY on the fly
         const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 8);
         let formatted = digitsOnly;
-        
+
         if (digitsOnly.length > 2 && digitsOnly.length <= 4) {
           formatted = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2)}`;
         } else if (digitsOnly.length > 4) {
           formatted = `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2, 4)}/${digitsOnly.slice(4)}`;
         }
-        
+
         // Update both the synthetic event and internal state
         e.target.value = formatted;
         setInternalValue(formatted);
@@ -198,98 +215,42 @@ export const DateInput = React.forwardRef<HTMLInputElement, SpecializedInputProp
 );
 DateInput.displayName = "DateInput";
 
-export const TimeInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="time" {...props} />
-);
-TimeInput.displayName = "TimeInput";
-
-export const DatetimeLocalInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="datetime-local" {...props} />
-);
-DatetimeLocalInput.displayName = "DatetimeLocalInput";
-
-export const MonthInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="month" {...props} />
-);
-MonthInput.displayName = "MonthInput";
-
-export const WeekInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="week" {...props} />
-);
-WeekInput.displayName = "WeekInput";
-
-export const CheckboxInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="checkbox" {...props} />
-);
-CheckboxInput.displayName = "CheckboxInput";
-
-export const RadioInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="radio" {...props} />
-);
-RadioInput.displayName = "RadioInput";
-
-export const RangeInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="range" {...props} />
-);
-RangeInput.displayName = "RangeInput";
-
-export const ColorInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="color" {...props} />
-);
-ColorInput.displayName = "ColorInput";
-
-export const FileInput = React.forwardRef<HTMLInputElement, SpecializedInputProps>(
-  (props, ref) => <NativeInput ref={ref} type="file" {...props} />
-);
-FileInput.displayName = "ColorInput";
-
+// --- DISPATCHER ---
 
 export type InputProps = React.ComponentProps<typeof NativeInput>;
 
+const INPUT_COMPONENTS: Record<
+  string,
+  React.ForwardRefExoticComponent<
+    SpecializedInputProps & React.RefAttributes<HTMLInputElement>
+  >
+> = {
+  text: TextInput,
+  password: PasswordInput,
+  email: EmailInput,
+  number: NumberInput,
+  hidden: HiddenInput,
+  tel: TelInput,
+  url: UrlInput,
+  search: SearchInput,
+  date: DateInput,
+  time: TimeInput,
+  "datetime-local": DatetimeLocalInput,
+  month: MonthInput,
+  week: WeekInput,
+  checkbox: CheckboxInput,
+  radio: RadioInput,
+  range: RangeInput,
+  color: ColorInput,
+  file: FileInput,
+};
+
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ type = "text", ...props }, ref) => {
-    switch (type) {
-      case "text":
-        return <TextInput ref={ref} {...props} />;
-      case "password":
-        return <PasswordInput ref={ref} {...props} />;
-      case "email":
-        return <EmailInput ref={ref} {...props} />;
-      case "number":
-        return <NumberInput ref={ref} {...props} />;
-      case "hidden":
-        return <HiddenInput ref={ref} {...props} />;
-      case "tel":
-        return <TelInput ref={ref} {...props} />;
-      case "url":
-        return <UrlInput ref={ref} {...props} />;
-      case "search":
-        return <SearchInput ref={ref} {...props} />;
-      case "date":
-        return <DateInput ref={ref} {...props} />;
-      case "time":
-        return <TimeInput ref={ref} {...props} />;
-      case "datetime-local":
-        return <DatetimeLocalInput ref={ref} {...props} />;
-      case "month":
-        return <MonthInput ref={ref} {...props} />;
-      case "week":
-        return <WeekInput ref={ref} {...props} />;
-      case "checkbox":
-        return <CheckboxInput ref={ref} {...props} />;
-      case "radio":
-        return <RadioInput ref={ref} {...props} />;
-      case "range":
-        return <RangeInput ref={ref} {...props} />;
-      case "color":
-        return <ColorInput ref={ref} {...props} />;
-      case "file":
-        return <FileInput ref={ref} {...props} />;
-      default:
-        // Escape hatch: Fallback to NativeInput for any custom or unrecognized input type
-        return <NativeInput ref={ref} type={type} {...props} />;
-    }
+    const Component = INPUT_COMPONENTS[type];
+    // Escape hatch: fall back to NativeInput for any custom/unrecognized type
+    if (!Component) return <NativeInput ref={ref} type={type} {...props} />;
+    return <Component ref={ref} {...props} />;
   }
 );
-
 Input.displayName = "Input";

@@ -10,9 +10,9 @@ export default toMonolithic(
   requireGuest({
     paths: [
       "/landing",
-      "/authentication/signup",
-      "/authentication/signin",
-      "/authentication/signout",
+      "/auth/signup",
+      "/auth/signin",
+      "/auth/signout",
     ],
   }),
 );

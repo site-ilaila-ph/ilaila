@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 import { Separator } from "@/lib/components/layout/separator"
 import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/lib/components/component-polymorphism"
 

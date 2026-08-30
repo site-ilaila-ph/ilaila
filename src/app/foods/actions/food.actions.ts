@@ -1,8 +1,8 @@
 "use server";
 
 import z from "zod";
-import toServerAction from "@/lib/server/actions";
-import { acquireDb } from "@/lib/server/db";
+import { toServerAction } from "@/lib/action";
+import { acquireDb } from "@/lib/live";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllFood, getFoodById } from "@/app/foods/services/food.service";
 

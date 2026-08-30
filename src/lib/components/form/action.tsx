@@ -5,7 +5,7 @@ import type {
   AnyFunctionCoercedServerAction,
   InferFunctionCoercedServerActionResultData,
 } from "@/lib/action";
-import useServerAction from "@/lib/action";
+import { useServerAction } from "@/lib/action";
 import { useFormExtensionApi } from "@/lib/components/form/form";
 import type { ActionFailure } from "@/lib/common-server-action-protocol";
 

@@ -1,6 +1,6 @@
 "use server";
 
-import toServerAction from "@/lib/actions";
+import { toServerAction } from "@/lib/action";
 import signOut from "../services/sign-out";
 import z from "zod";
 

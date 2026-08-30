@@ -22,7 +22,7 @@ export type FoodListItem = Prisma.FoodGetPayload<{
 export async function getAllFood(
   db?: Pick<PrismaClient, "food">,
 ): Promise<FoodListItem[]> {
-  const resolvedDb = db ?? (await import("@/lib/server/db")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
   return resolvedDb.food.findMany({
     include: {
@@ -36,7 +36,7 @@ export async function getFoodById(
   id: string,
   db?: Pick<PrismaClient, "food">,
 ): Promise<FoodWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/server/db")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
   return resolvedDb.food.findUnique({
     where: { id },

@@ -1,6 +1,6 @@
 import { ApplicationMiddleware, createMiddleware } from "@/lib/middleware";
 import { AuthMiddlewareFactoryOptions } from "./types";
-import { createSessionReader } from "@/lib/session";
+import { createSessionReader } from "@/lib/session/client";
 import { NextResponse } from "next/server";
 import { REDIRECT_ROUTE_FOR_UNAUTHENTICATED_USERS } from "@/config/auth";
 import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";

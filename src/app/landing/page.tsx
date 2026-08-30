@@ -16,13 +16,13 @@ export default function LandingPage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href="/authentication/signin"
+              href="/auth/signin"
               className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
             >
               Sign In
             </Link>
             <Link
-              href="/authentication/signup"
+              href="/auth/signup"
               className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
             >
               Sign Up

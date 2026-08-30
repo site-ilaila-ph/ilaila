@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 import {
   Dialog,
   DialogContent,

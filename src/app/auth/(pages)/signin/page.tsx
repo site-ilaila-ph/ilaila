@@ -3,6 +3,7 @@
 import schema from "../../validation/schemas/sign-in";
 import signInAction from "@/app/auth/actions/sign-in-action";
 import { 
+  Form,
   FormContent, 
   FormFieldGroup, 
   FormFooter, 
@@ -11,18 +12,18 @@ import {
   FormTitle 
 } from "@/lib/components/form/form";
 import { Viewport } from "@/lib/components/layout/viewport";
-import { ActionForm, ActionFormField } from "@/lib/components/form/action";
+import { ActionFormField } from "@/lib/components/form/action";
 import { useCallback } from "react";
 import { redirect } from "next/navigation";
 
 export default function SignInPage() {
   const onSuccess = useCallback(() => {
-    redirect('/authentication/signin');
+    redirect('/auth/signin');
   }, []);
 
   return (
     <Viewport className="flex flex-col items-center justify-center">
-      <ActionForm className="w-full max-w-md" schema={schema} action={signInAction} onSuccess={onSuccess}>
+      <Form className="w-full max-w-md" schema={schema} onSuccess={onSuccess}>
         <FormHeader className="flex flex-row justify-center">
           <FormTitle>
             <h1 className="text-2xl font-semibold">Sign In</h1>
@@ -39,7 +40,7 @@ export default function SignInPage() {
         <FormFooter className="justify-end">
           <FormSubmitButton>Sign in</FormSubmitButton>
         </FormFooter>
-      </ActionForm>
+      </Form>
     </Viewport>
   );
 }

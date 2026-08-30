@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope, Montserrat } from "next/font/google";
 import "@/styles/globals.css";
 import { cn } from "@/lib/client";
-import { ClientReadonlySession, createSessionReader, SessionContext } from "@/lib/session";
+import { ClientReadonlySession, createSessionReader, SessionContext } from "@/lib/session/client";
 import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";
 import { User } from "@/generated/prisma/client";
 

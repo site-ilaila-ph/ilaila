@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 
 const NativeInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(function ({ className, type, ...props }, forwardedRef) {
   return (

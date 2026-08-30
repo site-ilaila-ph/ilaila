@@ -8,7 +8,7 @@ import {
   useMessageScrollerVisibility,
 } from "@shadcn/react/message-scroller"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 import { Button } from "@/lib/components/actions/button"
 import { ArrowDownIcon } from "lucide-react"
 import { throwIfUsingRenderProp } from "@/lib/components/component-polymorphism"

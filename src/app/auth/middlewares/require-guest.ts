@@ -2,7 +2,7 @@ import { ApplicationMiddleware, createMiddleware } from "@/lib/middleware";
 import { AuthMiddlewareFactoryOptions } from "./types";
 import { NextResponse } from "next/server";
 import { REDIRECT_ROUTE_FOR_AUTHENTICATED_USERS } from "@/config/auth";
-import { createSessionReader } from "@/lib/session";
+import { createSessionReader } from "@/lib/session/client";
 import {
   acquireDb,
   acquireCacheManager,

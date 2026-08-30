@@ -1,24 +1,6 @@
-import { createContext, useContext } from "react";
-
-import { User } from "@/generated/prisma/client";
-
-export type ClientSessionUser = Omit<User, 'createdAt' | 'updatedAt' | 'passwordHash'>;
-
-export type ClientReadonlySession = {
-    id: string;
-    user: ClientSessionUser;
-}
-
-// models `useSession()` in the client.
-export type ClientUseSessionFn = () => ClientReadonlySession;
-
-const SessionContext = createContext<ClientReadonlySession | null>(null);
-
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
-import type { PrismaClient } from "@/generated/prisma/client";
-import { CacheManager, CookieMap } from "@/lib/live";
-
-export type SessionUser = Awaited<ReturnType<PrismaClient['user']['findUnique']>>;
+import { PrismaClient, User } from "@/generated/prisma/client";
+import { CookieMap, CacheManager } from "../live";
 
 export interface SessionReaderDependencies {
   cookieMap: CookieMap;
@@ -26,9 +8,11 @@ export interface SessionReaderDependencies {
   cache: CacheManager;
 }
 
+
+
 export interface SessionReader {
   getSessionId(): Promise<string | null>;
-  getSessionUser(): Promise<SessionUser | null>;
+  getSessionUser(): Promise<User | null>;
 }
 
 export function createSessionReader(deps: SessionReaderDependencies): SessionReader {
@@ -39,7 +23,7 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
       return cookieMap.get(SESSION_TOKEN_COOKIE_NAME);
     },
 
-    async getSessionUser(): Promise<SessionUser | null> {
+    async getSessionUser(): Promise<User | null> {
       const sessionId = cookieMap.get(SESSION_TOKEN_COOKIE_NAME);
 
       if (!sessionId) return null;
@@ -66,10 +50,3 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
     },
   };
 }
-
-const useSession = () => {
-  const session = useContext(SessionContext);
-  return session;
-}
-
-export { SessionContext, useSession };

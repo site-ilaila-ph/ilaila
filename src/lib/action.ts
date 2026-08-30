@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 if (typeof window !== "undefined") {
   throw new Error("A server-only module was imported in the client.");
 }
@@ -16,12 +17,12 @@ import type { ActionFailure, ActionResponse, ActionValidationErrors } from "./co
 
 type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
-type AsyncServiceFunction<TParams = unknown, TReturn = unknown, TDeps = unknown> = (
+type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
   params: TParams,
   deps: TDeps
 ) => Promise<TReturn>;
 
-type AnyAsyncServiceFunction = AsyncServiceFunction<unknown, unknown, unknown>;
+type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>;
 
 // --- Constraint violation reporting -----------------------------------------
 
@@ -69,13 +70,13 @@ function violationsToGlobalErrors(violations: ConstraintViolation[]): string[] {
   return violations.filter((v) => v.field === undefined).map((v) => v.message);
 }
 
-type ServerActionBusinessConstraint<TParams, TDeps = unknown> = (
+type ServerActionBusinessConstraint<TParams, TDeps = any> = (
   params: TParams,
   deps: TDeps,
   api: ConstraintApi
 ) => void | Promise<void>;
 
-type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<unknown, unknown>;
+type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<any, any>;
 
 interface ServiceFunctionToServerActionOptions<
   TFn extends AsyncServiceFunction,
@@ -145,7 +146,7 @@ function toServerAction<
       for (const constraint of constraints) {
         await constraint(validParams, resolvedDeps as TDeps, constraintApi);
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (!(error instanceof ConstraintFailSignal)) {
         throw error;
       }
@@ -167,7 +168,7 @@ function toServerAction<
         success: true,
         data: data as Awaited<ReturnType<TFn>>,
       };
-    } catch (error: unknown) {
+    } catch (error: any) {
       if (!(error instanceof ServerError)) {
         return {
           success: false,
@@ -227,8 +228,6 @@ function useServerAction<TAction extends AnyFunctionCoercedServerAction>({ actio
     return { executionOngoing, result, execute }
 }
 
-export default useServerAction;
-
 class ServerError extends Error {
   public readonly domain: string;
   public readonly hint?: string;
@@ -246,7 +245,7 @@ class ServerError extends Error {
   }
 }
 
-export { toServerAction, ServerError };
+export { toServerAction, useServerAction, ServerError };
 
 export type {
   AnyParameterSchema,

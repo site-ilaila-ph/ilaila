@@ -1,6 +1,6 @@
 import * as React from "react"
 
-import cn from "@/lib/utilities/cn"
+import { cn } from "@/lib/client"
 import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/lib/components/component-polymorphism"
 import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
