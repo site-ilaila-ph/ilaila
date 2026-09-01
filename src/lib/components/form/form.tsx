@@ -451,3 +451,31 @@ export function FormSubmitButton({
     </Button>
   );
 }
+
+export interface FormErrorProps extends React.ComponentProps<"p"> {
+  /**
+   * Field name to display the error for. Uses form context to grab the error.
+   * Can be omitted to display global form errors via "root".
+   */
+  name?: string;
+}
+
+/**
+ * FormError - displays error message for a specific field or globally
+ * Uses form context to fetch error state
+ */
+export function FormError({ name, className, ...props }: FormErrorProps) {
+  const methods = useMagicFormMethods();
+  const fieldName = name || "root";
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const error = (methods.formState.errors as any)?.[fieldName]?.message;
+
+  if (!error) return null;
+
+  return (
+    <p className={cn("mt-1 text-sm text-destructive", className)} {...props}>
+      {error}
+    </p>
+  );
+}
