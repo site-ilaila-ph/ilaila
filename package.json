@@ -28,6 +28,7 @@
     "@base-ui/react": "^1.6.0",
     "@hookform/resolvers": "^5.7.1",
     "@prisma/client": "^7.9.1",
+    "@prisma/client-runtime-utils": "^7.10.0",
     "@prisma/dev": "0.25.1",
     "@shadcn/react": "^0.2.1",
     "@upstash/redis": "^1.38.2",
