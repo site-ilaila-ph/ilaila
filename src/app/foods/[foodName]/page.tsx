@@ -1,215 +1,195 @@
-// app/foods/[foodName]/page.tsx
 "use client";
 
-import { use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getFoodItemByNameAction } from "@/app/foods/actions";
+import type { FoodWithIncludes } from "@/app/foods/services";
 
-interface FoodItem {
-  id: string;
-  name: string;
-  description: string;
-  history: string;
-  preparation: string;
-  recipe: string;
-  culturalSignificance: string;
-  isHeritage: boolean;
-  businesses?: { id: string; name: string }[];
-  images?: { id: string; url: string; altText?: string }[];
-  tags?: { id: string; name: string }[];
-} 
-
-const MOCK_FOODS: Record<string, FoodItem> = {
-  "adobong-baboy-at-manok": {
-    id: "food-1",
-    name: "Adobong Baboy at Manok",
-    description: "Tender pork belly and chicken braised in cane vinegar, soy sauce, garlic, and black peppercorns.",
-    history: "An indigenous Filipino cooking process using vinegar and salt to preserve meat in tropical climates prior to refrigeration.",
-    preparation: "Marinate meat in soy sauce and crushed garlic. Sear in a skillet, then simmer with cane vinegar, bay leaves, and peppercorns until tender.",
-    recipe: "Pork belly, chicken quarters, cane vinegar, soy sauce, garlic, bay leaves, whole black peppercorns.",
-    culturalSignificance: "Widely regarded as the unofficial national dish, symbolizing Filipino culinary adaptability and preservation methods.",
-    isHeritage: true,
-    businesses: [
-      { id: "b1", name: "Aling Nena's Carinderia" },
-      { id: "b2", name: "Manila Heritage Restaurant" },
-    ],
-    tags: [
-      { id: "t1", name: "Savory" },
-      { id: "t2", name: "Stew" },
-      { id: "t3", name: "Heritage" },
-    ],
-  },
-  "sinigang-sa-sampalok": {
-    id: "food-2",
-    name: "Sinigang sa Sampalok",
-    description: "A comforting sour soup made with pork ribs, tamarind broth, and fresh regional garden vegetable s.",
-    history: "Traditional sour stew adapted across various islands utilizing native souring agents like tamarind, batuan, and kamias.",
-    preparation: "Boil pork until tender, create the sour broth using fresh tamarind pulp, and add vegetables based on cooking time.",
-    recipe: "Pork ribs, tamarind broth base, radish, kangkong, string beans, eggplant, tomatoes, green chili.",
-    culturalSignificance: "Represents the fundamental Filipino flavor preference for appetite-stimulating sour broths in warm weather.",
-    isHeritage: true,
-    businesses: [{ id: "b3", name: "Kainan sa Bario" }],
-    tags: [
-      { id: "t4", name: "Soup" },
-      { id: "t5", name: "Sour" },
-      { id: "t3", name: "Heritage" },
-    ],
-  },
-  "sisig-kapampangan": {
-    id: "food-3",
-    name: "Sisig Kapampangan",
-    description: "Crispy diced pork face and chicken liver seasoned with calamansi, onions, and chili peppers.",
-    history: "Created in Angeles City, Pampanga, evolving from a sour salad into the iconic sizzling dish enjoyed across the country.",
-    preparation: "Boil pork face, grill over charcoal to crisp, finely dice, and mix with onions, chili, calamansi, and seasoning.",
-    recipe: "Pork face/jowl, chicken liver, calamansi, red onions, chili peppers, salt, pepper.",
-    culturalSignificance: "Culinary pride of Pampanga and a centerpiece of Filipino social gatherings and street food culture.",
-    isHeritage: true,
-    businesses: [{ id: "b4", name: "Lucing's Sisig House" }],
-    tags: [
-      { id: "t6", name: "Sizzling" },
-      { id: "t7", name: "Spicy" },
-      { id: "t3", name: "Heritage" },
-    ],
-  },
-  "special-halo-halo": {
-    id: "food-4",
-    name: "Special Halo-Halo",
-    description: "Layered shaved ice dessert with sweetened beans, native jellies, leche flan, and ube halaya.",
-    history: "Evolved from the pre-war Japanese 'kakigori' brought to the islands and localized by Filipinos.",
-    preparation: "Layer preserved fruits and sweet beans at the bottom, pack finely shaved ice on top, pour evaporated milk, and crown with leche flan and ube.",
-    recipe: "Shaved ice, evaporated milk, sweetened mongo beans, nata de coco, sago, ube halaya, leche flan.",
-    culturalSignificance: "The ultimate tropical summer treat symbolizing rich Filipino flavor layering and communal enjoyment.",
-    isHeritage: false,
-    businesses: [{ id: "b5", name: "Razon's halo-halo" }],
-    tags: [
-      { id: "t8", name: "Dessert" },
-      { id: "t9", name: "Cold" },
-    ],
-  },
-};
-
-export default function SingleFoodWikiPage({
+export default function SingleFoodPage({
   params,
 }: {
   params: Promise<{ foodName: string }>;
 }) {
-  const resolvedParams = use(params);
-  const currentSlug = resolvedParams.foodName;
+  const [food, setFood] = useState<FoodWithIncludes | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const food = MOCK_FOODS[currentSlug] || MOCK_FOODS["adobong-baboy-at-manok"];
+  useEffect(() => {
+    let isMounted = true;
 
-  return (
-    <main className="min-h-screen bg-slate-50/50 text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
-      {/* Ilaila Header (Clean Version) */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-4">
-        <div className="mx-auto max-w-6xl flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm group-hover:bg-teal-700 transition-colors">
-              I
-            </div>
-            <span className="font-medium text-slate-900 text-lg tracking-tight">
+    async function loadFood() {
+      const resolvedParams = await params;
+      const decodedName = decodeURIComponent(resolvedParams.foodName);
+      const result = await getFoodItemByNameAction(decodedName);
+
+      if (!isMounted) return;
+
+      if (result.success) {
+        setFood(result.data ?? null);
+      } else {
+        setFood(null);
+      }
+
+      setIsLoading(false);
+    }
+
+    void loadFood();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [params]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background text-foreground">
+        <nav className="border-b border-border bg-card/80 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+            <Link
+              href="/home"
+              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
+            >
               Ilaila
-            </span>
+            </Link>
+          </div>
+        </nav>
+        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
+          <p className="text-muted-foreground">Loading food details...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!food) {
+    return (
+      <main className="min-h-screen bg-background text-foreground">
+        <nav className="border-b border-border bg-card/80 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+            <Link
+              href="/home"
+              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
+            >
+              Ilaila
+            </Link>
+          </div>
+        </nav>
+        <div className="mx-auto max-w-6xl px-6 py-20 text-center">
+          <p className="text-muted-foreground">Food not found</p>
+          <Link href="/foods" className="mt-4 inline-block text-primary hover:underline">
+            Back to foods
           </Link>
         </div>
-      </header>
+      </main>
+    );
+  }
 
-      {/* Main Content Area */}
-      <article className="mx-auto max-w-3xl px-6 py-12">
-        {/* Category Pill */}
-        <div className="flex justify-center mb-6">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-teal-50 text-teal-800 text-xs font-medium border border-teal-200/60 shadow-xs">
-            {food.isHeritage ? "Heritage Food Item" : "Featured Food Item"}
-          </span>
+  return (
+    <main className="min-h-screen bg-background text-foreground">
+      <nav className="border-b border-border bg-card/80 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+          <Link
+            href="/home"
+            className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
+          >
+            Ilaila
+          </Link>
+          <Link href="/foods" className="text-sm text-muted-foreground hover:text-foreground">
+            Back to foods
+          </Link>
         </div>
+      </nav>
 
-        {/* Dish Title & Description */}
-        <header className="text-center space-y-4 mb-12">
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-            {food.name}
-          </h1>
-
-          <p className="text-base md:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto font-normal">
-            {food.description}
-          </p>
+      <article className="mx-auto max-w-4xl px-6 py-12">
+        <header className="mb-12 border-b border-border pb-8">
+          <h1 className="mb-4 text-4xl font-bold tracking-tight">{food.name}</h1>
+          {food.tags && food.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {food.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                >
+                  {tag.value}
+                </span>
+              ))}
+            </div>
+          )}
         </header>
 
-        {/* Content Cards */}
-        <div className="space-y-6">
-          <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-sm transition-shadow">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-teal-700 mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-              History & Origins
-            </h2>
-            <p className="text-sm md:text-base text-slate-600 leading-relaxed">
-              {food.history}
-            </p>
-          </section>
+        <div className="grid gap-12 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            {food.images && food.images.length > 0 && (
+              <section className="mb-12">
+                <h2 className="mb-6 text-2xl font-semibold">Gallery</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {food.images.map((image) => (
+                    <div
+                      key={image.id}
+                      className="overflow-hidden rounded-lg border border-border bg-muted"
+                    >
+                      <div className="aspect-video bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <span className="text-sm text-muted-foreground">{image.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-          <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/70 shadow-xs hover:shadow-sm transition-shadow">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-teal-700 mb-3 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
-              Cultural Significance
-            </h2>
-            <p className="text-sm md:text-base text-slate-600 leading-relaxed">
-              {food.culturalSignificance}
-            </p>
-          </section>
+            <section className="mb-12">
+              <h2 className="mb-4 text-2xl font-semibold">History</h2>
+              <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                {food.history}
+              </p>
+            </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section className="bg-white p-6 rounded-2xl border border-slate-200/70 shadow-xs">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Recipe Ingredients
-              </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
+            <section className="mb-12">
+              <h2 className="mb-4 text-2xl font-semibold">Preparation</h2>
+              <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                {food.preparation}
+              </p>
+            </section>
+
+            <section className="mb-12">
+              <h2 className="mb-4 text-2xl font-semibold">Recipe</h2>
+              <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                 {food.recipe}
               </p>
             </section>
 
-            <section className="bg-white p-6 rounded-2xl border border-slate-200/70 shadow-xs">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Preparation
-              </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                {food.preparation}
+            <section className="mb-12">
+              <h2 className="mb-4 text-2xl font-semibold">Cultural Significance</h2>
+              <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                {food.culturalSignificance}
               </p>
             </section>
           </div>
 
-          {food.businesses && food.businesses.length > 0 && (
-            <section className="bg-slate-100/60 p-6 rounded-2xl border border-slate-200/60">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
-                Where to find this in Ilaila
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {food.businesses.map((biz) => (
-                  <span
-                    key={biz.id}
-                    className="inline-flex items-center gap-1.5 bg-white px-3.5 py-2 rounded-xl text-xs font-medium text-slate-800 border border-slate-200 shadow-2xs"
-                  >
-                    <span className="text-teal-600">📍</span> {biz.name}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
+          <aside className="lg:col-span-1">
+            <div className="sticky top-6 rounded-lg border border-border bg-card p-6">
+              <h2 className="mb-6 text-xl font-semibold">Available at</h2>
+              {food.businesses && food.businesses.length > 0 ? (
+                <div className="space-y-4">
+                  {food.businesses.map((bf) => (
+                    <Link
+                      key={bf.id}
+                      href={`/business/${bf.business.id}`}
+                      className="block rounded-lg border border-border p-4 transition hover:border-primary hover:bg-card/50"
+                    >
+                      <h3 className="font-semibold text-primary hover:underline">
+                        {bf.business.name}
+                      </h3>
+                      <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+                        {bf.business.address}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No businesses found serving this food</p>
+              )}
+            </div>
+          </aside>
         </div>
-
-        {/* Footer info & tags */}
-        <footer className="mt-12 pt-6 border-t border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <span>
-            Database Record: <code className="text-slate-600">{food.id}</code>
-          </span>
-          <div className="flex flex-wrap gap-1.5">
-            {food.tags?.map((tag) => (
-              <span
-                key={tag.id}
-                className="bg-slate-200/50 text-slate-600 px-2.5 py-1 rounded-full text-[11px] font-medium"
-              >
-                #{tag.name}
-              </span>
-            ))}
-          </div>
-        </footer>
       </article>
     </main>
   );

@@ -119,19 +119,19 @@ export default function TheTeamPage() {
         }
       `}</style>
 
-      <main className="relative min-h-screen overflow-hidden bg-[color:var(--background)] text-[color:var(--foreground)]">
+      <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
         <div className="pointer-events-none absolute inset-0">
-          <div className="float-slow absolute -left-5 top-20 h-48 w-48 rounded-full bg-[color:var(--primary-muted)] opacity-70 blur-3xl" />
-          <div className="float-slow absolute right-0 top-32 h-52 w-52 rounded-full bg-[color:var(--accent)]/10 opacity-80 blur-3xl" style={{ animationDelay: "1.2s" }} />
+          <div className="float-slow absolute -left-5 top-20 h-48 w-48 rounded-full bg-secondary opacity-70 blur-3xl" />
+          <div className="float-slow absolute right-0 top-32 h-52 w-52 rounded-full bg-accent/10 opacity-80 blur-3xl" style={{ animationDelay: "1.2s" }} />
         </div>
 
-        <nav className="relative z-10 border-b border-[color:var(--border)] bg-[color:var(--surface)]/80 backdrop-blur">
+        <nav className="relative z-10 border-b border-border bg-(--surface)/80 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
             <Link
               href="/home"
-              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-[color:var(--primary)]"
+              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--primary)] text-sm font-semibold text-white">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
                 I
               </span>
               Ilaila
@@ -140,13 +140,13 @@ export default function TheTeamPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/about/san-pedro"
-                className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
               >
                 San Pedro
               </Link>
               <Link
                 href="/about/the-website"
-                className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
               >
                 The Website
               </Link>
@@ -156,13 +156,13 @@ export default function TheTeamPage() {
 
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="reveal max-w-3xl">
-            <span className="mb-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-sm font-medium text-[color:var(--primary)]">
+            <span className="mb-4 inline-flex rounded-full bg-(--primary-muted) px-3 py-1 text-sm font-medium text-primary">
               Reference concept
             </span>
-            <h1 className="text-4xl font-black tracking-tight text-[color:var(--foreground)] sm:text-5xl">
+            <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">
               The people behind the story.
             </h1>
-            <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
+            <p className="mt-6 text-lg leading-8 text-(--text-secondary)">
               This page is a reference layout for introducing the people shaping the brand, the
               local stories, and the experience behind the product.
             </p>
@@ -172,8 +172,8 @@ export default function TheTeamPage() {
             {/* Frontend Team */}
             <div>
               <div className="mb-8 reveal slide-left">
-                <h2 className="text-2xl font-bold text-[color:var(--foreground)]">Frontend Team</h2>
-                <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
+                <h2 className="text-2xl font-bold text-foreground">Frontend Team</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
                   {teamConfig.frontend.features.join(" • ")}
                 </p>
               </div>
@@ -181,12 +181,12 @@ export default function TheTeamPage() {
                 {teamConfig.frontend.members.map((member, index) => (
                   <div
                     key={member.name}
-                    className="card-lift scale-in rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6"
+                    className="card-lift scale-in rounded-[1.5rem] border border-border bg-(--surface) p-6"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <h3 className="text-lg font-semibold text-[color:var(--foreground)]">{member.name}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
                     {member.github && (
-                      <p className="mt-2 text-sm text-[color:var(--primary)]">@{member.github}</p>
+                      <p className="mt-2 text-sm text-primary">@{member.github}</p>
                     )}
                   </div>
                 ))}
@@ -196,8 +196,8 @@ export default function TheTeamPage() {
             {/* Backend Team */}
             <div>
               <div className="mb-8 reveal slide-right">
-                <h2 className="text-2xl font-bold text-[color:var(--foreground)]">Backend Team</h2>
-                <p className="mt-2 text-sm text-[color:var(--text-secondary)]">
+                <h2 className="text-2xl font-bold text-foreground">Backend Team</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
                   {teamConfig.backend.features.join(" • ")}
                 </p>
               </div>
@@ -205,12 +205,12 @@ export default function TheTeamPage() {
                 {teamConfig.backend.members.map((member, index) => (
                   <div
                     key={member.name}
-                    className="card-lift fade-rotate rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6"
+                    className="card-lift fade-rotate rounded-[1.5rem] border border-border bg-(--surface) p-6"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <h3 className="text-lg font-semibold text-[color:var(--foreground)]">{member.name}</h3>
+                    <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
                     {member.github && (
-                      <p className="mt-2 text-sm text-[color:var(--primary)]">@{member.github}</p>
+                      <p className="mt-2 text-sm text-primary">@{member.github}</p>
                     )}
                   </div>
                 ))}

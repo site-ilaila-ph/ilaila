@@ -1,4 +1,5 @@
-import { acquireDb } from "@/lib/live";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "@/app/auth/lib/password";
 import 'dotenv/config'; // Loads default .env
 import { config } from 'dotenv';
@@ -10,8 +11,31 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 async function main() {
-  const client = acquireDb();
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
 
+  const client = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
+
+  console.log("Cleaning existing database records...");
+  await client.review.deleteMany();
+  await client.bookmark.deleteMany();
+  await client.appReview.deleteMany();
+  await client.menuItem.deleteMany();
+  await client.businessImage.deleteMany();
+  await client.businessTag.deleteMany();
+  await client.businessFood.deleteMany();
+  await client.business.deleteMany();
+  await client.foodImage.deleteMany();
+  await client.foodTag.deleteMany();
+  await client.food.deleteMany();
+  await client.session.deleteMany();
+  await client.user.deleteMany();
+
+  console.log("Seeding users...");
   const admin = await client.user.create({
     data: {
       userName: "admin",
@@ -29,6 +53,24 @@ async function main() {
     },
   });
 
+  const maria = await client.user.create({
+    data: {
+      userName: "maria_santos",
+      email: "maria@example.com",
+      passwordHash: await hash("password123"),
+    },
+  });
+
+  const chefMario = await client.user.create({
+    data: {
+      userName: "chef_mario",
+      email: "mario@example.com",
+      passwordHash: await hash("password123"),
+      isAdmin: true,
+    },
+  });
+
+  console.log("Seeding heritage foods...");
   const adobo = await client.food.create({
     data: {
       name: "Adobo",
@@ -45,7 +87,7 @@ async function main() {
         create: [{ value: "savory" }, { value: "vinegar-based" }, { value: "national-dish" }],
       },
       images: {
-        create: [{ description: "A plate of chicken adobo with rice" }],
+        create: [{ description: "A plate of chicken adobo with garlic rice" }],
       },
     },
   });
@@ -65,10 +107,77 @@ async function main() {
       tags: {
         create: [{ value: "sour" }, { value: "soup" }, { value: "comfort-food" }],
       },
+      images: {
+        create: [{ description: "Bowl of steaming hot pork sinigang soup" }],
+      },
     },
   });
 
-  const business = await client.business.create({
+  const haloHalo = await client.food.create({
+    data: {
+      name: "Halo-Halo",
+      description: "A popular Filipino cold dessert featuring crushed ice, evaporated milk, and various sweet ingredients.",
+      history:
+        "Evolution of the pre-war Japanese kakigori brought by early immigrants, adapted with local tropical fruits, sweet beans, and leche flan.",
+      preparation: "Layer sweetened beans, fruits, and jellies in a tall glass, top with finely shaved ice, milk, ube ice cream, and leche flan.",
+      recipe:
+        "Shaved ice, evaporated milk, macapuno, sago, gulaman, sweet red beans, jackfruit, lech flan, ube ice cream.",
+      culturalSignificance:
+        "The ultimate Filipino summer dessert embodying vibrant colors and festive communal sharing.",
+      isHeritage: true,
+      tags: {
+        create: [{ value: "dessert" }, { value: "sweet" }, { value: "cold" }, { value: "summer" }],
+      },
+      images: {
+        create: [{ description: "Tall glass of colorful halo-halo with ube ice cream on top" }],
+      },
+    },
+  });
+
+  const pancitPalabok = await client.food.create({
+    data: {
+      name: "Pancit Palabok",
+      description: "Rice noodles topped with golden shrimp sauce, crushed pork rinds, smoked fish flakes, and hard-boiled eggs.",
+      history:
+        "Inspired by Chinese noodle trading history, palabok evolved distinctly with rich local seafood gravies and indigenous toppings.",
+      preparation: "Boil rice noodles, smother in thick savory shrimp broth, and garnish with finely minced chicharon, tinapa flakes, and shrimp.",
+      recipe:
+        "Rice noodles, shrimp broth, annatto powder, tinapa flakes, crushed chicharon, hard-boiled eggs, scallions.",
+      culturalSignificance:
+        "A centerpiece noodle dish traditionally served at birthdays, fiestas, and community gatherings.",
+      isHeritage: true,
+      tags: {
+        create: [{ value: "noodles" }, { value: "seafood" }, { value: "fiesta" }],
+      },
+      images: {
+        create: [{ description: "Platter of pancit palabok garnished with shrimp and eggs" }],
+      },
+    },
+  });
+
+  const lechon = await client.food.create({
+    data: {
+      name: "Lechon",
+      description: "Whole roasted pig with ultra-crispy golden skin and tender, succulent meat.",
+      history:
+        "Rooted in Hispanic roasting traditions (lechón) introduced during Spanish rule, perfected locally with unique stuffings like lemongrass and star anise.",
+      preparation: "Stuff a whole pig with aromatics, skewer on a bamboo pole, and roast slowly over glowing charcoal while basting skin.",
+      recipe:
+        "Whole pig, lemongrass, garlic, onions, bay leaves, salt, pepper, liver sauce.",
+      culturalSignificance:
+        "The undisputed star of Filipino fiestas, weddings, and grand celebrations.",
+      isHeritage: true,
+      tags: {
+        create: [{ value: "roasted" }, { value: "pork" }, { value: "celebration" }, { value: "crispy" }],
+      },
+      images: {
+        create: [{ description: "Crispy golden roasted lechon served with liver sauce" }],
+      },
+    },
+  });
+
+  console.log("Seeding businesses...");
+  const business1 = await client.business.create({
     data: {
       name: "Aling Nena's Kitchen",
       description: "A family-run carinderia serving home-style Filipino dishes since 1985.",
@@ -89,13 +198,13 @@ async function main() {
         create: [
           {
             name: "Chicken Adobo",
-            description: "Served with steamed rice",
+            description: "Served with steamed garlic rice",
             price: 120.0,
             dietaryTags: ["contains-soy"],
           },
           {
             name: "Sinigang na Baboy",
-            description: "Pork sinigang, good for sharing",
+            description: "Pork sinigang soup, good for sharing",
             price: 180.0,
             dietaryTags: [],
           },
@@ -107,10 +216,83 @@ async function main() {
     },
   });
 
+  const business2 = await client.business.create({
+    data: {
+      name: "Manila Heritage Cafe",
+      description: "An authentic historic cafe in Intramuros offering classic colonial sweets and local heritage dishes.",
+      history: "Located in a restored Spanish-era ancestral house overlooking historic cobblestone streets.",
+      isPublished: true,
+      createdById: chefMario.id,
+      address: "45 General Luna St, Intramuros, Manila",
+      latitude: 14.5896,
+      longitude: 120.9750,
+      hours: "Tue-Sun 10:00 AM - 9:00 PM",
+      tags: {
+        create: [{ value: "historic" }, { value: "cafe" }, { value: "desserts" }, { value: "ambiance" }],
+      },
+      images: {
+        create: [{ description: "Cozy interior of Manila Heritage Cafe" }],
+      },
+      menuItems: {
+        create: [
+          {
+            name: "Special Halo-Halo Supreme",
+            description: "Loaded with homemade leche flan and ube ice cream",
+            price: 160.0,
+            dietaryTags: ["dairy"],
+          },
+          {
+            name: "Pancit Palabok Special",
+            description: "Rich shrimp gravy with fresh smoked fish flakes",
+            price: 210.0,
+            dietaryTags: ["seafood"],
+          },
+        ],
+      },
+      foods: {
+        create: [{ foodId: haloHalo.id }, { foodId: pancitPalabok.id }],
+      },
+    },
+  });
+
+  const business3 = await client.business.create({
+    data: {
+      name: "Cebu Lechon Haus & Grill",
+      description: "World-class crispy Cebu lechon roasted fresh daily with aromatic herbs and spices.",
+      history: "Proudly bringing authentic island roasting traditions straight from the Queen City of the South.",
+      isPublished: true,
+      createdById: chefMario.id,
+      address: "88 Mango Avenue, Cebu City",
+      latitude: 10.3157,
+      longitude: 123.8854,
+      hours: "Daily 10:00 AM - 10:00 PM",
+      tags: {
+        create: [{ value: "lechon" }, { value: "grill" }, { value: "cebu" }, { value: "meat" }],
+      },
+      images: {
+        create: [{ description: "Freshly carved crunchy lechon belly" }],
+      },
+      menuItems: {
+        create: [
+          {
+            name: "Crispy Lechon Belly (per quarter kilo)",
+            description: "Juicy pork belly with shatteringly crisp skin",
+            price: 280.0,
+            dietaryTags: ["pork"],
+          },
+        ],
+      },
+      foods: {
+        create: [{ foodId: lechon.id }],
+      },
+    },
+  });
+
+  console.log("Seeding reviews and bookmarks...");
   await client.review.create({
     data: {
       userId: regularUser.id,
-      businessId: business.id,
+      businessId: business1.id,
       text: "Tastes just like my lola's cooking. Highly recommend the adobo!",
       foodQuality: 5,
       service: 4,
@@ -119,14 +301,57 @@ async function main() {
     },
   });
 
+  await client.review.create({
+    data: {
+      userId: maria.id,
+      businessId: business2.id,
+      text: "The halo-halo is out of this world! Perfect ambiance inside Intramuros.",
+      foodQuality: 5,
+      service: 5,
+      ambiance: 5,
+      value: 4,
+    },
+  });
+
   await client.bookmark.create({
     data: {
       userId: regularUser.id,
-      businessId: business.id,
+      businessId: business1.id,
+    },
+  });
+
+  await client.bookmark.create({
+    data: {
+      userId: maria.id,
+      businessId: business2.id,
+    },
+  });
+
+  console.log("Seeding app reviews...");
+  await client.appReview.create({
+    data: {
+      userId: regularUser.id,
+      userName: "Juan Dela Cruz",
+      email: "juan@example.com",
+      rating: 5,
+      text: "Ilaila is a fantastic digital museum! Loving the rich historical insights on Filipino food.",
+      isApproved: true,
+    },
+  });
+
+  await client.appReview.create({
+    data: {
+      userId: maria.id,
+      userName: "Maria Santos",
+      email: "maria@example.com",
+      rating: 5,
+      text: "Very user-friendly website. Great tool for finding heritage spots.",
+      isApproved: true,
     },
   });
 
   console.log("Seed complete.");
+  await client.$disconnect();
 }
 
 main()

@@ -1,18 +1,18 @@
 import { toMonolithic } from "@/lib/middleware";
-import requireAuthenticated from "@/app/auth/middlewares/require-authenticated";
-import requireGuest from "@/app/auth/middlewares/require-guest";
+import { requireAuthenticated, requireGuest } from "@/app/auth/middlewares";
 import { MiddlewareConfig } from "next/server";
 
 export default toMonolithic(
   requireAuthenticated({
-    paths: ["/home"],
+    paths: ["/", "/home"],
   }),
   requireGuest({
     paths: [
+      "/",
       "/landing",
-      "/auth/signup",
-      "/auth/signin",
-      "/auth/signout",
+      "/auth/sign-up",
+      "/auth/sign-in",
+      "/auth/sign-out",
     ],
   }),
 );

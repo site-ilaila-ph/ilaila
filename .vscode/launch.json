@@ -23,6 +23,7 @@
       "userDataDir": "${workspaceFolder}/dev/tmp/chrome-dev-user",
       "url": "http://localhost:3000",
       "sourceMaps": true,
+      "timeout": 180000
     }
   ]
 }

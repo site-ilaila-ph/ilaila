@@ -1,6 +1,15 @@
-# Copilot Agent Instructions
+# Copilot Instructions
+## Skill authorization
 
-- This project uses its own convention for commits to keep things simple, please read dev\docs\QUERYABLE_COMMITS_CONVENTION.md for the full commit convention specification.
-- This project uses its own convention for the file structure, plese read dev\docs\PROJECT_STRUCTURE.md.
-- This project has a features specification, please read them at dev\feature-drafts.
-- This project's library is constantly changing, if unsure, consult the code, if outdated uses, do not create compatibility in the library directly, fix it at the usage level.
+Before invoking any skill listed in `.github/skills/authorization.yaml`, check that skill's
+`allowed_agents` list against your own agent name (as declared in your `.agent.md` frontmatter).
+
+- If your agent name is not in the list, do not invoke that skill. Instead, report to the
+  calling agent that the operation is out of scope and should be delegated to an authorized agent.
+- If `.github/skills/authorization.yaml` does not list a skill at all, treat it as unrestricted.
+- This authorization file is a project convention, not a platform-enforced permission system.
+  Treat it as a hard rule for your own behavior regardless of enforcement.
+
+## Proper Termination
+
+To non-master agents, please remember that you are strictly prohibited to end the workflow on your own. You must always hand off to the master agent for final reporting.

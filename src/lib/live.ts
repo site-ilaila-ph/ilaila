@@ -126,51 +126,65 @@ export function acquireCacheManager(): CacheManager {
   const l2: CacheLayer | null = process.env.NODE_ENV === "production" ? createRedisCache() : null;
 
   const formatKey = (key: CacheKey) => joinKey(key, ":");
+  const normalizeTtl = (ttlSeconds?: number): number | undefined => {
+    if (typeof ttlSeconds !== "number" || ttlSeconds <= 0) return undefined;
+    return ttlSeconds;
+  };
+  const getRemainingTtl = async (layer: CacheLayer, key: string): Promise<number | undefined> => {
+    const ttl = await layer.remainingTtl(key);
+    return ttl > 0 ? ttl : undefined;
+  };
+
+  const get = async <T>({ key }: { key: CacheKey }): Promise<T | null> => {
+    const k = formatKey(key);
+
+    const l1Result = await l1.get<T>(k);
+    if (l1Result != null) return l1Result;
+
+    if (!l2) return null;
+
+    const l2Result = await l2.get<T>(k);
+    if (l2Result != null) {
+      // Backfill L1 using L2's remaining TTL so promotion doesn't outlive the source
+      const ttl = await getRemainingTtl(l2, k);
+      await l1.set(k, l2Result, ttl);
+      return l2Result;
+    }
+
+    return null;
+  };
+
+  const set = async ({ key, value, ttlSeconds }: { key: CacheKey; value: unknown; ttlSeconds?: number }) => {
+    const k = formatKey(key);
+    const ttl = normalizeTtl(ttlSeconds);
+
+    // Write L1 immediately so the current process sees it right away
+    await l1.set(k, value, ttl);
+
+    // L2 write happens in the background, if present
+    if (!l2) return;
+    defer({ fn: () => l2.set(k, value, ttl) });
+  };
+
+  const invalidate = async ({ key }: { key: CacheKey }) => {
+    const k = formatKey(key);
+    await Promise.allSettled([l1.delete(k), l2 ? l2.delete(k) : Promise.resolve()]);
+  };
+
+  const cached = async <T>({ key, fn, ttlSeconds }: { key: CacheKey; fn: () => Promise<T>; ttlSeconds?: number }): Promise<T> => {
+    const existing = await get<T>({ key });
+    if (existing != null) return existing;
+
+    const freshData = await fn();
+    await set({ key, value: freshData, ttlSeconds });
+    return freshData;
+  };
 
   return {
-    async get<T>({ key }: { key: CacheKey }): Promise<T | null> {
-      const k = formatKey(key);
-
-      const l1Result = await l1.get<T>(k);
-      if (l1Result != null) return l1Result;
-
-      if (!l2) return null;
-
-      const l2Result = await l2.get<T>(k);
-      if (l2Result != null) {
-        // Backfill L1 using L2's remaining TTL so promotion doesn't outlive the source
-        const ttl = await l2.remainingTtl(k);
-        await l1.set(k, l2Result, ttl > 0 ? ttl : undefined);
-        return l2Result;
-      }
-
-      return null;
-    },
-
-    async set({ key, value, ttlSeconds }) {
-      const k = formatKey(key);
-
-      // Write L1 immediately so the current process sees it right away
-      await l1.set(k, value, ttlSeconds);
-
-      // L2 write happens in the background, if present
-      if (!l2) return;
-      defer({ fn: () => l2.set(k, value, ttlSeconds) });
-    },
-
-    async invalidate({ key }) {
-      const k = formatKey(key);
-      await Promise.allSettled([l1.delete(k), l2 ? l2.delete(k) : Promise.resolve()]);
-    },
-
-    async cached<T>({ key, fn, ttlSeconds }: { key: CacheKey; fn: () => Promise<T>; ttlSeconds?: number }): Promise<T> {
-      const cached = await this.get<T>({ key });
-      if (cached != null) return cached;
-
-      const freshData = await fn();
-      await this.set({ key, value: freshData, ttlSeconds });
-      return freshData;
-    },
+    get,
+    set,
+    invalidate,
+    cached,
   };
 }
 

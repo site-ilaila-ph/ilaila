@@ -1,6 +1,7 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect } from "react";
 
 const stats = [
@@ -202,19 +203,19 @@ export default function SanPedroPage() {
         }
       `}</style>
 
-      <main className="relative min-h-screen overflow-hidden bg-[color:var(--background)] text-[color:var(--foreground)]">
+      <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="float-slow absolute -left-10 top-16 h-56 w-56 rounded-full bg-[color:var(--primary-muted)] opacity-70 blur-3xl" />
-          <div className="float-slow absolute right-0 top-32 h-64 w-64 rounded-full bg-[color:var(--accent)]/10 opacity-80 blur-3xl" style={{ animationDelay: "1s" }} />
+          <div className="float-slow absolute -left-10 top-16 h-56 w-56 rounded-full bg-secondary opacity-70 blur-3xl" />
+          <div className="float-slow absolute right-0 top-32 h-64 w-64 rounded-full bg-accent/10 opacity-80 blur-3xl" style={{ animationDelay: "1s" }} />
         </div>
 
-        <nav className="relative z-10 border-b border-[color:var(--border)] bg-[color:var(--surface)]/80 backdrop-blur">
+        <nav className="relative z-10 border-b border-border bg-(--surface)/80 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
             <Link
               href="/home"
-              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-[color:var(--primary)]"
+              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[color:var(--primary)] text-sm font-semibold text-white">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
                 I
               </span>
               Ilaila
@@ -223,13 +224,13 @@ export default function SanPedroPage() {
             <div className="flex items-center gap-3">
               <Link
                 href="/about/the-team"
-                className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium text-(--text-secondary) transition hover:bg-muted"
               >
                 The Team
               </Link>
               <Link
                 href="/about/the-website"
-                className="rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-medium text-[color:var(--text-secondary)] transition hover:bg-[color:var(--muted)]"
+                className="rounded-full border border-border px-4 py-2 text-sm font-medium text-(--text-secondary) transition hover:bg-muted"
               >
                 The Website
               </Link>
@@ -240,13 +241,13 @@ export default function SanPedroPage() {
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="reveal">
-              <span className="mb-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-sm font-medium text-[color:var(--primary)]">
+              <span className="mb-4 inline-flex rounded-full bg-(--primary-muted) px-3 py-1 text-sm font-medium text-primary">
                 Reference concept
               </span>
-              <h1 className="max-w-xl text-4xl font-black tracking-tight text-[color:var(--foreground)] sm:text-5xl">
+              <h1 className="max-w-xl text-4xl font-black tracking-tight text-foreground sm:text-5xl">
                 San Pedro, Laguna.
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-8 text-[color:var(--text-secondary)]">
+              <p className="mt-6 max-w-xl text-lg leading-8 text-(--text-secondary)">
                 A place known for its rooted community spirit, welcoming neighborhoods, and a
                 blend of heritage and everyday life. This is a concept page inspired by the town’s
                 identity rather than an official profile.
@@ -254,23 +255,25 @@ export default function SanPedroPage() {
             </div>
 
             <div className="reveal float-slow" style={{ animationDelay: "180ms" }}>
-              <div className="pulse-glow rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-5 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-                <div className="shimmer-card rounded-[1.5rem] bg-gradient-to-br from-[color:var(--primary-muted)] via-white to-[color:var(--muted)] p-6">
+              <div className="pulse-glow rounded-[2rem] border border-border bg-(--surface) p-5 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
+                <div className="shimmer-card rounded-[1.5rem] bg-linear-to-br from-secondary via-card to-muted p-6">
                   <div className="mb-5 flex items-center justify-between text-sm">
-                    <span className="rounded-full border border-[color:var(--border)] bg-white px-3 py-1 font-medium uppercase tracking-[0.2em] text-[color:var(--text-secondary)]">
+                    <span className="rounded-full border border-border bg-card px-3 py-1 font-medium uppercase tracking-[0.2em] text-(--text-secondary)">
                       Local
                     </span>
-                    <span className="font-medium text-[color:var(--primary)]">Laguna</span>
+                    <span className="font-medium text-primary">Laguna</span>
                   </div>
 
-                  <div className="rounded-[1.5rem] bg-white p-4 shadow-sm">
-                    <img
+                  <div className="rounded-[1.5rem] bg-card p-4 shadow-sm">
+                    <Image
                       src="https://www.lionunion.com/wp-content/uploads/2023/11/San-Pedro-Banner.jpg"
                       alt="San Pedro Banner"
                       className="mb-4 h-44 w-full rounded-[1.1rem] object-cover scroll-fade"
+                      width={400}
+                      height={176}
                     />
-                    <h2 className="text-xl font-bold text-[color:var(--foreground)]">San Pedro</h2>
-                    <p className="mt-2 text-sm leading-6 text-[color:var(--text-secondary)]">
+                    <h2 className="text-xl font-bold text-foreground">San Pedro</h2>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       A community rooted in hospitality, neighborhood life, and the everyday rhythm
                       of local culture.
                     </p>
@@ -281,18 +284,18 @@ export default function SanPedroPage() {
           </div>
         </section>
 
-        <section className="relative z-10 border-y border-[color:var(--border)] bg-[color:var(--surface)]">
+        <section className="relative z-10 border-y border-border bg-card">
           <div className="mx-auto grid max-w-6xl gap-6 px-6 py-10 md:grid-cols-4">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}
-                className="card-lift reveal rounded-[1.5rem] border border-[color:var(--border)] bg-white p-5 text-left"
+                className="card-lift reveal rounded-[1.5rem] border border-border bg-card p-5 text-left"
                 style={{ animationDelay: `${index * 120}ms` }}
               >
-                <div className="text-3xl font-black tracking-tight text-[color:var(--foreground)]">
+                <div className="text-3xl font-black tracking-tight text-foreground">
                   {stat.value}
                 </div>
-                <div className="mt-2 text-sm text-[color:var(--text-secondary)]">{stat.label}</div>
+                <div className="mt-2 text-sm text-muted-foreground">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -300,31 +303,31 @@ export default function SanPedroPage() {
 
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 max-w-2xl reveal">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
               03Brief History
             </p>
-            <h2 className="text-3xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               From tunas shores to city streets
             </h2>
-            <p className="mt-4 text-lg text-[color:var(--text-secondary)]">1725</p>
+            <p className="mt-4 text-lg text-muted-foreground">1725</p>
           </div>
 
           <div className="space-y-6">
             {milestones.map((item, index) => (
               <div
                 key={item.title}
-                className="card-lift reveal grid gap-5 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-6 md:grid-cols-[140px_1fr]"
+                className="card-lift reveal grid gap-5 rounded-[1.75rem] border border-border bg-card p-6 md:grid-cols-[140px_1fr]"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 <div className="flex items-start">
-                  <span className="inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
+                  <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                     {item.phase}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-2xl font-semibold text-[color:var(--foreground)]">{item.title}</h3>
-                  <p className="mt-3 text-base leading-7 text-[color:var(--text-secondary)]">{item.text}</p>
+                  <h3 className="text-2xl font-semibold text-foreground">{item.title}</h3>
+                  <p className="mt-3 text-base leading-7 text-muted-foreground">{item.text}</p>
                 </div>
               </div>
             ))}
@@ -332,56 +335,58 @@ export default function SanPedroPage() {
         </section>
 
         {/* Sampaguita Section */}
-        <section className="relative z-10 border-t border-[color:var(--border)] bg-[color:var(--surface)]">
+        <section className="relative z-10 border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-6 py-20">
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div className="reveal">
-                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
                   The Sampaguita City
                 </p>
-                <h2 className="text-3xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-4xl">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                   A flower woven into identity
                 </h2>
-                <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
+                <p className="mt-6 text-lg leading-8 text-muted-foreground">
                   Sampaguita has long been part of San Pedros cultural and economic story—from garlands sold along the streets to locally made products and the citys annual Sampaguita Festival. Known as the Sampaguita Capital of the Philippines the flower continues to shape the citys heritage and community pride.
                 </p>
                 <div className="mt-8 space-y-4">
                   <div className="flex items-start gap-4">
-                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--primary-muted)] text-sm font-semibold text-[color:var(--primary)]">
+                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-primary">
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-[color:var(--foreground)]">Garlands & Street Culture</h4>
-                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Traditional sampaguita garlands remain iconic along San Pedros streets</p>
+                      <h4 className="font-semibold text-foreground">Garlands & Street Culture</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Traditional sampaguita garlands remain iconic along San Pedros streets</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--primary-muted)] text-sm font-semibold text-[color:var(--primary)]">
+                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-primary">
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-[color:var(--foreground)]">Local Products</h4>
-                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Sampaguita oil and soap crafted by local artisans</p>
+                      <h4 className="font-semibold text-foreground">Local Products</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Sampaguita oil and soap crafted by local artisans</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--primary-muted)] text-sm font-semibold text-[color:var(--primary)]">
+                    <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-primary">
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-[color:var(--foreground)]">Annual Festival</h4>
-                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">Celebration and revival of sampaguita heritage every May</p>
+                      <h4 className="font-semibold text-foreground">Annual Festival</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Celebration and revival of sampaguita heritage every May</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="reveal float-slow" style={{ animationDelay: "200ms" }}>
-                <div className="pulse-glow rounded-[2rem] border border-[color:var(--border)] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-                  <img
+                <div className="pulse-glow rounded-[2rem] border border-border bg-card p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
+                  <Image
                     src="https://media.philstar.com/photos/2024/02/15/sampaguita2023-07-2517-10-23_2024-02-15_11-04-37.jpg"
                     alt="Sampaguita flowers"
                     className="w-full h-auto rounded-[1.5rem] object-cover scroll-fade"
+                    width={600}
+                    height={400}
                   />
                 </div>
               </div>
@@ -392,49 +397,53 @@ export default function SanPedroPage() {
         {/* Local Food Section */}
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 reveal">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
               Local Flavors
             </p>
-            <h2 className="text-3xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               A taste of San Pedro
             </h2>
-            <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
               From old neighborhood panciterias to everyday merienda, San Pedros food culture reflects its history as a close-knit community where tradition and flavor are passed down through generations.
             </p>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Pancit Maciang */}
-            <div className="card-lift reveal rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden" style={{ animationDelay: "100ms" }}>
-              <img
+            <div className="card-lift reveal rounded-[1.75rem] border border-border bg-card overflow-hidden" style={{ animationDelay: "100ms" }}>
+              <Image
                 src="https://www.angsarap.net/wp-content/uploads/2024/02/Pancit-Maciang-Wide.jpg"
                 alt="Pancit Maciang"
                 className="w-full h-64 object-cover scroll-fade"
+                width={600}
+                height={256}
               />
               <div className="p-6">
-                <h3 className="text-xl font-bold text-[color:var(--foreground)]">Pancit Maciang</h3>
-                <p className="mt-3 text-sm text-[color:var(--text-secondary)] leading-6">
+                <h3 className="text-xl font-bold text-foreground">Pancit Maciang</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-6">
                   A San Pedro institution dating back to the 1950s. Known for its distinctive noodles, egg, and ketchup/lechon-style toppings, Pancit Maciang represents the citys culinary heritage and neighborhood dining tradition.
                 </p>
-                <span className="mt-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
+                <span className="mt-4 inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
                   Since 1950s
                 </span>
               </div>
             </div>
 
             {/* Street Panciterias */}
-            <div className="card-lift reveal rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface)] overflow-hidden" style={{ animationDelay: "200ms" }}>
-              <img
+            <div className="card-lift reveal rounded-[1.75rem] border border-border bg-card overflow-hidden" style={{ animationDelay: "200ms" }}>
+              <Image
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZlKvOm8feRZzpupRdbN0_Qd-TnegTy0uL-ZS7BpZsh24XjZlYVKTk-BRm&s=10"
                 alt="Neighborhood Panciterias"
                 className="w-full h-64 object-cover scroll-fade"
+                width={600}
+                height={256}
               />
               <div className="p-6">
-                <h3 className="text-xl font-bold text-[color:var(--foreground)]">Neighborhood Panciterias</h3>
-                <p className="mt-3 text-sm text-[color:var(--text-secondary)] leading-6">
+                <h3 className="text-xl font-bold text-foreground">Neighborhood Panciterias</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-6">
                   Small, local noodle shops where families gather for quick meals and conversation. These humble establishments are the backbone of San Pedros everyday food culture and community gathering spaces.
                 </p>
-                <span className="mt-4 inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
+                <span className="mt-4 inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
                   Community Staple
                 </span>
               </div>
@@ -443,42 +452,44 @@ export default function SanPedroPage() {
         </section>
 
         {/* Festivals Section */}
-        <section className="relative z-10 border-t border-[color:var(--border)] bg-[color:var(--surface)]">
+        <section className="relative z-10 border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-6 py-20">
             <div className="mb-12 reveal">
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
                 Celebrations
               </p>
-              <h2 className="text-3xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 Festivals & Traditions
               </h2>
-              <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
+              <p className="mt-6 text-lg leading-8 text-muted-foreground">
                 Throughout the year, San Pedro celebrates its heritage and community spirit through vibrant festivals that bring neighborhoods together.
               </p>
             </div>
 
             <div className="space-y-6">
               {/* Sampaguita Festival */}
-              <div className="card-lift reveal grid gap-6 rounded-[1.75rem] border border-[color:var(--border)] bg-white p-6 md:grid-cols-[300px_1fr]" style={{ animationDelay: "100ms" }}>
-                <img
+              <div className="card-lift reveal grid gap-6 rounded-[1.75rem] border border-border bg-card p-6 md:grid-cols-[300px_1fr]" style={{ animationDelay: "100ms" }}>
+                <Image
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjWQg9CnLWXJltm4rrW9bOAMqJ7V3XGOvBi0b6QpYElYCmfRcF9g--F1kX&s=10"
                   alt="Sampaguita Festival"
                   className="w-full h-full object-cover rounded-[1.25rem] scroll-fade"
+                  width={300}
+                  height={300}
                 />
                 <div className="flex flex-col justify-center">
-                  <h3 className="text-2xl font-bold text-[color:var(--foreground)]">Sampaguita Festival</h3>
-                  <p className="mt-3 text-sm text-[color:var(--primary)] font-semibold">May 22–30 (Annual)</p>
-                  <p className="mt-4 text-base leading-7 text-[color:var(--text-secondary)]">
+                  <h3 className="text-2xl font-bold text-foreground">Sampaguita Festival</h3>
+                  <p className="mt-3 text-sm text-primary font-semibold">May 22–30 (Annual)</p>
+                  <p className="mt-4 text-base leading-7 text-muted-foreground">
                     The citys most significant celebration, dedicated to reviving and honoring San Pedros sampaguita heritage. The festival features parades, cultural performances, local product showcases, and community gatherings that celebrate the flower that defines the citys identity.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
+                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
                       🌸 Cultural
                     </span>
-                    <span className="inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
+                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
                       🎉 Community
                     </span>
-                    <span className="inline-flex rounded-full bg-[color:var(--primary-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--primary)]">
+                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
                       🏛️ Heritage
                     </span>
                   </div>
@@ -491,13 +502,13 @@ export default function SanPedroPage() {
         {/* Barangays Section */}
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 reveal">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary)]">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
               Communities
             </p>
-            <h2 className="text-3xl font-bold tracking-tight text-[color:var(--foreground)] sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               28 Barangays of San Pedro
             </h2>
-            <p className="mt-6 text-lg leading-8 text-[color:var(--text-secondary)]">
+            <p className="mt-6 text-lg leading-8 text-muted-foreground">
               San Pedro is composed of 28 barangays, each with its own character and community spirit that together form the fabric of the city.
             </p>
           </div>
@@ -506,10 +517,10 @@ export default function SanPedroPage() {
             {barangays.map((barangay, index) => (
               <div
                 key={barangay}
-                className="card-lift scale-in rounded-[1rem] border border-[color:var(--border)] bg-white p-4 text-center hover:bg-[color:var(--primary-muted)]"
+                className="card-lift scale-in rounded-[1rem] border border-border bg-card p-4 text-center hover:bg-secondary"
                 style={{ animationDelay: `${(index % 15) * 40}ms` }}
               >
-                <p className="text-sm font-semibold text-[color:var(--foreground)]">{barangay}</p>
+                <p className="text-sm font-semibold text-foreground">{barangay}</p>
               </div>
             ))}
           </div>

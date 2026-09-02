@@ -11,7 +11,7 @@ import {
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "./input-group";
+} from "./form/input-group";
 import { useHasPointer } from "@/lib/hooks";
 
 // ---------------------------------------------------------------------------
@@ -34,14 +34,14 @@ type ConfiguredComponentOptions = {
  *     displayName: "Foo",
  *   });
  */
-function configuredComponent<P, R = unknown>(
-  render: (props: P, ref: React.Ref<R>) => React.ReactElement | null,
+function configuredComponent<P extends object, R = unknown>(
+  render: (props: React.PropsWithoutRef<P>, ref: React.ForwardedRef<R>) => React.ReactElement | null,
   options: ConfiguredComponentOptions = {},
 ) {
   const { displayName, forwardRef = true } = options;
 
   const Component = forwardRef
-    ? React.forwardRef<R, P>(render as any)
+    ? React.forwardRef(render)
     : ((render as unknown) as React.FC<P>);
 
   if (displayName) {
@@ -122,11 +122,11 @@ function NativeSelectOptGroup({ className, ...props }: React.ComponentProps<"opt
   );
 }
 
-const native = {
-    Input: NativeInput,
-    Select: NativeSelect,
-    SelectOptGroup: NativeSelectOptGroup,
-    SelectOption: NativeSelectOption
+export const native = {
+  Input: NativeInput,
+  Select: NativeSelect,
+  SelectOptGroup: NativeSelectOptGroup,
+  SelectOption: NativeSelectOption,
 };
 
 // ---------------------------------------------------------------------------
@@ -335,18 +335,23 @@ const DateInput = configuredComponent<SpecializedInputProps, HTMLInputElement>(
 );
 
 // Extensions (extends `type`).
-function TextareaInput({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
+const TextareaInput = configuredComponent<
+  React.ComponentProps<"textarea">,
+  HTMLTextAreaElement
+>(
+  ({ className, ...props }, ref) => (
     <textarea
+      ref={ref}
       data-slot="textarea"
       className={cn(
         "flex field-sizing-content min-h-16 w-full resize-none rounded-2xl border border-transparent bg-input/50 px-3 py-3 text-base transition-[color,box-shadow,background-color] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
+        className,
       )}
       {...props}
     />
-  )
-}
+  ),
+  { displayName: "TextareaInput" },
+);
 
 // --- GROUPED EXPORT ---
 // Access as specialized.TextInput, specialized.PasswordInput, etc.
@@ -370,6 +375,7 @@ export const specialized = {
   PasswordInput,
   SearchInput,
   DateInput,
+  TextareaInput,
 };
 
 export const Select = NativeSelect;

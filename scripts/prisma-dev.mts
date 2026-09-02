@@ -97,7 +97,7 @@ async function main() {
       user: dbUrl.username,
       password: dbUrl.password,
       database: dbUrl.pathname.slice(1),
-      timeout: 30 * 1000,
+      timeout: 2 * 60 * 1000,
     });
   }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { PrismaClient } from "@/generated/prisma/client";
-import { getAllFood, getFoodById } from "@/app/foods/services/food.service";
+import { getAllFood, getFoodById } from "@/app/foods/services";
 
 describe("food service", () => {
   it("getAllFood returns all food items with related images and tags", async () => {
@@ -105,4 +105,5 @@ describe("food service", () => {
 
     expect(result).toEqual(foodItem);
   });
+
 });
