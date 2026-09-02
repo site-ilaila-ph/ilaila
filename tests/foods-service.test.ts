@@ -38,6 +38,7 @@ describe("food service", () => {
         images: true,
         tags: true,
       },
+      orderBy: { name: "asc" },
     });
 
     expect(result).toEqual(foodItems);
@@ -97,7 +98,12 @@ describe("food service", () => {
         tags: true,
         businesses: {
           include: {
-            business: true,
+            business: {
+              include: {
+                images: true,
+                tags: true,
+              },
+            },
           },
         },
       },

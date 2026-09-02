@@ -13,7 +13,7 @@ import {
 } from "@/app/app-reviews/actions";
 import { Button } from "@/lib/components/actions/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/lib/components/layout/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/lib/components/navigation/tabs";
 
 interface AppReview {
   id: string;

@@ -1,9 +1,9 @@
 "use server";
 
-import { toServerAction } from "@/lib/action";
+import { toServerAction } from "@/lib/action/server";
 import { acquireDb } from "@/lib/live";
 import z from "zod";
-import { ServerError } from "@/lib/action";
+import { ServerError } from "@/lib/action/server";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { cookies } from "next/headers";
 

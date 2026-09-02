@@ -60,7 +60,7 @@ async function writeLock() {
 async function respectLock() {
   if (await fsx.exists(join(rootDir, ".prisma-dev-lock"))) {
     console.error("An instance of prisma-dev is already running.");
-    process.exit(1);
+    process.exit(0);
   }
 }
 
@@ -103,6 +103,7 @@ async function main() {
 
   async function regenerateAndPush() {
     await run("pnpm", ["exec", "prisma", "db", "push"], { cwd: rootDir });
+    await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
     await run("pnpm", ["exec", "prisma", "generate"], { cwd: rootDir });
   }
 
@@ -124,17 +125,17 @@ async function main() {
   }
 
   let shuttingDown = false;
-  async function shutdown(exitCode = 0) {
+  async function shutdown() {
     if (shuttingDown) return;
     shuttingDown = true;
     await watcher.close();
     await cleanupDatabase();
     await removeLock();
-    process.exit(exitCode);
+    process.exit(0);
   }
 
-  process.on("SIGINT", () => shutdown(0));
-  process.on("SIGTERM", () => shutdown(0));
+  process.on("SIGINT", () => shutdown());
+  process.on("SIGTERM", () => shutdown());
 
   watcher.on("ready", async () => {
     try {
@@ -147,7 +148,7 @@ async function main() {
         } catch (err) {
           if (err instanceof CommandFailedError) {
             console.error(err.message);
-            await shutdown(err.exitCode);
+            await shutdown();
           } else {
             throw err;
           }
@@ -158,7 +159,7 @@ async function main() {
     } catch (err) {
       if (err instanceof CommandFailedError) {
         console.error(err.message);
-        await shutdown(err.exitCode);
+        await shutdown();
       } else {
         throw err;
       }
@@ -168,5 +169,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("fatal:", err);
-  process.exit(1);
+  process.exit(0);
 });

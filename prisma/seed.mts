@@ -23,7 +23,6 @@ async function main() {
   console.log("Cleaning existing database records...");
   await client.review.deleteMany();
   await client.bookmark.deleteMany();
-  await client.appReview.deleteMany();
   await client.menuItem.deleteMany();
   await client.businessImage.deleteMany();
   await client.businessTag.deleteMany();
@@ -324,29 +323,6 @@ async function main() {
     data: {
       userId: maria.id,
       businessId: business2.id,
-    },
-  });
-
-  console.log("Seeding app reviews...");
-  await client.appReview.create({
-    data: {
-      userId: regularUser.id,
-      userName: "Juan Dela Cruz",
-      email: "juan@example.com",
-      rating: 5,
-      text: "Ilaila is a fantastic digital museum! Loving the rich historical insights on Filipino food.",
-      isApproved: true,
-    },
-  });
-
-  await client.appReview.create({
-    data: {
-      userId: maria.id,
-      userName: "Maria Santos",
-      email: "maria@example.com",
-      rating: 5,
-      text: "Very user-friendly website. Great tool for finding heritage spots.",
-      isApproved: true,
     },
   });
 
