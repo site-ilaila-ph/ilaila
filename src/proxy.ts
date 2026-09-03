@@ -12,7 +12,6 @@ export default toMonolithic(
       "/landing",
       "/auth/sign-up",
       "/auth/sign-in",
-      "/auth/sign-out",
     ],
   }),
 );

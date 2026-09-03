@@ -57,7 +57,7 @@ export default function HomePage() {
           </Link>
           <div className="flex gap-3">
             <Link
-              href="/auth/sign-in"
+              href="/auth/sign-out"
               className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
             >
               Sign Out

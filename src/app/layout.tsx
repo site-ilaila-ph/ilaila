@@ -42,13 +42,17 @@ export default async function RootLayout({
 }>) {
   const session = createSessionReader({ db: acquireDb(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
   const sessionId = await session.getSessionId();
+  const sessionUser = sessionId ? await session.getSessionUser() : null;
+  const clientSession = sessionId && sessionUser
+    ? { id: sessionId, user: sanitizeUser(sessionUser) }
+    : null;
   return (
     <html
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", manrope.variable, montserratHeading.variable)}
     >
       <body className="min-h-full w-full flex flex-col">
-        <SessionContext value={sessionId ? { id: sessionId, user: sanitizeUser((await session.getSessionUser())!) } : null}>
+        <SessionContext value={clientSession}>
           {children}
         </SessionContext>
       </body>

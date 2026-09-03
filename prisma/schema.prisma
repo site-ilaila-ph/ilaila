@@ -58,6 +58,7 @@ model FoodImage {
   id          String @id @default(cuid())
   foodId      String
   description String
+  url         String?
   food        Food   @relation(fields: [foodId], references: [id])
 }
 
@@ -87,6 +88,7 @@ model BusinessImage {
   id          String   @id @default(cuid())
   businessId  String
   description String
+  url         String?
   business    Business @relation(fields: [businessId], references: [id])
 }
 

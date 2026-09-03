@@ -56,8 +56,8 @@ export default function SignInPage() {
       <Form className="w-full max-w-md" schema={schema}>
         <ActionFormExtension
           action={signInAction}
-          onSuccess={() => {
-            redirect('/home');
+          onSuccess={(isAdmin) => {
+            redirect(isAdmin ? "/management" : "/home");
           }}
         />
         <FormHeader className="flex flex-row justify-center">

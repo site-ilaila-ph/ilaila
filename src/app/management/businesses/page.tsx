@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   getAllBusinessesForManagement,
 } from "@/app/management/services";
@@ -41,6 +42,7 @@ export default function ManageBusinesses() {
     longitude: 0,
     hours: "",
     history: "",
+    imageData: "",
   });
 
   useEffect(() => {
@@ -74,7 +76,7 @@ export default function ManageBusinesses() {
   }
 
   async function handleDelete(id: string) {
-    if (confirm("Are you sure you want to delete this business?")) {
+    if (confirm("Sigurado ka bang gusto mong tanggalin ang negosyong ito?")) {
       try {
         await deleteBusinessAction(id);
         await loadBusinesses();
@@ -93,6 +95,7 @@ export default function ManageBusinesses() {
       longitude: 0,
       hours: "",
       history: "",
+      imageData: "",
     });
     setEditingId(null);
     setShowForm(false);
@@ -103,49 +106,49 @@ export default function ManageBusinesses() {
       <div className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Manage Businesses</h1>
-            <p className="mt-1 text-muted-foreground">Create, edit, and delete business listings</p>
+            <h1 className="text-3xl font-bold">Pamahalaan ang mga Negosyo</h1>
+            <p className="mt-1 text-muted-foreground">Gumawa, mag-edit, at magtanggal ng mga listahan ng negosyo</p>
           </div>
-          <Button onClick={() => setShowForm(true)}>Add Business</Button>
+          <Button onClick={() => setShowForm(true)}>Magdagdag ng Negosyo</Button>
         </div>
 
         {showForm && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>{editingId ? "Edit Business" : "Add New Business"}</CardTitle>
+              <CardTitle>{editingId ? "Mag-edit ng Negosyo" : "Magdagdag ng Bagong Negosyo"}</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <Label htmlFor="name">Business Name</Label>
+                    <Label htmlFor="name">Pangalan ng Negosyo</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Enter business name"
+                      placeholder="Ilagay ang pangalan ng negosyo"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address">Tirahan</Label>
                     <Input
                       id="address"
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Enter address"
+                      placeholder="Ilagay ang address"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Paglalarawan</Label>
                   <textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter business description"
+                    placeholder="Ilagay ang paglalarawan ng negosyo"
                     className="w-full rounded-md border border-border bg-background px-3 py-2"
                     rows={3}
                     required
@@ -153,12 +156,31 @@ export default function ManageBusinesses() {
                 </div>
 
                 <div>
-                  <Label htmlFor="history">History</Label>
+                  <Label htmlFor="business-image">Larawan ng Negosyo</Label>
+                  <Input
+                    id="business-image"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setFormData((current) => ({ ...current, imageData: String(reader.result) }));
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  {formData.imageData && (
+                    <Image src={formData.imageData} alt="Preview ng negosyo" width={240} height={140} unoptimized className="mt-3 h-28 w-48 rounded-lg object-cover" />
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="history">Kasaysayan</Label>
                   <textarea
                     id="history"
                     value={formData.history}
                     onChange={(e) => setFormData({ ...formData, history: e.target.value })}
-                    placeholder="Enter business history"
+                    placeholder="Ilagay ang kasaysayan ng negosyo"
                     className="w-full rounded-md border border-border bg-background px-3 py-2"
                     rows={3}
                   />
@@ -186,7 +208,7 @@ export default function ManageBusinesses() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="hours">Hours</Label>
+                    <Label htmlFor="hours">Oras ng Operasyon</Label>
                     <Input
                       id="hours"
                       value={formData.hours}
@@ -197,9 +219,9 @@ export default function ManageBusinesses() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button type="submit">{editingId ? "Update" : "Create"} Business</Button>
+                  <Button type="submit">{editingId ? "I-update" : "Gumawa ng"} Negosyo</Button>
                   <Button type="button" variant="outline" onClick={resetForm}>
-                    Cancel
+                    Kanselahin
                   </Button>
                 </div>
               </form>
@@ -209,12 +231,12 @@ export default function ManageBusinesses() {
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading businesses...</p>
+            <p className="text-muted-foreground">Ikinakarga ang mga negosyo...</p>
           </div>
         ) : businesses.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No businesses yet. Create one to get started!</p>
+              <p className="text-muted-foreground">Wala pang negosyo. Gumawa ng isa upang magsimula!</p>
             </CardContent>
           </Card>
         ) : (
@@ -226,15 +248,15 @@ export default function ManageBusinesses() {
                     <h3 className="font-semibold">{business.name}</h3>
                     <p className="text-sm text-muted-foreground">{business.address}</p>
                     <div className="mt-2 flex gap-4 text-xs">
-                      <span>Reviews: {business._count?.reviews || 0}</span>
-                      <span>Foods: {business._count?.foods || 0}</span>
-                      <span>Status: {business.isPublished ? "Published" : "Draft"}</span>
+                      <span>Mga Review: {business._count?.reviews || 0}</span>
+                      <span>Mga Pagkain: {business._count?.foods || 0}</span>
+                      <span>Katayuan: {business.isPublished ? "Nailathala" : "Hindi pa nailathala"}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Link href={`/management/businesses/${business.id}`}>
                       <Button variant="outline" size="sm">
-                        View
+                        Tingnan
                       </Button>
                     </Link>
                     <Button
@@ -250,18 +272,19 @@ export default function ManageBusinesses() {
                           longitude: 0,
                           hours: business.hours,
                           history: "",
+                          imageData: "",
                         });
                         setShowForm(true);
                       }}
                     >
-                      Edit
+                      Mag-edit
                     </Button>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(business.id)}
                     >
-                      Delete
+                      Tanggalin
                     </Button>
                   </div>
                 </CardContent>
