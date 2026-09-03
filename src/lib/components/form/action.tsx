@@ -64,6 +64,16 @@ export function ActionFormExtension<
         });
       }
 
+      if (result.type === "insensitive" || result.type === "sensitive") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        methods.setError("root" as any, {
+          type: "server",
+          message: result.type === "insensitive" && result.message
+            ? result.message
+            : "Something went wrong. Please try again.",
+        });
+      }
+
       await onFailure?.(result);
 
       return { halt: true };

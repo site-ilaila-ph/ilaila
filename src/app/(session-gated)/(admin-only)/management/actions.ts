@@ -1,7 +1,7 @@
 "use server";
 
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb } from "@/lib/live";
+import { acquireDb } from "@/lib/infra";
 import z from "zod";
 import type { PrismaClient } from "@/generated/prisma/client";
 

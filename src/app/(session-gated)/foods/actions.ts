@@ -2,7 +2,7 @@
 
 import z from "zod";
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb } from "@/lib/live";
+import { acquireDb } from "@/lib/infra";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllFood, getFoodById, getFoodByName, getTopRatedFoods } from "@/app/(session-gated)/foods/services";
 

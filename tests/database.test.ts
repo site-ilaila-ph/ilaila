@@ -8,7 +8,7 @@ const { PrismaClient, PrismaPg } = vi.hoisted(() => ({
 vi.mock("@/generated/prisma/client", () => ({ PrismaClient }));
 vi.mock("@prisma/adapter-pg", () => ({ PrismaPg }));
 
-import { acquireDb } from "@/lib/live";
+import { acquireDb } from "@/lib/infra";
 
 describe("database live component", () => {
   const originalDatabaseUrl = process.env.DATABASE_URL;

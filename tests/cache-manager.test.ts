@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { acquireCacheManager } from "@/lib/live";
+import { acquireCacheManager } from "@/lib/infra";
 
 describe("CacheManager", () => {
   it("supports detached cached() calls without object context", async () => {

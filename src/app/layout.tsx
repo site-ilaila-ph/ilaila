@@ -4,7 +4,7 @@ import "@/app/styles/globals.css";
 import { cn } from "@/lib/client";
 import { createSessionReader } from "@/lib/session/server";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
-import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";
+import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/infra";
 import type { User } from "@/generated/prisma/client";
 
 const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ilaila",
-  description: "A website publishing restaurants and cafes in the upper villages of San Pedro City, Laguna",
+  description: "Isang website para sa mga restawran at cafe sa mga pamayanan ng San Pedro City, Laguna",
 };
 
 function sanitizeUser(user: User): ClientReadonlySession['user'] {
@@ -44,7 +44,7 @@ export default async function RootLayout({
   const sessionId = await session.getSessionId();
   return (
     <html
-      lang="en"
+      lang="tl"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", manrope.variable, montserratHeading.variable)}
     >
       <body className="min-h-full w-full flex flex-col">

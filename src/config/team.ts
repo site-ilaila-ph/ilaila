@@ -10,7 +10,7 @@ export type RoleConfig = {
 
 const team = {
   frontend: {
-    features: ["about", "business", "food", "management", "home & landing"],
+    features: ["tungkol dito", "negosyo", "pagkain", "pamamahala", "home at landing"],
     members: [
       { 
         name: "Bellezas, Precious Mae F.", 
@@ -51,7 +51,7 @@ const team = {
     ],
   },
   backend: {
-    features: ["business", "food", "management", "home & landing"],
+    features: ["negosyo", "pagkain", "pamamahala", "home at landing"],
     members: [
       {
         name: "Centeno, Lemer M.",

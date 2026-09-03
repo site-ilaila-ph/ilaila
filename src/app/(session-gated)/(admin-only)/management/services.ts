@@ -1,6 +1,6 @@
 "use server";
 
-import { acquireDb } from "@/lib/live";
+import { acquireDb } from "@/lib/infra";
 
 export async function getAllBusinessesForManagement() {
   const db = acquireDb();

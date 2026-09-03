@@ -2,15 +2,15 @@
 /* oklch notation: oklch(lightness chroma hue) */
  
 :root {
-  --surface: #ffffff;
-  --border: oklch(0.92 0.004 286.32);
-  --primary: oklch(0.52 0.105 223.128);
-  --primary-muted: #dcefe5;
-  --secondary: oklch(0.967 0.001 286.375);
-  --accent: oklch(0.967 0.001 286.375);
-  --muted: oklch(0.967 0.001 286.375);
-  --text-secondary: #4b5563;
-  --card: oklch(1 0 0);
+  --surface: #fbfdf9;
+  --border: oklch(0.86 0.035 145);
+  --primary: oklch(0.42 0.12 145);
+  --primary-muted: #e1f0df;
+  --secondary: oklch(0.95 0.035 145);
+  --accent: oklch(0.93 0.045 145);
+  --muted: oklch(0.95 0.018 145);
+  --text-secondary: #405247;
+  --card: oklch(0.99 0.008 145);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);

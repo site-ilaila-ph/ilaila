@@ -3,7 +3,7 @@ import signUpSchema from "./validation/schemas/sign-up";
 
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import { acquireCacheManager, acquireDb } from "@/lib/live";
+import { acquireCacheManager, acquireDb } from "@/lib/infra";
 import { verify, hash } from "./lib/password";
 import z from "zod";
 import { SESSION_TOKEN_COOKIE_NAME, SESSION_TTL_SECONDS } from "@/config/auth";
@@ -21,7 +21,7 @@ export const signIn = async ({
     throw new ServerError({
       domain: "authentication",
       hint: "wrong-password-or-email",
-      message: "Wrong password or email.",
+      message: "Mali ang password o email.",
       sensitive: false,
     });
   }
@@ -37,7 +37,7 @@ export const signIn = async ({
     throw new ServerError({
       domain: "authentication",
       hint: "sign-in-failed",
-      message: "Incorrect credentials.",
+      message: "Mali ang mga kredensyal.",
       sensitive: false,
     });
   }
@@ -102,7 +102,7 @@ export const signUp = async ({
         throw new ServerError({
           domain: 'authentication',
           hint: 'email-exists',
-          message: 'An account with this email already exists.',
+          message: 'May account nang gumagamit ng email na ito.',
           sensitive: false,
         });
       }
@@ -111,7 +111,7 @@ export const signUp = async ({
         throw new ServerError({
           domain: 'authentication',
           hint: 'username-exists',
-          message: 'This username is already taken.',
+          message: 'Ginagamit na ang username na ito.',
           sensitive: false,
         });
       }
@@ -120,7 +120,7 @@ export const signUp = async ({
     throw new ServerError({
       domain: 'authentication',
       hint: 'unknown',
-      message: 'An unexpected error occurred during sign up.',
+      message: 'May hindi inaasahang error habang gumagawa ng account.',
       sensitive: true,
     });
   }

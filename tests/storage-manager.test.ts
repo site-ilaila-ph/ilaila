@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { acquireStorageManager } from "@/lib/live";
+import { acquireStorageManager } from "@/lib/infra";
 
 describe("StorageManager", () => {
   it("uploads text and reports metadata", async () => {
@@ -14,6 +14,17 @@ describe("StorageManager", () => {
     expect(result.pathname).toBe("test%20folder/hello.txt");
     expect(result.contentType).toBe("text/plain");
     expect((await storage.get({ key: ["test folder", "hello.txt"] }))?.size).toBe(Buffer.byteLength(content));
+  });
+
+  it("persists objects across manager instances", async () => {
+    const key = ["persistence", "shared.txt"];
+    const firstStorage = acquireStorageManager();
+    await firstStorage.upload({ key, fileOrBody: "shared content" });
+
+    const secondStorage = acquireStorageManager();
+    expect((await secondStorage.get({ key }))?.size).toBe(Buffer.byteLength("shared content"));
+
+    await secondStorage.delete({ key });
   });
 
   it("lists only matching keys and supports binary bodies", async () => {

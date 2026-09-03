@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
+import {
+  PrismaClientInitializationError,
+  PrismaClientKnownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientUnknownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
 import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
 
@@ -100,6 +107,68 @@ type InferFunctionCoercedServerActionResultData<
   TFn extends AnyFunctionCoercedServerAction,
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
 
+function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
+  if (error instanceof PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      return {
+        success: false,
+        type: "insensitive",
+        hint: "unique-constraint",
+        message: "This value is already in use.",
+      };
+    }
+
+    if (error.code === "P2025") {
+      return {
+        success: false,
+        type: "insensitive",
+        hint: "record-not-found",
+        message: "The requested record could not be found.",
+      };
+    }
+
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-request",
+    };
+  }
+
+  if (error instanceof PrismaClientValidationError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-validation",
+    };
+  }
+
+  if (error instanceof PrismaClientInitializationError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-initialization",
+    };
+  }
+
+  if (error instanceof PrismaClientUnknownRequestError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-unknown-request",
+    };
+  }
+
+  if (error instanceof PrismaClientRustPanicError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-engine",
+    };
+  }
+
+  return null;
+}
+
 // --- Implementation ----------------------------------------------------------
 
 function toServerAction<
@@ -124,34 +193,34 @@ function toServerAction<
 
     const validParams = parsed.data as Parameters<TFn>[0];
 
-    const resolvedDeps: TDeps | undefined =
-      typeof dependencies === "function"
-        ? await (dependencies as () => TDeps | Promise<TDeps>)()
-        : dependencies;
-
-    const violations: ConstraintViolation[] = [];
-    const constraintApi = createConstraintApi(violations);
-
     try {
-      for (const constraint of constraints) {
-        await constraint(validParams, resolvedDeps as TDeps, constraintApi);
-      }
-    } catch (error: any) {
-      if (!(error instanceof ConstraintFailSignal)) {
-        throw error;
-      }
-    }
+      const resolvedDeps: TDeps | undefined =
+        typeof dependencies === "function"
+          ? await (dependencies as () => TDeps | Promise<TDeps>)()
+          : dependencies;
 
-    if (violations.length > 0) {
-      return {
-        success: false,
-        type: "constraint",
-        fieldErrors: violationsToFieldErrors(violations),
-        globalErrors: violationsToGlobalErrors(violations),
-      };
-    }
+      const violations: ConstraintViolation[] = [];
+      const constraintApi = createConstraintApi(violations);
 
-    try {
+      try {
+        for (const constraint of constraints) {
+          await constraint(validParams, resolvedDeps as TDeps, constraintApi);
+        }
+      } catch (error: any) {
+        if (!(error instanceof ConstraintFailSignal)) {
+          throw error;
+        }
+      }
+
+      if (violations.length > 0) {
+        return {
+          success: false,
+          type: "constraint",
+          fieldErrors: violationsToFieldErrors(violations),
+          globalErrors: violationsToGlobalErrors(violations),
+        };
+      }
+
       const data = await serviceFn(validParams, resolvedDeps);
 
       return {
@@ -159,6 +228,9 @@ function toServerAction<
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
+      const prismaFailure = prismaErrorToActionFailure(error);
+      if (prismaFailure) return prismaFailure;
+
       if (!(error instanceof ServerError)) {
         return {
           success: false,

@@ -27,7 +27,7 @@ export type FoodListItem = Prisma.FoodGetPayload<{
 export async function getAllFood(
   db?: Pick<PrismaClient, "food">,
 ): Promise<FoodListItem[]> {
-  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
 
   return resolvedDb.food.findMany({
     include: {
@@ -42,7 +42,7 @@ export async function getFoodById(
   id: string,
   db?: Pick<PrismaClient, "food">,
 ): Promise<FoodWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
 
   return resolvedDb.food.findUnique({
     where: { id },
@@ -67,7 +67,7 @@ export async function getFoodByName(
   name: string,
   db?: Pick<PrismaClient, "food">,
 ): Promise<FoodWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
 
   return resolvedDb.food.findFirst({
     where: {
@@ -97,7 +97,7 @@ export async function getTopRatedFoods(
   limit: number = 3,
   db?: Pick<PrismaClient, "food" | "businessFood" | "review">,
 ): Promise<(FoodListItem & { averageRating: number })[]> {
-  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
 
   // Get all foods with their associated businesses
   const foods = await resolvedDb.food.findMany({
