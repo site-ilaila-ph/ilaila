@@ -1,6 +1,15 @@
 import Link from "next/link";
+import { createSessionReader } from "@/lib/session/server";
+import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = createSessionReader({
+    db: acquireDb(),
+    cache: acquireCacheManager(),
+    cookieMap: await acquireNextJSCookieMap(),
+  });
+  const browseHref = (await session.getSessionId()) ? "/home" : "/auth/sign-in";
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <nav className="border-b border-border bg-(--surface)/80 backdrop-blur">
@@ -44,7 +53,7 @@ export default function LandingPage() {
         </p>
         <div className="mb-16 flex flex-wrap justify-center gap-3">
           <Link
-            href="/home"
+            href={browseHref}
             className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             Browse Now

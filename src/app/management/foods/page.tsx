@@ -19,6 +19,7 @@ interface Food {
   name: string;
   description: string;
   isHeritage: boolean;
+  tags: { value: string }[];
   _count?: {
     businesses: number;
     images: number;
@@ -39,6 +40,7 @@ export default function ManageFoods() {
     recipe: "",
     culturalSignificance: "",
     isHeritage: true,
+    tags: [""],
     imageData: "",
   });
 
@@ -92,6 +94,7 @@ export default function ManageFoods() {
       recipe: "",
       culturalSignificance: "",
       isHeritage: true,
+      tags: [""],
       imageData: "",
     });
     setEditingId(null);
@@ -233,6 +236,39 @@ export default function ManageFoods() {
                   />
                 </div>
 
+                <div>
+                  <Label>Mga Katangian</Label>
+                  <div className="space-y-2">
+                    {formData.tags.map((tag, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          aria-label={`Katangian ${index + 1}`}
+                          value={tag}
+                          onChange={(e) => setFormData((current) => ({
+                            ...current,
+                            tags: current.tags.map((item, itemIndex) => itemIndex === index ? e.target.value : item),
+                          }))}
+                          placeholder="Hal. Maanghang"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          aria-label={`Alisin ang katangian ${index + 1}`}
+                          onClick={() => setFormData((current) => ({
+                            ...current,
+                            tags: current.tags.length > 1 ? current.tags.filter((_, itemIndex) => itemIndex !== index) : [""],
+                          }))}
+                        >
+                          <Trash2 size={15} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <Button type="button" variant="outline" className="mt-2" onClick={() => setFormData((current) => ({ ...current, tags: [...current.tags, ""] }))}>
+                    Magdagdag ng katangian
+                  </Button>
+                </div>
+
                 <div className="flex gap-2">
                   <Button type="submit">{editingId ? "I-update" : "Gumawa ng"} Pagkain</Button>
                   <Button type="button" variant="outline" onClick={resetForm}>
@@ -276,6 +312,7 @@ export default function ManageFoods() {
                           recipe: "",
                           culturalSignificance: "",
                           isHeritage: food.isHeritage,
+                          tags: food.tags?.map((tag) => tag.value) || [""],
                           imageData: "",
                         });
                         setShowForm(true);

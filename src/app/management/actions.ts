@@ -2,6 +2,7 @@
 
 import { toServerAction } from "@/lib/action/server";
 import { acquireDb, acquireStorageManager } from "@/lib/live";
+import { invalidateManagementCache } from "@/app/management/services";
 import z from "zod";
 import type { PrismaClient } from "@/generated/prisma/client";
 
@@ -73,6 +74,8 @@ export const createBusinessAction = toServerAction({
       );
     }
 
+    await invalidateManagementCache("businesses", "stats");
+
     return business;
   },
   schema: createBusinessSchema,
@@ -119,6 +122,8 @@ export const updateBusinessAction = toServerAction({
       await db.businessImage.create({ data: { businessId: id, description: "Business image", url: await saveImage(input.imageData, `businesses/${id}-${Date.now()}`) } });
     }
 
+    await invalidateManagementCache("businesses", "stats");
+
     return business;
   },
   schema: updateBusinessSchema,
@@ -131,7 +136,9 @@ export const deleteBusinessAction = toServerAction({
     deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.business.delete({ where: { id } });
+    const business = await db.business.delete({ where: { id } });
+    await invalidateManagementCache("businesses", "stats");
+    return business;
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -174,9 +181,10 @@ export const createFoodAction = toServerAction({
       await db.foodImage.create({ data: { foodId: food.id, description: "Food image", url: await saveImage(input.imageData, `foods/${food.id}`) } });
     }
 
-    if (input.tags && input.tags.length > 0) {
+    const tags = input.tags?.map((tag) => tag.trim()).filter(Boolean) ?? [];
+    if (tags.length > 0) {
       await Promise.all(
-        input.tags.map(tag =>
+        tags.map(tag =>
           db.foodTag.create({
             data: { value: tag, foodId: food.id },
           })
@@ -199,13 +207,14 @@ const updateFoodSchema = z.object({
   recipe: z.string().optional(),
   culturalSignificance: z.string().optional(),
   isHeritage: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
   imageData: z.string().optional(),
 });
 
 export const updateFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food" | "foodImage"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "food" | "foodTag" | "foodImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
@@ -228,6 +237,14 @@ export const updateFoodAction = toServerAction({
       await db.foodImage.create({ data: { foodId: id, description: "Food image", url: await saveImage(input.imageData, `foods/${id}-${Date.now()}`) } });
     }
 
+    if (input.tags) {
+      await db.foodTag.deleteMany({ where: { foodId: id } });
+      const tags = input.tags.map((tag) => tag.trim()).filter(Boolean);
+      await Promise.all(tags.map((tag) => db.foodTag.create({ data: { value: tag, foodId: id } })));
+    }
+
+    await invalidateManagementCache("foods", "stats");
+
     return food;
   },
   schema: updateFoodSchema,
@@ -240,7 +257,9 @@ export const deleteFoodAction = toServerAction({
     deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.food.delete({ where: { id } });
+    const food = await db.food.delete({ where: { id } });
+    await invalidateManagementCache("foods", "stats");
+    return food;
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -254,7 +273,9 @@ export const deleteReviewAction = toServerAction({
     deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.review.delete({ where: { id } });
+    const review = await db.review.delete({ where: { id } });
+    await invalidateManagementCache("reviews", "stats");
+    return review;
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -282,10 +303,12 @@ export const updateUserRoleAction = toServerAction({
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.user.update({
+    const user = await db.user.update({
       where: { id: userId },
       data: { isAdmin },
     });
+    await invalidateManagementCache("users", "stats");
+    return user;
   },
   schema: z.object({ userId: z.string(), isAdmin: z.boolean() }),
   dependencies: adminActionDependencies,
@@ -297,7 +320,9 @@ export const deleteUserAction = toServerAction({
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.user.delete({ where: { id: userId } });
+    const user = await db.user.delete({ where: { id: userId } });
+    await invalidateManagementCache("users", "stats");
+    return user;
   },
   schema: z.string(),
   dependencies: adminActionDependencies,

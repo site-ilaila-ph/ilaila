@@ -24,15 +24,15 @@ export function defer({ fn }: { fn: () => void | Promise<void> }): void {
   after(() => fn());
 }
 
-function joinKey(key: string | string[], separator: string): string {
-  return Array.isArray(key) ? key.map(encodeURIComponent).join(separator) : key;
+function joinKey(key: string | readonly string[], separator: string): string {
+  return typeof key === "string" ? key : key.map(encodeURIComponent).join(separator);
 }
 
 // =============================================================================
 // Cache (two-tier: in-memory L1 + optional Redis L2)
 // =============================================================================
 
-export type CacheKey = string | string[];
+export type CacheKey = string | readonly string[];
 
 export interface CacheLayer {
   get<T>(key: string): Promise<T | null>;
@@ -121,7 +121,11 @@ export interface CacheManager {
   cached<T>(params: { key: CacheKey; fn: () => Promise<T>; ttlSeconds?: number }): Promise<T>;
 }
 
+const globalForCache = globalThis as unknown as { cache: CacheManager | undefined };
+
 export function acquireCacheManager(): CacheManager {
+  if (globalForCache.cache) return globalForCache.cache;
+
   const l1 = createMemoryCache();
   const l2: CacheLayer | null = process.env.NODE_ENV === "production" ? createRedisCache() : null;
 
@@ -180,12 +184,15 @@ export function acquireCacheManager(): CacheManager {
     return freshData;
   };
 
-  return {
+  const cache: CacheManager = {
     get,
     set,
     invalidate,
     cached,
   };
+
+  globalForCache.cache = cache;
+  return cache;
 }
 
 // =============================================================================
