@@ -183,9 +183,9 @@ async function main() {
       history: "Started as a small roadside stall by Aling Nena, now run by her children.",
       isPublished: true,
       createdById: admin.id,
-      address: "123 Rizal St, Calamba, Laguna",
-      latitude: 14.2117,
-      longitude: 121.1653,
+      address: "123 Rizal St, San Pedro, Laguna",
+      latitude: 14.3595,
+      longitude: 121.0473,
       hours: "Mon-Sat 7:00 AM - 8:00 PM",
       tags: {
         create: [{ value: "carinderia" }, { value: "family-owned" }, { value: "budget-friendly" }],
@@ -217,14 +217,14 @@ async function main() {
 
   const business2 = await client.business.create({
     data: {
-      name: "Manila Heritage Cafe",
-      description: "An authentic historic cafe in Intramuros offering classic colonial sweets and local heritage dishes.",
-      history: "Located in a restored Spanish-era ancestral house overlooking historic cobblestone streets.",
+      name: "San Pedro Heritage Cafe",
+      description: "A welcoming San Pedro cafe offering classic Filipino sweets and local heritage dishes.",
+      history: "Built around family recipes and a love of preserving the flavors shared across Laguna homes.",
       isPublished: true,
       createdById: chefMario.id,
-      address: "45 General Luna St, Intramuros, Manila",
-      latitude: 14.5896,
-      longitude: 120.9750,
+      address: "45 San Antonio St, San Pedro, Laguna",
+      latitude: 14.3568,
+      longitude: 121.0551,
       hours: "Tue-Sun 10:00 AM - 9:00 PM",
       tags: {
         create: [{ value: "historic" }, { value: "cafe" }, { value: "desserts" }, { value: "ambiance" }],
@@ -256,17 +256,17 @@ async function main() {
 
   await client.business.create({
     data: {
-      name: "Cebu Lechon Haus & Grill",
-      description: "World-class crispy Cebu lechon roasted fresh daily with aromatic herbs and spices.",
-      history: "Proudly bringing authentic island roasting traditions straight from the Queen City of the South.",
+      name: "Laguna Lechon Haus & Grill",
+      description: "Crispy lechon roasted fresh daily with aromatic herbs and spices for San Pedro gatherings.",
+      history: "A neighborhood grill bringing celebratory Filipino roasting traditions to local tables.",
       isPublished: true,
       createdById: chefMario.id,
-      address: "88 Mango Avenue, Cebu City",
-      latitude: 10.3157,
-      longitude: 123.8854,
+      address: "88 United Boulevard, San Pedro, Laguna",
+      latitude: 14.3479,
+      longitude: 121.0604,
       hours: "Daily 10:00 AM - 10:00 PM",
       tags: {
-        create: [{ value: "lechon" }, { value: "grill" }, { value: "cebu" }, { value: "meat" }],
+        create: [{ value: "lechon" }, { value: "grill" }, { value: "san-pedro" }, { value: "meat" }],
       },
       images: {
         create: [{ description: "Freshly carved crunchy lechon belly" }],
