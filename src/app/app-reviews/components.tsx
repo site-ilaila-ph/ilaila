@@ -15,7 +15,6 @@ interface AppReview {
   isApproved: boolean;
   createdAt: Date;
   user?: {
-    email: string;
     userName: string | null;
   };
 }

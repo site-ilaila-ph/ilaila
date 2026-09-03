@@ -2,6 +2,7 @@
 
 import { toServerAction } from "@/lib/action/server";
 import { acquireDb } from "@/lib/live";
+import { requireAdmin } from "@/app/app-reviews/services";
 import z from "zod";
 
 const createAppReviewSchema = z.object({
@@ -37,6 +38,7 @@ const updateAppReviewStatusSchema = z.object({
 
 export const updateAppReviewStatusAction = toServerAction({
   serviceFn: async (input: z.infer<typeof updateAppReviewStatusSchema>) => {
+    await requireAdmin();
     const db = acquireDb();
     
     return await db.appReview.update({
@@ -49,6 +51,7 @@ export const updateAppReviewStatusAction = toServerAction({
 
 export const deleteAppReviewAction = toServerAction({
   serviceFn: async (id: string) => {
+    await requireAdmin();
     const db = acquireDb();
     return await db.appReview.delete({ where: { id } });
   },

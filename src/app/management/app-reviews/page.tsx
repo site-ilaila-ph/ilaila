@@ -28,6 +28,13 @@ interface AppReview {
   };
 }
 
+function getActionErrorMessage(
+  result: { success: false; message?: string; globalErrors?: string[] },
+  fallback: string,
+) {
+  return result.message ?? result.globalErrors?.[0] ?? fallback;
+}
+
 export default function ManageAppReviews() {
   const [reviews, setReviews] = useState<AppReview[]>([]);
   const [pendingReviews, setPendingReviews] = useState<AppReview[]>([]);
@@ -63,7 +70,8 @@ export default function ManageAppReviews() {
 
   async function handleApprove(id: string) {
     try {
-      await updateAppReviewStatusAction({ id, isApproved: true });
+      const result = await updateAppReviewStatusAction({ id, isApproved: true });
+      if (!result.success) throw new Error(getActionErrorMessage(result, "Failed to approve review."));
       await loadData();
     } catch (error) {
       console.error("Failed to approve review:", error);
@@ -72,7 +80,8 @@ export default function ManageAppReviews() {
 
   async function handleReject(id: string) {
     try {
-      await updateAppReviewStatusAction({ id, isApproved: false });
+      const result = await updateAppReviewStatusAction({ id, isApproved: false });
+      if (!result.success) throw new Error(getActionErrorMessage(result, "Failed to unapprove review."));
       await loadData();
     } catch (error) {
       console.error("Failed to reject review:", error);
@@ -82,7 +91,8 @@ export default function ManageAppReviews() {
   async function handleDelete(id: string) {
     if (confirm("Are you sure you want to delete this review?")) {
       try {
-        await deleteAppReviewAction(id);
+        const result = await deleteAppReviewAction(id);
+        if (!result.success) throw new Error(getActionErrorMessage(result, "Failed to delete review."));
         await loadData();
       } catch (error) {
         console.error("Failed to delete review:", error);
