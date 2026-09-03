@@ -1,7 +1,7 @@
 ---
 name: master
 description: The primary project agent. Understands the user's request, navigates the repository, implements changes, validates them, and delegates only to the narrowest domain specialist when needed.
-tools: [vscode/memory, vscode/resolveMemoryFileUri, vscode/askQuestions, vscode/toolSearch, execute, read/getNotebookSummary, read/problems, read/readFile, read/readNotebookCellOutput, read/terminalSelection, read/getTaskOutput, agent, edit, search, web, browser, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/toolSearch, vscodeNotebooks/getNotebookSummary, vscodeNotebooks/readNotebookCellOutput, todo]
+tools: [vscode/installExtension, vscode/memory, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/extensions, vscode/askQuestions, vscode/toolSearch, execute, read/getNotebookSummary, read/problems, read/readFile, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent, GitHub.vscode-pull-request-github/issue_fetch, GitHub.vscode-pull-request-github/labels_fetch, GitHub.vscode-pull-request-github/notification_fetch, GitHub.vscode-pull-request-github/doSearch, GitHub.vscode-pull-request-github/activePullRequest, GitHub.vscode-pull-request-github/pullRequestStatusChecks, GitHub.vscode-pull-request-github/openPullRequest, GitHub.vscode-pull-request-github/create_pull_request, GitHub.vscode-pull-request-github/resolveReviewThread, edit, search, web, browser, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/toolSearch, vscodeNotebooks/getNotebookSummary, vscodeNotebooks/readNotebookCellOutput, todo]
 user-invocable: true
 agents:
   - agent-builder

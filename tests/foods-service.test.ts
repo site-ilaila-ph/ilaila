@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { getAllFood, getFoodById } from "@/app/foods/services";
+import { getAllFood, getFoodById } from "@/app/(session-gated)/foods/services";
 
 describe("food service", () => {
   it("getAllFood returns all food items with related images and tags", async () => {

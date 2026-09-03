@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { hash, verify } from "@/app/auth/lib/password";
-import signInSchema from "@/app/auth/validation/schemas/sign-in";
-import signUpSchema from "@/app/auth/validation/schemas/sign-up";
+import { hash, verify } from "@/app/(unauthenticated-only)/auth/lib/password";
+import signInSchema from "@/app/(unauthenticated-only)/auth/validation/schemas/sign-in";
+import signUpSchema from "@/app/(unauthenticated-only)/auth/validation/schemas/sign-up";
 
 describe("auth password hashing and verification", () => {
   it("should hash a password and verify it successfully", async () => {
