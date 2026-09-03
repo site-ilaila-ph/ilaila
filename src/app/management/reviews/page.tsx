@@ -48,7 +48,8 @@ export default function ManageReviews() {
     if (confirm("Are you sure you want to delete this review?")) {
       try {
         await deleteReviewAction(id);
-        await loadReviews();
+        const data = await getAllReviewsForManagement();
+        setReviews(data as Review[]);
       } catch (error) {
         console.error("Failed to delete review:", error);
       }
