@@ -82,114 +82,121 @@ export default function LandingPage() {
 
       <main className="mx-auto flex max-w-6xl flex-col items-center px-6 py-20 text-center">
         <span className="mb-4 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-primary">
-          Explore San Pedro&apos;s food culture
+          Tuklasin ang kultura ng pagkain sa San Pedro
         </span>
         <h1 className="mb-4 text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
-          Find the food and
+          Hanapin ang mga pagkaing at
           <br />
-          people that matter
+          taong mahalaga sa atin
         </h1>
         <p className="mb-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-          Look for restaurants, food traditions, and recipes from San Pedro. See
-          what people think. Connect with the community.
+          Maghanap ng mga kainan, tradisyon ng pagkain, at resipe mula sa San
+          Pedro. Alamin ang opinyon ng iba at makiisa sa komunidad.
         </p>
         <div className="mb-16 flex flex-wrap justify-center gap-3">
           <Link
             href="/home"
             className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:opacity-90 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            Browse Now
+            Maghanap Ngayon
           </Link>
           <Link
             href="/about/the-website"
             className="rounded-full border border-border px-6 py-3 text-sm font-semibold transition duration-200 ease-out hover:-translate-y-1 hover:bg-muted hover:shadow-md active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            Learn More
+            Alamin Pa
           </Link>
         </div>
 
         <div className="mb-16 grid w-full gap-6 md:grid-cols-3 md:gap-8">
           <div className="landing-reveal flex h-full flex-col rounded-xl border border-border bg-card p-6 shadow-md shadow-primary/5 transition duration-300 ease-out hover:-translate-y-2 hover:border-primary/60 hover:bg-secondary hover:shadow-xl hover:shadow-primary/15">
             <div className="mb-4 text-4xl">🏪</div>
-            <h3 className="mb-2 text-lg font-semibold">Local Restaurants</h3>
+            <h3 className="mb-2 text-lg font-semibold">Mga Lokal na Kainan</h3>
             <p className="text-sm text-muted-foreground">
-              Find where to eat in San Pedro. See what&apos;s good, what&apos;s
-              popular, and where your friends go.
+              Hanapin kung saan masarap kumain sa San Pedro. Tingnan kung ano
+              ang patok at kung saan nagpupunta ang iyong mga kaibigan.
             </p>
           </div>
 
           <div className="landing-reveal flex h-full flex-col rounded-xl border border-border bg-card p-6 shadow-md shadow-primary/5 transition duration-300 ease-out hover:-translate-y-2 hover:border-primary/60 hover:bg-secondary hover:shadow-xl hover:shadow-primary/15">
             <div className="mb-4 text-4xl">🍲</div>
-            <h3 className="mb-2 text-lg font-semibold">Traditional Dishes</h3>
+            <h3 className="mb-2 text-lg font-semibold">
+              Mga Tradisyonal na Lutuin
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Learn about the foods that are part of San Pedro. Recipes,
-              stories, and what makes them special.
+              Alamin ang mga pagkaing bahagi ng San Pedro, pati ang mga resipe,
+              kuwento, at natatanging katangian ng mga ito.
             </p>
           </div>
 
           <div className="landing-reveal flex h-full flex-col rounded-xl border border-border bg-card p-6 shadow-md shadow-primary/5 transition duration-300 ease-out hover:-translate-y-2 hover:border-primary/60 hover:bg-secondary hover:shadow-xl hover:shadow-primary/15">
             <div className="mb-4 text-4xl">📍</div>
-            <h3 className="mb-2 text-lg font-semibold">Real Reviews</h3>
+            <h3 className="mb-2 text-lg font-semibold">
+              Tunay na mga Pagsusuri
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Read what people actually think. Leave your own review. Help
-              others find great food.
+              Basahin ang tunay na opinyon ng mga tao. Mag-iwan ng iyong
+              pagsusuri at tulungan ang iba na makahanap ng masarap na pagkain.
             </p>
           </div>
         </div>
 
         <section className="landing-reveal mb-16 w-full rounded-xl border border-border bg-card/80 p-8 shadow-xl shadow-primary/10 md:p-10">
-          <h2 className="mb-6 text-3xl font-bold">Why use Ilaila</h2>
+          <h2 className="mb-6 text-3xl font-bold">Bakit Ilaila?</h2>
           <div className="grid gap-x-16 gap-y-10 text-left md:grid-cols-2">
             <div className="rounded-lg border border-border/70 bg-background/40 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
               <h3 className="mb-2 font-semibold text-primary">
-                It&apos;s just for San Pedro
+                Para talaga sa San Pedro
               </h3>
               <p className="text-sm text-muted-foreground">
-                We focus on one place. You get real information about the food
-                and restaurants here, not generic content from everywhere.
+                Nakatuon kami sa iisang lugar. Makakakuha ka ng totoong
+                impormasyon tungkol sa mga pagkain at kainan dito, hindi
+                pangkalahatang nilalaman.
               </p>
             </div>
             <div className="rounded-lg border border-border/70 bg-background/40 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
               <h3 className="mb-2 font-semibold text-primary">
-                Help local places
+                Suportahan ang mga Lokal
               </h3>
               <p className="text-sm text-muted-foreground">
-                When you review a restaurant or share about a food, you&apos;re
-                directly helping the people who run these places.
+                Kapag nagsuri ka ng kainan o nagbahagi tungkol sa pagkain,
+                direktang nakatutulong ka sa mga taong nagpapatakbo ng mga ito.
               </p>
             </div>
             <div className="rounded-lg border border-border/70 bg-background/40 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
               <h3 className="mb-2 font-semibold text-primary">
-                Keep stories alive
+                Buhayin ang mga Kuwento
               </h3>
               <p className="text-sm text-muted-foreground">
-                Traditional dishes and family recipes matter. We document them
-                so they don&apos;t get forgotten.
+                Mahalaga ang mga tradisyonal na lutuin at resipe ng pamilya.
+                Itinatala namin ang mga ito upang hindi malimutan.
               </p>
             </div>
             <div className="rounded-lg border border-border/70 bg-background/40 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
               <h3 className="mb-2 font-semibold text-primary">
-                Find what&apos;s good
+                Hanapin ang Masarap
               </h3>
               <p className="text-sm text-muted-foreground">
-                See honest reviews from real people. Discover places and foods
-                you&apos;ll actually enjoy.
+                Tingnan ang tapat na pagsusuri mula sa tunay na mga tao.
+                Tuklasin ang mga lugar at pagkaing tunay mong masisiyahan.
               </p>
             </div>
           </div>
         </section>
 
         <section className="landing-reveal w-full rounded-xl border border-primary/20 bg-linear-to-br from-primary/20 via-secondary to-background p-8 text-center shadow-xl shadow-primary/15 md:p-10">
-          <h2 className="mb-4 text-2xl font-bold">Ready to start exploring?</h2>
+          <h2 className="mb-4 text-2xl font-bold">
+            Handa ka na bang tumuklas?
+          </h2>
           <p className="mb-6 text-muted-foreground">
-            Sign up to save restaurants, leave reviews, and see what other
-            people recommend
+            Mag-sign up upang mag-save ng mga kainan, mag-iwan ng pagsusuri, at
+            makita ang mga rekomendasyon ng iba
           </p>
           <Link
             href="/auth/sign-up"
             className="inline-block rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition duration-200 ease-out hover:-translate-y-1 hover:shadow-lg hover:opacity-90 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            Get Started
+            Magsimula
           </Link>
         </section>
       </main>
@@ -200,18 +207,18 @@ export default function LandingPage() {
             <div>
               <h4 className="mb-3 font-semibold text-[#f2f5ef]">Ilaila</h4>
               <p className="text-sm text-[#f2f5ef]/75">
-                Food and restaurants in San Pedro
+                Mga pagkain at kainan sa San Pedro
               </p>
             </div>
             <div>
-              <h4 className="mb-3 font-semibold text-[#f2f5ef]">Browse</h4>
+              <h4 className="mb-3 font-semibold text-[#f2f5ef]">Maghanap</h4>
               <ul className="space-y-3 text-sm text-[#f2f5ef]/75">
                 <li>
                   <Link
                     href="/business/discovery"
                     className="inline-flex rounded-sm transition duration-200 hover:translate-x-1 hover:text-[#dcefe5] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dcefe5]"
                   >
-                    Restaurants
+                    Mga Kainan
                   </Link>
                 </li>
                 <li>
@@ -219,20 +226,20 @@ export default function LandingPage() {
                     href="/foods"
                     className="inline-flex rounded-sm transition duration-200 hover:translate-x-1 hover:text-[#dcefe5] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dcefe5]"
                   >
-                    Dishes
+                    Mga Lutuin
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="mb-3 font-semibold text-[#f2f5ef]">Learn</h4>
+              <h4 className="mb-3 font-semibold text-[#f2f5ef]">Alamin</h4>
               <ul className="space-y-3 text-sm text-[#f2f5ef]/75">
                 <li>
                   <Link
                     href="/about/the-website"
                     className="inline-flex rounded-sm transition duration-200 hover:translate-x-1 hover:text-[#dcefe5] active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dcefe5]"
                   >
-                    About
+                    Tungkol sa Amin
                   </Link>
                 </li>
                 <li>

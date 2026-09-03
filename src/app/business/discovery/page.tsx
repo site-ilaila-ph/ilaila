@@ -47,7 +47,7 @@ export default function BusinessDiscoveryPage() {
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p>Loading businesses...</p>
+          <p>Nilo-load ang mga negosyo...</p>
         </div>
       </main>
     );
@@ -68,7 +68,7 @@ export default function BusinessDiscoveryPage() {
               href="/business/discovery"
               className="rounded-full border border-border px-4 py-2 text-sm font-medium"
             >
-              Businesses
+              Mga Negosyo
             </Link>
           </div>
         </div>
@@ -77,16 +77,16 @@ export default function BusinessDiscoveryPage() {
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">
-            Discover Local Businesses
+            Tuklasin ang mga Lokal na Negosyo
           </h1>
           <p className="text-lg text-muted-foreground">
-            Explore the vibrant food and business scene of San Pedro
+            Tuklasin ang masiglang mundo ng pagkain at negosyo sa San Pedro
           </p>
         </div>
 
         {businesses.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No businesses found</p>
+            <p className="text-muted-foreground">Walang nakitang negosyo</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

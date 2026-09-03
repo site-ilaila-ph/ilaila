@@ -52,7 +52,9 @@ export default function BusinessProfilePage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Loading business details...</p>
+          <p className="text-muted-foreground">
+            Nilo-load ang detalye ng negosyo...
+          </p>
         </div>
       </main>
     );
@@ -72,25 +74,30 @@ export default function BusinessProfilePage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Business not found</p>
-          <Link href="/business/discovery" className="mt-4 inline-block text-primary hover:underline">
-            Back to businesses
+          <p className="text-muted-foreground">Hindi natagpuan ang negosyo</p>
+          <Link
+            href="/business/discovery"
+            className="mt-4 inline-block text-primary hover:underline"
+          >
+            Bumalik sa mga negosyo
           </Link>
         </div>
       </main>
     );
   }
 
-  const averageRating = business.reviews.length > 0
-    ? Math.round(
-        (business.reviews.reduce(
-          (sum, r) => sum + (r.foodQuality + r.service + r.ambiance + r.value) / 4,
-          0
-        ) /
-          business.reviews.length) *
-          10
-      ) / 10
-    : 0;
+  const averageRating =
+    business.reviews.length > 0
+      ? Math.round(
+          (business.reviews.reduce(
+            (sum, r) =>
+              sum + (r.foodQuality + r.service + r.ambiance + r.value) / 4,
+            0,
+          ) /
+            business.reviews.length) *
+            10,
+        ) / 10
+      : 0;
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -102,29 +109,42 @@ export default function BusinessProfilePage({
           >
             Ilaila
           </Link>
-          <Link href="/business/discovery" className="text-sm text-muted-foreground hover:text-foreground">
-            Back to businesses
+          <Link
+            href="/business/discovery"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Bumalik sa mga negosyo
           </Link>
         </div>
       </nav>
 
       <article className="mx-auto max-w-4xl px-6 py-12">
         <header className="mb-12 border-b border-border pb-8">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">{business.name}</h1>
-          <p className="mb-4 text-lg text-muted-foreground">{business.description}</p>
-          
+          <h1 className="mb-4 text-4xl font-bold tracking-tight">
+            {business.name}
+          </h1>
+          <p className="mb-4 text-lg text-muted-foreground">
+            {business.description}
+          </p>
+
           <div className="flex flex-wrap gap-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Rating</p>
-              <p className="text-2xl font-bold text-primary">{averageRating}/5</p>
-              <p className="text-xs text-muted-foreground">({business.reviews.length} reviews)</p>
+              <p className="text-sm font-medium text-muted-foreground">Marka</p>
+              <p className="text-2xl font-bold text-primary">
+                {averageRating}/5
+              </p>
+              <p className="text-xs text-muted-foreground">
+                ({business.reviews.length} pagsusuri)
+              </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Location</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                Lokasyon
+              </p>
               <p className="text-lg font-semibold">{business.address}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Hours</p>
+              <p className="text-sm font-medium text-muted-foreground">Oras</p>
               <p className="text-lg font-semibold">{business.hours}</p>
             </div>
           </div>
@@ -147,7 +167,7 @@ export default function BusinessProfilePage({
           <div className="lg:col-span-2">
             {business.history && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">History</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Kasaysayan</h2>
                 <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                   {business.history}
                 </p>
@@ -156,7 +176,9 @@ export default function BusinessProfilePage({
 
             {business.foods && business.foods.length > 0 && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">Foods Served</h2>
+                <h2 className="mb-4 text-2xl font-semibold">
+                  Mga Inihahain na Pagkain
+                </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {business.foods.map((bf) => (
                     <Link
@@ -181,7 +203,10 @@ export default function BusinessProfilePage({
                 <h2 className="mb-4 text-2xl font-semibold">Menu</h2>
                 <div className="space-y-4">
                   {business.menuItems.map((item) => (
-                    <div key={item.id} className="border-b border-border pb-4 last:border-b-0">
+                    <div
+                      key={item.id}
+                      className="border-b border-border pb-4 last:border-b-0"
+                    >
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-semibold">{item.name}</h3>
@@ -191,12 +216,17 @@ export default function BusinessProfilePage({
                             </p>
                           )}
                         </div>
-                        <p className="font-semibold text-primary">₱{item.price.toString()}</p>
+                        <p className="font-semibold text-primary">
+                          ₱{item.price.toString()}
+                        </p>
                       </div>
                       {item.dietaryTags && item.dietaryTags.length > 0 && (
                         <div className="mt-2 flex gap-2">
                           {item.dietaryTags.map((tag, idx) => (
-                            <span key={idx} className="text-xs text-muted-foreground">
+                            <span
+                              key={idx}
+                              className="text-xs text-muted-foreground"
+                            >
                               {tag}
                             </span>
                           ))}
@@ -210,22 +240,28 @@ export default function BusinessProfilePage({
 
             {business.reviews && business.reviews.length > 0 && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">Reviews</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Mga Pagsusuri</h2>
                 <div className="space-y-4">
                   {business.reviews.map((review) => (
-                    <div key={review.id} className="rounded-lg border border-border bg-card p-6">
+                    <div
+                      key={review.id}
+                      className="rounded-lg border border-border bg-card p-6"
+                    >
                       <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-semibold">{review.user.userName}</h3>
+                        <h3 className="font-semibold">
+                          {review.user.userName}
+                        </h3>
                         <div className="flex gap-4 text-sm text-muted-foreground">
-                          <span>Food: {review.foodQuality}/5</span>
-                          <span>Service: {review.service}/5</span>
-                          <span>Ambiance: {review.ambiance}/5</span>
-                          <span>Value: {review.value}/5</span>
+                          <span>Pagkain: {review.foodQuality}/5</span>
+                          <span>Serbisyo: {review.service}/5</span>
+                          <span>Kapaligiran: {review.ambiance}/5</span>
+                          <span>Sulit: {review.value}/5</span>
                         </div>
                       </div>
                       <p className="text-muted-foreground">{review.text}</p>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        👍 {review.upvotes} {review.upvotes === 1 ? "upvote" : "upvotes"}
+                        👍 {review.upvotes}{" "}
+                        {review.upvotes === 1 ? "pabor" : "mga pabor"}
                       </p>
                     </div>
                   ))}
@@ -240,7 +276,9 @@ export default function BusinessProfilePage({
                 <h3 className="mb-4 text-lg font-semibold">Contact Info</h3>
                 <dl className="space-y-3 text-sm">
                   <div>
-                    <dt className="font-medium text-muted-foreground">Address</dt>
+                    <dt className="font-medium text-muted-foreground">
+                      Address
+                    </dt>
                     <dd className="mt-1">{business.address}</dd>
                   </div>
                   <div>
@@ -255,7 +293,10 @@ export default function BusinessProfilePage({
                   <h3 className="mb-4 text-lg font-semibold">Gallery</h3>
                   <div className="space-y-2">
                     {business.images.map((image) => (
-                      <div key={image.id} className="text-sm text-muted-foreground">
+                      <div
+                        key={image.id}
+                        className="text-sm text-muted-foreground"
+                      >
                         {image.description}
                       </div>
                     ))}

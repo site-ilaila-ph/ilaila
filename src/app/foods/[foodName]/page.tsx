@@ -53,7 +53,9 @@ export default function SingleFoodPage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Loading food details...</p>
+          <p className="text-muted-foreground">
+            Nilo-load ang detalye ng pagkain...
+          </p>
         </div>
       </main>
     );
@@ -73,9 +75,12 @@ export default function SingleFoodPage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Food not found</p>
-          <Link href="/foods" className="mt-4 inline-block text-primary hover:underline">
-            Back to foods
+          <p className="text-muted-foreground">Hindi natagpuan ang pagkain</p>
+          <Link
+            href="/foods"
+            className="mt-4 inline-block text-primary hover:underline"
+          >
+            Bumalik sa mga pagkain
           </Link>
         </div>
       </main>
@@ -92,15 +97,20 @@ export default function SingleFoodPage({
           >
             Ilaila
           </Link>
-          <Link href="/foods" className="text-sm text-muted-foreground hover:text-foreground">
-            Back to foods
+          <Link
+            href="/foods"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            Bumalik sa mga pagkain
           </Link>
         </div>
       </nav>
 
       <article className="mx-auto max-w-4xl px-6 py-12">
         <header className="mb-12 border-b border-border pb-8">
-          <h1 className="mb-4 text-4xl font-bold tracking-tight">{food.name}</h1>
+          <h1 className="mb-4 text-4xl font-bold tracking-tight">
+            {food.name}
+          </h1>
           {food.tags && food.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {food.tags.map((tag) => (
@@ -119,7 +129,7 @@ export default function SingleFoodPage({
           <div className="lg:col-span-2">
             {food.images && food.images.length > 0 && (
               <section className="mb-12">
-                <h2 className="mb-6 text-2xl font-semibold">Gallery</h2>
+                <h2 className="mb-6 text-2xl font-semibold">Galeriya</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {food.images.map((image) => (
                     <div
@@ -127,7 +137,9 @@ export default function SingleFoodPage({
                       className="overflow-hidden rounded-lg border border-border bg-muted"
                     >
                       <div className="aspect-video bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                        <span className="text-sm text-muted-foreground">{image.description}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {image.description}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -136,28 +148,30 @@ export default function SingleFoodPage({
             )}
 
             <section className="mb-12">
-              <h2 className="mb-4 text-2xl font-semibold">History</h2>
+              <h2 className="mb-4 text-2xl font-semibold">Kasaysayan</h2>
               <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                 {food.history}
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="mb-4 text-2xl font-semibold">Preparation</h2>
+              <h2 className="mb-4 text-2xl font-semibold">Paghahanda</h2>
               <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                 {food.preparation}
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="mb-4 text-2xl font-semibold">Recipe</h2>
+              <h2 className="mb-4 text-2xl font-semibold">Resipe</h2>
               <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                 {food.recipe}
               </p>
             </section>
 
             <section className="mb-12">
-              <h2 className="mb-4 text-2xl font-semibold">Cultural Significance</h2>
+              <h2 className="mb-4 text-2xl font-semibold">
+                Kahalagahang Kultural
+              </h2>
               <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                 {food.culturalSignificance}
               </p>
@@ -166,7 +180,7 @@ export default function SingleFoodPage({
 
           <aside className="lg:col-span-1">
             <div className="sticky top-6 rounded-lg border border-border bg-card p-6">
-              <h2 className="mb-6 text-xl font-semibold">Available at</h2>
+              <h2 className="mb-6 text-xl font-semibold">Makikita sa</h2>
               {food.businesses && food.businesses.length > 0 ? (
                 <div className="space-y-4">
                   {food.businesses.map((bf) => (
@@ -185,7 +199,9 @@ export default function SingleFoodPage({
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No businesses found serving this food</p>
+                <p className="text-sm text-muted-foreground">
+                  Walang nakitang negosyong naghahain nito
+                </p>
               )}
             </div>
           </aside>

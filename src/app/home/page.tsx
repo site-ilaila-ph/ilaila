@@ -3,25 +3,32 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getBusinessesAction } from "@/app/business/actions";
-import { getFoodItemsAction, getTopRatedFoodsAction } from "@/app/foods/actions";
+import {
+  getFoodItemsAction,
+  getTopRatedFoodsAction,
+} from "@/app/foods/actions";
 import type { BusinessListItem } from "@/app/business/services";
 import type { FoodListItem } from "@/app/foods/services";
 
 export default function HomePage() {
   const [businesses, setBusinesses] = useState<BusinessListItem[]>([]);
   const [foods, setFoods] = useState<FoodListItem[]>([]);
-  const [topRatedFoods, setTopRatedFoods] = useState<(FoodListItem & { averageRating: number })[]>([]);
+  const [topRatedFoods, setTopRatedFoods] = useState<
+    (FoodListItem & { averageRating: number })[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadData() {
-      const [businessesResult, foodsResult, topRatedResult] = await Promise.all([
-        getBusinessesAction({}),
-        getFoodItemsAction({}),
-        getTopRatedFoodsAction(3),
-      ]);
+      const [businessesResult, foodsResult, topRatedResult] = await Promise.all(
+        [
+          getBusinessesAction({}),
+          getFoodItemsAction({}),
+          getTopRatedFoodsAction(3),
+        ],
+      );
 
       if (!isMounted) return;
 
@@ -60,7 +67,7 @@ export default function HomePage() {
               href="/auth/sign-in"
               className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
             >
-              Sign Out
+              Sign in
             </Link>
           </div>
         </div>
@@ -69,10 +76,11 @@ export default function HomePage() {
       <main className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-16 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">
-            Welcome to Ilaila
+            Maligayang pagdating sa Ilaila
           </h1>
           <p className="text-lg text-muted-foreground">
-            Discover the heritage food and business ecosystem of San Pedro
+            Tuklasin ang mga pagkaing pamana at mga lokal na negosyo ng San
+            Pedro
           </p>
         </div>
 
@@ -82,9 +90,11 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">🏪</div>
-            <h2 className="mb-2 text-xl font-semibold">Discover Businesses</h2>
+            <h2 className="mb-2 text-xl font-semibold">
+              Tuklasin ang mga Negosyo
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Browse local businesses and restaurants in San Pedro
+              Maghanap ng mga lokal na negosyo at kainan sa San Pedro
             </p>
           </Link>
 
@@ -93,9 +103,9 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">🍲</div>
-            <h2 className="mb-2 text-xl font-semibold">Heritage Foods</h2>
+            <h2 className="mb-2 text-xl font-semibold">Mga Pagkaing Pamana</h2>
             <p className="text-sm text-muted-foreground">
-              Learn about traditional foods and recipes
+              Alamin ang mga tradisyonal na pagkain at resipe
             </p>
           </Link>
 
@@ -104,9 +114,9 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">📍</div>
-            <h2 className="mb-2 text-xl font-semibold">About San Pedro</h2>
+            <h2 className="mb-2 text-xl font-semibold">Tungkol sa San Pedro</h2>
             <p className="text-sm text-muted-foreground">
-              Discover the history and culture of the area
+              Tuklasin ang kasaysayan at kultura ng ating lugar
             </p>
           </Link>
         </div>
@@ -116,9 +126,12 @@ export default function HomePage() {
             {businesses.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Featured Businesses</h2>
-                  <Link href="/business/discovery" className="text-sm text-primary hover:underline">
-                    View all
+                  <h2 className="text-2xl font-bold">Tampok na mga Negosyo</h2>
+                  <Link
+                    href="/business/discovery"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Tingnan lahat
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -146,9 +159,12 @@ export default function HomePage() {
             {foods.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Heritage Foods</h2>
-                  <Link href="/foods" className="text-sm text-primary hover:underline">
-                    View all
+                  <h2 className="text-2xl font-bold">Mga Pagkaing Pamana</h2>
+                  <Link
+                    href="/foods"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Tingnan lahat
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -185,9 +201,14 @@ export default function HomePage() {
             {topRatedFoods.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Top Rated Foods</h2>
-                  <Link href="/foods" className="text-sm text-primary hover:underline">
-                    View all
+                  <h2 className="text-2xl font-bold">
+                    Pinakamahusay na Pagkain
+                  </h2>
+                  <Link
+                    href="/foods"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Tingnan lahat
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -232,22 +253,23 @@ export default function HomePage() {
         )}
 
         <section className="rounded-lg border border-border bg-card p-8 text-center">
-          <h2 className="mb-4 text-2xl font-bold">Want to learn more?</h2>
+          <h2 className="mb-4 text-2xl font-bold">Gusto mo pa bang malaman?</h2>
           <p className="mb-6 text-muted-foreground">
-            Visit our about pages to learn more about San Pedro and our mission
+            Bisitahin ang aming mga pahina upang mas makilala ang San Pedro at
+            ang aming layunin
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/about/the-team"
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
-              Meet the Team
+              Kilalanin ang Koponan
             </Link>
             <Link
               href="/about/the-website"
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
-              About Ilaila
+              Tungkol sa Ilaila
             </Link>
           </div>
         </section>

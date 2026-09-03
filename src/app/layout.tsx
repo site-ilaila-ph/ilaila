@@ -4,12 +4,19 @@ import "@/app/styles/globals.css";
 import { cn } from "@/lib/client";
 import { createSessionReader } from "@/lib/session/server";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
-import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";
+import {
+  acquireCacheManager,
+  acquireDb,
+  acquireNextJSCookieMap,
+} from "@/lib/live";
 import { User } from "@/generated/prisma/client";
 
-const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
+const montserratHeading = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
-const manrope = Manrope({subsets:['latin'],variable:'--font-sans'});
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,16 +30,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ilaila",
-  description: "A website publishing restaurants and cafes in the upper villages of San Pedro City, Laguna",
+  description:
+    "A website publishing restaurants and cafes in the upper villages of San Pedro City, Laguna",
 };
 
-function sanitizeUser(user: User): ClientReadonlySession['user'] {
+function sanitizeUser(user: User): ClientReadonlySession["user"] {
   return {
     id: user.id,
     userName: user.userName,
     email: user.email,
-    isAdmin: user.isAdmin
-  }
+    isAdmin: user.isAdmin,
+  };
 }
 
 export default async function RootLayout({
@@ -40,15 +48,36 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = createSessionReader({ db: acquireDb(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
+  const session = createSessionReader({
+    db: acquireDb(),
+    cache: acquireCacheManager(),
+    cookieMap: await acquireNextJSCookieMap(),
+  });
   const sessionId = await session.getSessionId();
   return (
     <html
-      lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", manrope.variable, montserratHeading.variable)}
+      lang="fil"
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        manrope.variable,
+        montserratHeading.variable,
+      )}
     >
       <body className="min-h-full w-full flex flex-col">
-        <SessionContext value={sessionId ? { id: sessionId, user: sanitizeUser((await session.getSessionUser())!) } : null}>
+        <SessionContext
+          value={
+            sessionId
+              ? {
+                  id: sessionId,
+                  user: sanitizeUser((await session.getSessionUser())!),
+                }
+              : null
+          }
+        >
           {children}
         </SessionContext>
       </body>

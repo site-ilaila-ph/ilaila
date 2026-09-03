@@ -45,7 +45,7 @@ export default function FoodsPage() {
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Loading foods...</p>
+          <p className="text-muted-foreground">Nilo-load ang mga pagkain...</p>
         </div>
       </main>
     );
@@ -67,16 +67,16 @@ export default function FoodsPage() {
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">
-            Heritage Foods of San Pedro
+            Mga Pagkaing Pamana ng San Pedro
           </h1>
           <p className="text-lg text-muted-foreground">
-            Discover the culinary heritage and traditions of San Pedro
+            Tuklasin ang pamana at mga tradisyon sa pagluluto ng San Pedro
           </p>
         </div>
 
         {foods.length === 0 ? (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <p className="text-muted-foreground">No foods found</p>
+            <p className="text-muted-foreground">Walang nakitang pagkain</p>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

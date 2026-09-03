@@ -71,6 +71,24 @@ a {
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(
+        circle at 8% 0%,
+        rgb(210 235 205 / 0.55),
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 92% 18%,
+        rgb(232 243 224 / 0.8),
+        transparent 28%
+      ),
+      linear-gradient(
+        135deg,
+        transparent 0 48%,
+        rgb(255 255 255 / 0.3) 48% 52%,
+        transparent 52% 100%
+      );
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
