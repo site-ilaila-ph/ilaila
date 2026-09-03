@@ -1,13 +1,29 @@
 "use server";
 
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb } from "@/lib/live";
+import { acquireDb, acquireStorageManager } from "@/lib/live";
 import z from "zod";
 import type { PrismaClient } from "@/generated/prisma/client";
 
 const adminActionDependencies = () => ({
   db: acquireDb(),
 });
+
+async function saveImage(dataUrl: string, key: string) {
+  const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/);
+  if (!match) throw new Error("Invalid image format");
+  if (process.env.NODE_ENV !== "production" && !process.env.BLOB_READ_WRITE_TOKEN) {
+    return dataUrl;
+  }
+  const [, contentType, encoded] = match;
+  const bytes = Uint8Array.from(Buffer.from(encoded, "base64"));
+  const blob = await acquireStorageManager().upload({
+    key: ["management", key],
+    fileOrBody: new Blob([bytes], { type: contentType }),
+    options: { access: "public", contentType },
+  });
+  return blob.url;
+}
 
 // ============ BUSINESS MANAGEMENT ============
 
@@ -20,15 +36,16 @@ const createBusinessSchema = z.object({
   longitude: z.number(),
   hours: z.string().min(1),
   tags: z.array(z.string()).optional(),
+  imageData: z.string().optional(),
 });
 
 export const createBusinessAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createBusinessSchema>,
-    deps: { db: Pick<PrismaClient, "business" | "businessTag"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "business" | "businessTag" | "businessImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    
+
     const business = await db.business.create({
       data: {
         name: input.name,
@@ -41,6 +58,10 @@ export const createBusinessAction = toServerAction({
         createdById: "system", // Will be updated with actual user ID from session
       },
     });
+
+    if (input.imageData) {
+      await db.businessImage.create({ data: { businessId: business.id, description: "Business image", url: await saveImage(input.imageData, `businesses/${business.id}`) } });
+    }
 
     if (input.tags && input.tags.length > 0) {
       await Promise.all(
@@ -68,18 +89,19 @@ const updateBusinessSchema = z.object({
   longitude: z.number().optional(),
   hours: z.string().min(1).optional(),
   isPublished: z.boolean().optional(),
+  imageData: z.string().optional(),
 });
 
 export const updateBusinessAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateBusinessSchema>,
-    deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "business" | "businessImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
     const { id, ...data } = input;
     
-    return await db.business.update({
+    const business = await db.business.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -92,6 +114,12 @@ export const updateBusinessAction = toServerAction({
         ...(data.isPublished !== undefined && { isPublished: data.isPublished }),
       },
     });
+
+    if (input.imageData) {
+      await db.businessImage.create({ data: { businessId: id, description: "Business image", url: await saveImage(input.imageData, `businesses/${id}-${Date.now()}`) } });
+    }
+
+    return business;
   },
   schema: updateBusinessSchema,
   dependencies: adminActionDependencies,
@@ -120,12 +148,13 @@ const createFoodSchema = z.object({
   culturalSignificance: z.string().min(1),
   isHeritage: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
+  imageData: z.string().optional(),
 });
 
 export const createFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food" | "foodTag"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "food" | "foodTag" | "foodImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
@@ -140,6 +169,10 @@ export const createFoodAction = toServerAction({
         isHeritage: input.isHeritage,
       },
     });
+
+    if (input.imageData) {
+      await db.foodImage.create({ data: { foodId: food.id, description: "Food image", url: await saveImage(input.imageData, `foods/${food.id}`) } });
+    }
 
     if (input.tags && input.tags.length > 0) {
       await Promise.all(
@@ -166,18 +199,19 @@ const updateFoodSchema = z.object({
   recipe: z.string().optional(),
   culturalSignificance: z.string().optional(),
   isHeritage: z.boolean().optional(),
+  imageData: z.string().optional(),
 });
 
 export const updateFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "food" | "foodImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
     const { id, ...data } = input;
     
-    return await db.food.update({
+    const food = await db.food.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -189,6 +223,12 @@ export const updateFoodAction = toServerAction({
         ...(data.isHeritage !== undefined && { isHeritage: data.isHeritage }),
       },
     });
+
+    if (input.imageData) {
+      await db.foodImage.create({ data: { foodId: id, description: "Food image", url: await saveImage(input.imageData, `foods/${id}-${Date.now()}`) } });
+    }
+
+    return food;
   },
   schema: updateFoodSchema,
   dependencies: adminActionDependencies,

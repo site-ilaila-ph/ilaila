@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ExternalLink, MapPin, Star, ThumbsUp } from "lucide-react";
 import { createReviewAction, getBusinessByIdAction, getBusinessesAction, upvoteReviewAction } from "@/app/business/actions";
 import type { BusinessListItem } from "@/app/business/services";
@@ -302,8 +303,12 @@ export default function BusinessProfilePage({
                   <h3 className="mb-4 text-lg font-semibold">Gallery</h3>
                   <div className="space-y-2">
                     {business.images.map((image) => (
-                      <div key={image.id} className="text-sm text-muted-foreground">
-                        {image.description}
+                      <div key={image.id} className="overflow-hidden rounded-lg border border-border bg-muted">
+                        {image.url ? (
+                          <Image src={image.url} alt={image.description} width={640} height={360} unoptimized className="aspect-video w-full object-cover" />
+                        ) : (
+                          <div className="p-3 text-sm text-muted-foreground">{image.description}</div>
+                        )}
                       </div>
                     ))}
                   </div>

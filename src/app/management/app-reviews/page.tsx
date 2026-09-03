@@ -80,7 +80,7 @@ export default function ManageAppReviews() {
   }
 
   async function handleDelete(id: string) {
-    if (confirm("Are you sure you want to delete this review?")) {
+    if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
         await deleteAppReviewAction(id);
         await loadData();
@@ -94,33 +94,33 @@ export default function ManageAppReviews() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Manage App Reviews</h1>
-          <p className="mt-1 text-muted-foreground">Moderate and manage user reviews for the application</p>
+          <h1 className="text-3xl font-bold">Pamahalaan ang mga Review ng App</h1>
+          <p className="mt-1 text-muted-foreground">Suriin at pamahalaan ang mga review ng gumagamit para sa aplikasyon</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid gap-6 md:grid-cols-4 mb-12">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Total Reviews</p>
+              <p className="text-sm text-muted-foreground">Kabuuang Review</p>
               <p className="mt-2 text-3xl font-bold">{stats.total}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Approved</p>
+              <p className="text-sm text-muted-foreground">Naaprubahan</p>
               <p className="mt-2 text-3xl font-bold text-green-600">{stats.approved}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-sm text-muted-foreground">Nakabinbin</p>
               <p className="mt-2 text-3xl font-bold text-yellow-600">{stats.pending}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Average Rating</p>
+              <p className="text-sm text-muted-foreground">Karaniwang Marka</p>
               <p className="mt-2 text-3xl font-bold text-primary">
                 {stats.averageRating.toFixed(1)}/5
               </p>
@@ -131,21 +131,21 @@ export default function ManageAppReviews() {
         {isLoading ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Loading reviews...</p>
+              <p className="text-muted-foreground">Ikinakarga ang mga review...</p>
             </CardContent>
           </Card>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
-              <TabsTrigger value="all">All Reviews ({reviews.length})</TabsTrigger>
-              <TabsTrigger value="pending">Pending ({pendingReviews.length})</TabsTrigger>
+              <TabsTrigger value="all">Lahat ng Review ({reviews.length})</TabsTrigger>
+              <TabsTrigger value="pending">Nakabinbin ({pendingReviews.length})</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all">
               {reviews.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No reviews yet</p>
+                    <p className="text-muted-foreground">Wala pang review</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -156,10 +156,10 @@ export default function ManageAppReviews() {
                         <div className="mb-3 flex items-start justify-between">
                           <div>
                             <p className="font-semibold">
-                              {review.user?.userName || review.userName || "Anonymous"}
+                              {review.user?.userName || review.userName || "Hindi nakilala"}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {review.user?.email || review.email || "No email"}
+                              {review.user?.email || review.email || "Walang email"}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {new Date(review.createdAt).toLocaleDateString()}
@@ -177,7 +177,7 @@ export default function ManageAppReviews() {
                                 backgroundColor: review.isApproved ? "#10b981" : "#f59e0b",
                                 color: "white"
                               }}>
-                              {review.isApproved ? "Approved" : "Pending"}
+                              {review.isApproved ? "Naaprubahan" : "Nakabinbin"}
                             </div>
                           </div>
                         </div>
@@ -191,7 +191,7 @@ export default function ManageAppReviews() {
                               className="bg-green-600 hover:bg-green-700"
                               onClick={() => handleApprove(review.id)}
                             >
-                              Approve
+                              Aprubahan
                             </Button>
                           )}
                           {review.isApproved && (
@@ -200,7 +200,7 @@ export default function ManageAppReviews() {
                               variant="outline"
                               onClick={() => handleReject(review.id)}
                             >
-                              Unapprove
+                              Bawiin ang Pag-apruba
                             </Button>
                           )}
                           <Button
@@ -208,7 +208,7 @@ export default function ManageAppReviews() {
                             variant="destructive"
                             onClick={() => handleDelete(review.id)}
                           >
-                            Delete
+                            Tanggalin
                           </Button>
                         </div>
                       </CardContent>
@@ -222,7 +222,7 @@ export default function ManageAppReviews() {
               {pendingReviews.length === 0 ? (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No pending reviews</p>
+                    <p className="text-muted-foreground">Walang nakabinbing review</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -233,10 +233,10 @@ export default function ManageAppReviews() {
                         <div className="mb-3 flex items-start justify-between">
                           <div>
                             <p className="font-semibold">
-                              {review.user?.userName || review.userName || "Anonymous"}
+                              {review.user?.userName || review.userName || "Hindi nakilala"}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {review.user?.email || review.email || "No email"}
+                              {review.user?.email || review.email || "Walang email"}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {new Date(review.createdAt).toLocaleDateString()}
@@ -250,7 +250,7 @@ export default function ManageAppReviews() {
                               <span className="text-muted-foreground">/5</span>
                             </div>
                             <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold bg-yellow-500 text-white">
-                              Pending
+                              Nakabinbin
                             </div>
                           </div>
                         </div>
@@ -263,14 +263,14 @@ export default function ManageAppReviews() {
                             className="bg-green-600 hover:bg-green-700"
                             onClick={() => handleApprove(review.id)}
                           >
-                            Approve
+                            Aprubahan
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => handleDelete(review.id)}
                           >
-                            Reject & Delete
+                            Tanggihan at Tanggalin
                           </Button>
                         </div>
                       </CardContent>
