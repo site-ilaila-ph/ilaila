@@ -1,8 +1,8 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
-import { getAllReviewsForManagement } from "@/app/(session-gated)/(admin-only)/management/services";
-import { deleteReviewAction } from "@/app/(session-gated)/(admin-only)/management/actions";
+import { getAllReviewsForManagement } from "@/app/management/services";
+import { deleteReviewAction } from "@/app/management/actions";
 import { Button } from "@/lib/components/actions/button";
 import { Card, CardContent } from "@/lib/components/display/card";
 
