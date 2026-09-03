@@ -18,10 +18,17 @@ export type BusinessWithIncludes = Prisma.BusinessGetPayload<{
   };
 }>;
 
+type BusinessMenuItem = BusinessWithIncludes["menuItems"][number];
+
+export type SerializableBusinessWithIncludes = Omit<BusinessWithIncludes, "menuItems"> & {
+  menuItems: Array<Omit<BusinessMenuItem, "price"> & { price: number }>;
+};
+
 export type BusinessListItem = Prisma.BusinessGetPayload<{
   include: {
     images: true;
     tags: true;
+    reviews: true;
   };
 }>;
 
@@ -35,6 +42,7 @@ export async function getAllBusinesses(
     include: {
       images: true,
       tags: true,
+      reviews: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -43,11 +51,25 @@ export async function getAllBusinesses(
 export async function getBusinessById(
   id: string,
   db?: Pick<PrismaClient, "business">,
-): Promise<BusinessWithIncludes | null> {
+): Promise<SerializableBusinessWithIncludes | null> {
   const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
-  return resolvedDb.business.findUnique({
-    where: { id },
+  const requested = decodeURIComponent(id);
+  const include = {
+    images: true,
+    tags: true,
+    menuItems: true,
+    foods: { include: { food: true } },
+    reviews: { include: { user: true }, orderBy: { createdAt: "desc" as const } },
+  };
+  const byId = await resolvedDb.business.findUnique({
+    where: { id: requested },
+    include,
+  });
+  if (byId) return serializeBusiness(byId);
+
+  const businesses = await resolvedDb.business.findMany({
+    where: { isPublished: true },
     include: {
       images: true,
       tags: true,
@@ -65,6 +87,19 @@ export async function getBusinessById(
       },
     },
   });
+
+  const business = businesses.find((business) => business.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === requested.toLowerCase());
+  return business ? serializeBusiness(business) : null;
+}
+
+function serializeBusiness(business: BusinessWithIncludes): SerializableBusinessWithIncludes {
+  return {
+    ...business,
+    menuItems: business.menuItems.map((item) => ({
+      ...item,
+      price: Number(item.price),
+    })),
+  };
 }
 
 export async function getAverageRatingForBusiness(

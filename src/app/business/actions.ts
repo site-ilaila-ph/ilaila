@@ -5,6 +5,15 @@ import { toServerAction } from "@/lib/action/server";
 import { acquireDb } from "@/lib/live";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllBusinesses, getBusinessById } from "@/app/business/services";
+import { createSessionReader } from "@/lib/session/server";
+import { acquireCacheManager, acquireNextJSCookieMap } from "@/lib/live";
+
+async function requireCurrentUserId() {
+  const session = createSessionReader({ db: acquireDb(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
+  const user = await session.getSessionUser();
+  if (!user) throw new Error("Authentication required");
+  return user.id;
+}
 
 const businessActionDependencies = () => ({
   db: acquireDb(),
@@ -44,6 +53,8 @@ export const createReviewAction = toServerAction({
     input: z.infer<typeof createReviewSchema>,
   ) => {
     const db = acquireDb();
+    const userId = await requireCurrentUserId();
+    if (userId !== input.userId) throw new Error("You can only review as the signed-in user");
     return await db.review.upsert({
       where: { userId_businessId: { userId: input.userId, businessId: input.businessId } },
       create: {
@@ -98,4 +109,20 @@ export const deleteBookmarkAction = toServerAction({
     });
   },
   schema: deleteBookmarkSchema,
+});
+
+const upvoteReviewSchema = z.object({
+  reviewId: z.string(),
+});
+
+export const upvoteReviewAction = toServerAction({
+  serviceFn: async ({ reviewId }: z.infer<typeof upvoteReviewSchema>) => {
+    const db = acquireDb();
+    await requireCurrentUserId();
+    return await db.review.update({
+      where: { id: reviewId },
+      data: { upvotes: { increment: 1 } },
+    });
+  },
+  schema: upvoteReviewSchema,
 });
