@@ -254,7 +254,7 @@ async function main() {
     },
   });
 
-  const business3 = await client.business.create({
+  await client.business.create({
     data: {
       name: "Cebu Lechon Haus & Grill",
       description: "World-class crispy Cebu lechon roasted fresh daily with aromatic herbs and spices.",

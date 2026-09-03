@@ -30,6 +30,8 @@ async function verify(inputPassword: string, storedHash: string): Promise<boolea
   const originalHashBuffer =  Buffer.from(originalHash, 'hex');
   const inputHashBuffer = await scryptAsync(inputPassword, saltBuffer, K, { N, r, p });
 
+  if (originalHashBuffer.length !== inputHashBuffer.length) return false;
+
   return timingSafeEqual(
     originalHashBuffer,
     inputHashBuffer

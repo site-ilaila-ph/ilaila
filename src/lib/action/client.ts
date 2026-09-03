@@ -2,7 +2,6 @@
 
 import { useCallback, useState, useTransition } from "react";
 import type { AnyFunctionCoercedServerAction } from "./server";
-import { ActionFailure } from "../common-server-action-protocol";
 
 interface UseServerActionOptions<TAction extends AnyFunctionCoercedServerAction> {
     action: TAction;

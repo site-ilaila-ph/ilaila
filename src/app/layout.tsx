@@ -5,7 +5,7 @@ import { cn } from "@/lib/client";
 import { createSessionReader } from "@/lib/session/server";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
 import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/live";
-import { User } from "@/generated/prisma/client";
+import type { User } from "@/generated/prisma/client";
 
 const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
 

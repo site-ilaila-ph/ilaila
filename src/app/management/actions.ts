@@ -3,21 +3,11 @@
 import { toServerAction } from "@/lib/action/server";
 import { acquireDb } from "@/lib/live";
 import z from "zod";
-import { ServerError } from "@/lib/action/server";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { cookies } from "next/headers";
 
 const adminActionDependencies = () => ({
   db: acquireDb(),
 });
-
-// Middleware to verify admin access
-async function verifyAdminAccess(db: Pick<PrismaClient, "user">) {
-  const cookieStore = await cookies();
-  // Would check session and verify admin role
-  // Placeholder for now - will be enhanced with proper session validation
-  return true;
-}
 
 // ============ BUSINESS MANAGEMENT ============
 
@@ -37,7 +27,7 @@ export const createBusinessAction = toServerAction({
     input: z.infer<typeof createBusinessSchema>,
     deps: { db: Pick<PrismaClient, "business" | "businessTag"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     
     const business = await db.business.create({
       data: {
@@ -85,7 +75,7 @@ export const updateBusinessAction = toServerAction({
     input: z.infer<typeof updateBusinessSchema>,
     deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     
     const { id, ...data } = input;
     
@@ -112,7 +102,7 @@ export const deleteBusinessAction = toServerAction({
     id: string,
     deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     return await db.business.delete({ where: { id } });
   },
   schema: z.string(),
@@ -137,7 +127,7 @@ export const createFoodAction = toServerAction({
     input: z.infer<typeof createFoodSchema>,
     deps: { db: Pick<PrismaClient, "food" | "foodTag"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     
     const food = await db.food.create({
       data: {
@@ -183,7 +173,7 @@ export const updateFoodAction = toServerAction({
     input: z.infer<typeof updateFoodSchema>,
     deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     
     const { id, ...data } = input;
     
@@ -209,7 +199,7 @@ export const deleteFoodAction = toServerAction({
     id: string,
     deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     return await db.food.delete({ where: { id } });
   },
   schema: z.string(),
@@ -223,7 +213,7 @@ export const deleteReviewAction = toServerAction({
     id: string,
     deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     return await db.review.delete({ where: { id } });
   },
   schema: z.string(),
@@ -235,7 +225,8 @@ export const updateReviewStatusAction = toServerAction({
     { id, isApproved }: { id: string; isApproved: boolean },
     deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
+    void isApproved;
     // Would update a review status/moderation field if added to schema
     return await db.review.findUnique({ where: { id } });
   },
@@ -250,7 +241,7 @@ export const updateUserRoleAction = toServerAction({
     { userId, isAdmin }: { userId: string; isAdmin: boolean },
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     return await db.user.update({
       where: { id: userId },
       data: { isAdmin },
@@ -265,7 +256,7 @@ export const deleteUserAction = toServerAction({
     userId: string,
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
-    const db = acquireDb();
+    const db = deps.db;
     return await db.user.delete({ where: { id: userId } });
   },
   schema: z.string(),

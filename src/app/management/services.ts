@@ -1,7 +1,6 @@
 "use server";
 
 import { acquireDb } from "@/lib/live";
-import type { PrismaClient } from "@/generated/prisma/client";
 
 export async function getAllBusinessesForManagement() {
   const db = acquireDb();

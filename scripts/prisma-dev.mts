@@ -103,8 +103,8 @@ async function main() {
 
   async function regenerateAndPush() {
     await run("pnpm", ["exec", "prisma", "db", "push"], { cwd: rootDir });
-    await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
     await run("pnpm", ["exec", "prisma", "generate"], { cwd: rootDir });
+    await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
   }
 
   async function cleanupDatabase() {
@@ -141,10 +141,13 @@ async function main() {
     try {
       await waitForDbReady();
       await regenerateAndPush();
+      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       watcher.on("change", async () => {
         try {
           await regenerateAndPush();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (err) {
           if (err instanceof CommandFailedError) {
             console.error(err.message);

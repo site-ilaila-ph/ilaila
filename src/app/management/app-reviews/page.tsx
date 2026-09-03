@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   getAllAppReviews,
   getAppReviewStats,
@@ -12,7 +11,7 @@ import {
   deleteAppReviewAction,
 } from "@/app/app-reviews/actions";
 import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
+import { Card, CardContent } from "@/lib/components/display/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/lib/components/navigation/tabs";
 
 interface AppReview {
@@ -90,8 +89,6 @@ export default function ManageAppReviews() {
       }
     }
   }
-
-  const displayedReviews = activeTab === "pending" ? pendingReviews : reviews;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

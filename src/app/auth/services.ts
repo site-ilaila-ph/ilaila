@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { acquireCacheManager, acquireDb } from "@/lib/live";
 import { verify, hash } from "./lib/password";
 import z from "zod";
-import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
+import { SESSION_TOKEN_COOKIE_NAME, SESSION_TTL_SECONDS } from "@/config/auth";
 import { ServerError } from "@/lib/action/server";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
@@ -44,20 +44,28 @@ export const signIn = async ({
 
   // issue a session after verification.
   const sessionId = crypto.randomBytes(32).toString("hex");
-  const sessionTtlSeconds = 12 * 60 * 60;
+  const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
+
+  await db.session.create({
+    data: {
+      id: sessionId,
+      userId: user.id,
+      expiresAt,
+    },
+  });
 
   const cache = acquireCacheManager();
   await cache.set({
     key: ["session", "via-id", sessionId],
     value: user.id,
-    ttlSeconds: sessionTtlSeconds,
+    ttlSeconds: SESSION_TTL_SECONDS,
   });
   cookieStore.set("SESSION_TOKEN", sessionId, {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    expires: new Date(Date.now() + sessionTtlSeconds * 1000),
+    expires: expiresAt,
   });
 
   return null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/lib/components/actions/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
@@ -8,8 +8,6 @@ import { Input } from "@/lib/components/form/inputs";
 import { Label } from "@/lib/components/form/label";
 
 export default function UserSettings() {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
@@ -18,25 +16,10 @@ export default function UserSettings() {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    // Would load user session here
-    setIsLoading(false);
-  }, []);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     // Would update user settings
     console.log("Update user settings:", formData);
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl px-6 py-12 text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
   }
 
   return (

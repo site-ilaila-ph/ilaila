@@ -1,33 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/lib/components/actions/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
 
 export default function UserDashboard() {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const user: { userName?: string; email?: string } = {};
+  const [stats] = useState({
     reviews: 0,
     bookmarks: 0,
   });
-
-  useEffect(() => {
-    // Would load user session here
-    // For now, showing dashboard structure
-    setIsLoading(false);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="mx-auto max-w-4xl px-6 py-12 text-center">
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

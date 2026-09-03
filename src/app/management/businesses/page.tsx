@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   getAllBusinessesForManagement,
-  getBusinessById,
 } from "@/app/management/services";
 import {
   createBusinessAction,

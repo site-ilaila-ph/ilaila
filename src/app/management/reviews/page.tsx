@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { getAllReviewsForManagement } from "@/app/management/services";
 import { deleteReviewAction } from "@/app/management/actions";
 import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
+import { Card, CardContent } from "@/lib/components/display/card";
 
 interface Review {
   id: string;
@@ -27,10 +27,6 @@ export default function ManageReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadReviews();
-  }, []);
-
   async function loadReviews() {
     try {
       const data = await getAllReviewsForManagement();
@@ -41,6 +37,12 @@ export default function ManageReviews() {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    startTransition(() => {
+      void loadReviews();
+    });
+  }, []);
 
   async function handleDelete(id: string) {
     if (confirm("Are you sure you want to delete this review?")) {

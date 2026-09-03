@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { PrismaClient } from "@/generated/prisma/client";
+import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllFood, getFoodById } from "@/app/foods/services";
 
 describe("food service", () => {
