@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Search, Trash2 } from "lucide-react";
-import { getAllFoodsForManagement } from "@/app/management/services";
+import { getAllFoodsForManagement } from "@/app/(session-gated)/(admin-only)/management/services";
 import {
   createFoodAction,
   updateFoodAction,
