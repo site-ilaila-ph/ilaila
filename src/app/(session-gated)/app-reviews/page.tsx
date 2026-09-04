@@ -70,9 +70,9 @@ export default function SubmitAppReview() {
         </div>
 
         {submitted && (
-          <Card className="mb-8 border-green-200 bg-green-50">
+          <Card className="mb-8 border-emerald-200 bg-emerald-50">
             <CardContent className="py-4 text-center">
-              <p className="font-semibold text-green-700">
+              <p className="font-semibold text-emerald-700">
                 Thank you! Your review has been submitted and is pending approval.
               </p>
             </CardContent>

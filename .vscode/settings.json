@@ -1,17 +1,47 @@
 {
-    "files.exclude": {
-        // base ignore.
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true,
+  "files.exclude": {
+    // base ignore.
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
 
-        // normally we should not be editing these files.
-        // ".github": true,
-        // ".pnpm-store": true,
-        // "node_modules": true,
-        // ".next": true
-    },
-    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    // normally we should not be editing these files.
+    // ".github": true,
+    // ".pnpm-store": true,
+    // "node_modules": true,
+    // ".next": true
+  },
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+
+  "terminal.integrated.profiles.windows": {
+    // Custom terminal profile for development environment.
+    "Development PowerShell": {
+      "overrideName": true,
+      "icon": "developer-tools",
+      "path": "powershell.exe",
+      "args": [
+        "-NoExit",
+        "-NoProfile",
+        "-Command",
+        "& { . '${workspaceFolder}\\.vscode\\Development Powershell Profile.ps1' -Interactive }"
+      ]
+    }
+  },
+
+  // Also use the custom terminal profile for automation tasks (e.g., preLaunchTask, postDebugTask).
+  "terminal.integrated.automationProfile.windows": {
+    "overrideName": true,
+    "icon": "developer-tools",
+    "path": "powershell.exe",
+    "args": [
+      "-NoExit",
+      "-NoProfile",
+      "-Command",
+      "& { . '${workspaceFolder}\\.vscode\\Development Powershell Profile.ps1' }"
+    ]
+  },
+
+  "terminal.integrated.defaultProfile.windows": "Development PowerShell"
 }

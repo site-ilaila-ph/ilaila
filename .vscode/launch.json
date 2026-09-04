@@ -2,25 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Project",
+      "name": "Debug: App (Dev — Server)",
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm app:dev",
       "preLaunchTask": "Application Setup",
       "postDebugTask": "Application Teardown",
+      "env": {
+        "NODE_ENV": "development"
+      },
       "serverReadyAction": {
         "action": "startDebugging",
-        "name": "Debug Project (Client-Side)",
-        "pattern": "Local:\\s+http://localhost:(\\d{4})",
+        "name": "Debug: App (Dev — Client)",
+        "pattern": "Local:\\s+http://localhost:(\\d+)",
         "killOnServerStop": true
       }
     },
     {
-      "name": "Debug Project (Client-Side)",
+      "name": "Debug: App (Dev — Client)",
       "type": "chrome",
       "request": "launch",
       "webRoot": "${workspaceFolder}",
-      "userDataDir": "${workspaceFolder}/dev/tmp/chrome-dev-user",
+      "userDataDir": "${workspaceFolder}/.tmp/chrome-dev-user",
       "url": "http://localhost:3000",
       "sourceMaps": true,
       "timeout": 180000

@@ -6,21 +6,26 @@
     "node": "24.x"
   },
   "scripts": {
-    "app:dev": "next dev",
-    "app:lint": "eslint --cache",
-    "app:setup": "pnpm install && pnpm app:typegen",
-    "app:start": "next start",
-    "app:test": "vitest run",
-    "app:typecheck": "pnpm app:typegen && tsc --noEmit",
-    "app:typegen": "next typegen && pnpm db:typegen",
-    "app:validate": "pnpm app:lint && pnpm app:typecheck && pnpm app:test",
-    "app:build": "pnpm app:typegen && next build",
-    "db:dev": "tsx scripts/prisma-dev.mts",
-    "db:reset": "prisma migrate reset --force",
-    "db:push": "prisma db push",
-    "db:typegen": "prisma generate",
-    "db:stop": "pnpm tsx scripts/prisma-dev-stop.mts",
-    "build": "pnpm app:build",
+    "typegen:app": "next typegen",
+    "typegen:db": "prisma generate",
+    "typegen": "pnpm typegen:app && pnpm typegen:db",
+
+    "dev:app": "next dev",
+    "dev:db": "tsx scripts/prisma-dev.mts",
+    "dev:setup": "pnpm install --frozen-lockfile && pnpm typegen",
+    "dev": "concurrently --kill-others-on-fail \"pnpm run dev:app\" \"pnpm run dev:db\"",
+
+    "ci:typecheck": "pnpm run typegen:app && tsc --noEmit",
+    "ci:lint": "eslint --cache",
+    "ci:test": "vitest run",
+    "ci:setup": "pnpm install --frozen-lockfile && pnpm typegen",
+    "ci:checks": "pnpm run ci:typecheck && pnpm run ci:lint && pnpm run ci:test",
+    "ci": "pnpm run ci:setup && pnpm run ci:checks",
+
+    "cd:setup": "pnpm install --frozen-lockfile && pnpm typegen",
+    "cd:app": "pnpm run cd:setup && pnpm next build",
+    "cd:db": "pnpm run cd:setup && pnpm exec prisma migrate deploy",
+
     "prepare": "husky"
   },
   "dependencies": {

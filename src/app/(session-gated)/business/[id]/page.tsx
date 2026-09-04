@@ -129,8 +129,8 @@ export default function BusinessProfilePage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f8f4] text-foreground">
-      <nav className="border-b border-[#dfe5dc] bg-[#f7f8f4]/90 backdrop-blur">
+    <main className="min-h-screen bg-brand-bg text-foreground">
+      <nav className="border-b border-brand-border bg-brand-bg/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <Link
             href="/home"
@@ -145,14 +145,14 @@ export default function BusinessProfilePage({
       </nav>
 
       <article className="mx-auto max-w-7xl px-6 py-12">
-        <header className="mb-12 border-b border-[#dfe5dc] pb-10">
-          <div className="mb-8 flex min-h-64 items-end bg-[#234d43] p-7 text-white sm:p-10"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#d5e8d8]">San Pedro, Laguna</p><h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">{business.name}</h1></div></div>
+        <header className="mb-12 border-b border-brand-border pb-10">
+          <div className="mb-8 flex min-h-64 items-end bg-brand-deep p-7 text-white sm:p-10"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-muted">San Pedro, Laguna</p><h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">{business.name}</h1></div></div>
           <p className="mb-7 max-w-3xl text-lg leading-relaxed text-muted-foreground">{business.description}</p>
           
           <div className="flex flex-wrap gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Rating</p>
-              <p className="flex items-center gap-2 text-2xl font-bold text-primary"><Star className="size-5 fill-[#e47b45] text-[#e47b45]" />{averageRating}/5</p>
+              <p className="flex items-center gap-2 text-2xl font-bold text-primary"><Star className="size-5 fill-brand-accent text-brand-accent" />{averageRating}/5</p>
               <p className="text-xs text-muted-foreground">({business.reviews.length} reviews)</p>
             </div>
             <div>
@@ -180,7 +180,7 @@ export default function BusinessProfilePage({
           {business.reviews.length > 0 && (
             <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-4">
               {metricRatings.map(([label, total]) => (
-                <div key={label as string} className="border-l-2 border-[#e47b45] pl-3">
+                <div key={label as string} className="border-l-2 border-brand-accent pl-3">
                   <p className="text-xs text-muted-foreground">{label as string}</p>
                   <p className="mt-1 font-semibold">{((total as number) / business.reviews.length).toFixed(1)} / 5</p>
                 </div>

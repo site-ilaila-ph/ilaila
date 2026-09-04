@@ -109,7 +109,7 @@ export default function ManageAppReviews() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Approved</p>
-              <p className="mt-2 text-3xl font-bold text-green-600">{stats.approved}</p>
+              <p className="mt-2 text-3xl font-bold text-emerald-600">{stats.approved}</p>
             </CardContent>
           </Card>
           <Card>
@@ -174,7 +174,7 @@ export default function ManageAppReviews() {
                             </div>
                             <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold" 
                               style={{
-                                backgroundColor: review.isApproved ? "#10b981" : "#f59e0b",
+                                backgroundColor: review.isApproved ? "var(--color-success)" : "var(--color-warning)",
                                 color: "white"
                               }}>
                               {review.isApproved ? "Approved" : "Pending"}
@@ -188,7 +188,7 @@ export default function ManageAppReviews() {
                           {!review.isApproved && (
                             <Button
                               size="sm"
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-primary hover:bg-primary/90"
                               onClick={() => handleApprove(review.id)}
                             >
                               Approve
@@ -260,7 +260,7 @@ export default function ManageAppReviews() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-primary hover:bg-primary/90"
                             onClick={() => handleApprove(review.id)}
                           >
                             Approve
