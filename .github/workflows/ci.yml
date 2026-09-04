@@ -11,6 +11,8 @@ on:
 
 jobs:
     ci:
+        env:
+            DIRECT_URL: ${{ secrets.DIRECT_URL }}
         runs-on: ubuntu-latest
         steps:
             - name: Checkout Code
@@ -27,5 +29,3 @@ jobs:
 
             - name: CI Workflow Script
               run: pnpm run ci
-              env:
-                DIRECT_URL: ${{ secrets.DIRECT_URL }}
