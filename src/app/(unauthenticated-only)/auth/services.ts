@@ -30,7 +30,7 @@ export const signIn = async ({
 
   // if the device already has a session.
   if (cookieStore.has(SESSION_TOKEN_COOKIE_NAME)) {
-    return; // no need to do anything, user is already authenticated.
+    return user.isAdmin; // no need to do anything, user is already authenticated.
   }
 
   if (!verify(password, user.passwordHash)) {
@@ -68,7 +68,7 @@ export const signIn = async ({
     expires: expiresAt,
   });
 
-  return null;
+  return user.isAdmin;
 };
 
 export const signUp = async ({

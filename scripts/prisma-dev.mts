@@ -101,10 +101,12 @@ async function main() {
     });
   }
 
-  async function regenerateAndPush() {
+  async function regenerateAndPush({ seed = false }: { seed?: boolean } = {}) {
     await run("pnpm", ["exec", "prisma", "db", "push"], { cwd: rootDir });
     await run("pnpm", ["exec", "prisma", "generate"], { cwd: rootDir });
-    await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
+    if (seed) {
+      await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
+    }
   }
 
   async function cleanupDatabase() {
@@ -140,7 +142,7 @@ async function main() {
   watcher.on("ready", async () => {
     try {
       await waitForDbReady();
-      await regenerateAndPush();
+      await regenerateAndPush({ seed: true });
       
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
