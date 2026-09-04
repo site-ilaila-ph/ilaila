@@ -33,7 +33,7 @@ export const signIn = async ({
     return; // no need to do anything, user is already authenticated.
   }
 
-  if (!verify(password, user.passwordHash)) {
+  if (!(await verify(password, user.passwordHash))) {
     throw new ServerError({
       domain: "authentication",
       hint: "sign-in-failed",
