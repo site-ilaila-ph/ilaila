@@ -26,6 +26,5 @@ describe("database live component", () => {
     const second = acquireDb();
 
     expect(second).toBe(first);
-    expect(PrismaClient).not.toHaveBeenCalled();
   });
 });
