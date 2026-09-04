@@ -21,7 +21,7 @@
     "ci": "pnpm run ci:setup && pnpm run ci:checks",
     "cd:setup": "pnpm install --frozen-lockfile && pnpm typegen",
     "cd:app": "pnpm run cd:setup && pnpm next build",
-    "cd:db": "pnpm run cd:setup && pnpm exec prisma migrate deploy",
+    "cd:db": "pnpm run cd:setup && pnpm exec prisma migrate deploy"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
