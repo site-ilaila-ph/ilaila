@@ -23,9 +23,7 @@ jobs:
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  cache: "pnpm"
+              with: {"node-version": 22, "cache": "pnpm"}
 
             - name: CI Workflow Script
               run: pnpm run ci
