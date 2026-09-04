@@ -27,3 +27,5 @@ jobs:
 
             - name: CI Workflow Script
               run: pnpm run ci
+              env:
+                DIRECT_URL: ${{ secrets.DIRECT_URL }}
