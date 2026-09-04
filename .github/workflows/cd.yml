@@ -14,12 +14,17 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
+
+      - name: Run Database CD
+        run: pnpm run cd:db
+        env:
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
 
   deploy-app:
     runs-on: ubuntu-latest
