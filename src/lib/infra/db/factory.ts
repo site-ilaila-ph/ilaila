@@ -3,7 +3,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 
 const db = new PrismaClient({
   adapter: new PrismaPg({
-    connectionString: process.env.POSTGRES_PRISMA_URL,
+    connectionString: process.env.DATABASE_URL,
   }),
 });
 
