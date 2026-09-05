@@ -54,18 +54,40 @@ async function run(
 }
 
 async function writeLock() {
-  await fsx.writeJSON(join(rootDir, ".prisma-dev-lock"), { pid: process.pid });
+  await fsx.writeJSON(join(rootDir, ".tmp", ".prisma-dev-lock"), { pid: process.pid });
+}
+
+async function isPidAlive(pid: number): Promise<boolean> {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+        if (err instanceof Error && "code" in err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      return code === "EPERM";
+    }
+    return false;
+  }
 }
 
 async function respectLock() {
-  if (await fsx.exists(join(rootDir, ".prisma-dev-lock"))) {
-    console.error("An instance of prisma-dev is already running.");
-    process.exit(0);
+  const lockPath = join(rootDir, ".tmp", ".prisma-dev-lock");
+
+  if (await fsx.exists(lockPath)) {
+    const { pid } = await fsx.readJSON(lockPath);
+
+    if (typeof pid === "number" && (await isPidAlive(pid))) {
+      console.error(`An instance of prisma-dev is already running (pid ${pid}).`);
+      process.exit(0);
+    }
+
+    console.warn(`Stale prisma-dev lock found (pid ${pid} not running). Removing it.`);
+    await fsx.rm(lockPath, { force: true });
   }
 }
 
 async function removeLock() {
-  await fsx.rm(join(rootDir, ".prisma-dev-lock"), { force: true });
+  await fsx.rm(join(rootDir, ".tmp", ".prisma-dev-lock"), { force: true });
 }
 
 async function main() {
@@ -174,5 +196,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("fatal:", err);
-  process.exit(0);
+  process.exit(1);
 });
