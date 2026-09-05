@@ -54,6 +54,7 @@ async function run(
 }
 
 async function writeLock() {
+  await fsx.ensureDir(join(rootDir, ".tmp"));
   await fsx.writeJSON(join(rootDir, ".tmp", ".prisma-dev-lock"), { pid: process.pid });
 }
 
