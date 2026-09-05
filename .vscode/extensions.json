@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "dbaeumer.vscode-eslint",
+        "vitest.explorer",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "PKief.material-icon-theme",
+        "naumovs.color-highlight",
+        "mikestead.dotenv",
+        "wix.vscode-import-cost",
+        "yoavbls.pretty-ts-errors",
+        "Prisma.prisma",
+        "timonwong.shellcheck",
+        "zhuangtongfa.Material-theme"
+    ],
+}

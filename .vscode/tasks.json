@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Prisma Development Server",
+      "type": "shell",
+      "command": "pnpm db:dev",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "clear": true,
+        "close": true,
+        "group": "prisma"
+      },
+      "problemMatcher": {
+        "owner": "prisma",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "\\$ tsx scripts/prisma-dev\\.mts",
+          "endsPattern": "prisma-dev ready!"
+        }
+      }
+    },
+        {
+      "label": "Stop Prisma Development Server",
+      "type": "shell",
+      "command": "pnpm db:stop",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "close": true,
+        "clear": true,
+        "group": "prisma"
+      },
+      "problemMatcher": {
+        "owner": "prisma",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Loaded Prisma config",
+          "endsPattern": "postgres://.*"
+        }
+      }
+    },
+    {
+      "label": "Run Prisma",
+      "type": "shell",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Start Prisma Development Server"],
+    },
+    {
+      "label": "Application Setup",
+      "type": "shell",
+      "dependsOrder": "parallel",
+      "dependsOn": ["Run Prisma"]
+    },
+    {
+      "label": "Application Teardown",
+      "type": "shell",
+      "dependsOrder": "parallel",
+      "dependsOn": ["Stop Prisma Development Server"]
+    }
+  ]
+}
