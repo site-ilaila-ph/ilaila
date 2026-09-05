@@ -10,7 +10,7 @@
     "typegen:db": "prisma generate",
     "typegen": "pnpm typegen:app && pnpm typegen:db",
     "dev:app": "next dev",
-    "dev:db": "tsx scripts/prisma-dev.mts",
+    "dev:db": "pnpm tsx scripts/prisma-dev.mts",
     "dev:setup": "pnpm install --frozen-lockfile && pnpm typegen",
     "dev:seed": "tsx prisma/dev/seed.mts",
     "dev": "concurrently --kill-others-on-fail \"pnpm run dev:app\" \"pnpm run dev:db\"",

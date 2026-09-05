@@ -1,8 +1,10 @@
 import { hash } from "@/app/(unauthenticated-only)/auth/lib/password";
-import { acquireDb } from "@/lib/infra";
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 async function main() {
-  const client = acquireDb();
+  const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
+  const client = new PrismaClient({ adapter });
 
   console.log("Cleaning existing database records...");
   await client.review.deleteMany();
