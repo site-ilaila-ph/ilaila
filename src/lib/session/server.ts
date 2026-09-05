@@ -44,6 +44,7 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
             if (error instanceof PrismaClientKnownRequestError) {
               return null;
             }
+            console.error(error);
             throw error;
           }
         },

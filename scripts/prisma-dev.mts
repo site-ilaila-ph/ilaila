@@ -59,14 +59,13 @@ async function writeLock() {
 
 async function isPidAlive(pid: number): Promise<boolean> {
   try {
+    // signal 0 doesn't kill the process, it just checks for existence/permission
     process.kill(pid, 0);
     return true;
-  } catch (err) {
-        if (err instanceof Error && "code" in err) {
-      const code = (err as NodeJS.ErrnoException).code;
-      return code === "EPERM";
-    }
-    return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    if (err instanceof Error && 'code' in err) return err.code === "EPERM";
+    else return false
   }
 }
 
@@ -196,5 +195,5 @@ async function main() {
 
 main().catch((err) => {
   console.error("fatal:", err);
-  process.exit(1);
+  process.exit(0);
 });

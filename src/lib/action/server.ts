@@ -208,6 +208,7 @@ function toServerAction<
         }
       } catch (error: any) {
         if (!(error instanceof ConstraintFailSignal)) {
+          console.error(error);
           throw error;
         }
       }
