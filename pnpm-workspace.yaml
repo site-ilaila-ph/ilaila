@@ -12,3 +12,5 @@ allowBuilds:
   sharp: true
   ssh2: true
   unrs-resolver: true
+  msgpackr-extract: true
+  workerd: true
