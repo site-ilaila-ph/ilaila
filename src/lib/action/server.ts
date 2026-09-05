@@ -8,7 +8,11 @@ import {
   PrismaClientValidationError,
 } from "@prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
-import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
+import type {
+  ActionFailure,
+  ActionResponse,
+  ActionValidationErrors,
+} from "../common-server-action-protocol";
 
 // --- Service & action types -------------------------------------------------
 
@@ -16,7 +20,7 @@ type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
 type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
   params: TParams,
-  deps: TDeps
+  deps: TDeps,
 ) => Promise<TReturn>;
 
 type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>;
@@ -54,7 +58,9 @@ function createConstraintApi(violations: ConstraintViolation[]): ConstraintApi {
   };
 }
 
-function violationsToFieldErrors(violations: ConstraintViolation[]): ActionValidationErrors {
+function violationsToFieldErrors(
+  violations: ConstraintViolation[],
+): ActionValidationErrors {
   const fieldErrors: ActionValidationErrors = {};
   for (const violation of violations) {
     if (violation.field === undefined) continue;
@@ -70,10 +76,13 @@ function violationsToGlobalErrors(violations: ConstraintViolation[]): string[] {
 type ServerActionBusinessConstraint<TParams, TDeps = any> = (
   params: TParams,
   deps: TDeps,
-  api: ConstraintApi
+  api: ConstraintApi,
 ) => void | Promise<void>;
 
-type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<any, any>;
+type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<
+  any,
+  any
+>;
 
 interface ServiceFunctionToServerActionOptions<
   TFn extends AsyncServiceFunction,
@@ -86,10 +95,11 @@ interface ServiceFunctionToServerActionOptions<
   dependencies?: TDeps | (() => TDeps | Promise<TDeps>);
 }
 
-type AnyServiceFunctionToServerActionOptions = ServiceFunctionToServerActionOptions<
-  AnyAsyncServiceFunction,
-  AnyParameterSchema
->;
+type AnyServiceFunctionToServerActionOptions =
+  ServiceFunctionToServerActionOptions<
+    AnyAsyncServiceFunction,
+    AnyParameterSchema
+  >;
 
 interface FunctionCoercedServerAction<
   TFn extends AnyAsyncServiceFunction,
@@ -176,11 +186,13 @@ function toServerAction<
   TSchema extends z.ZodType<Parameters<TFn>[0]>,
   TDeps = Parameters<TFn>[1],
 >(
-  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>
+  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>,
 ): FunctionCoercedServerAction<TFn, TSchema> {
   const { serviceFn, schema, constraints = [], dependencies } = options;
 
-  return async (input: z.input<TSchema>): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
+  return async (
+    input: z.input<TSchema>,
+  ): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
     const parsed = await schema.safeParseAsync(input);
 
     if (!parsed.success) {
@@ -208,7 +220,6 @@ function toServerAction<
         }
       } catch (error: any) {
         if (!(error instanceof ConstraintFailSignal)) {
-          console.error(error);
           throw error;
         }
       }
@@ -229,6 +240,7 @@ function toServerAction<
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
+      console.error(error);
       const prismaFailure = prismaErrorToActionFailure(error);
       if (prismaFailure) return prismaFailure;
 
@@ -270,7 +282,12 @@ class ServerError extends Error {
   public readonly hint?: string;
   public readonly sensitive: boolean;
 
-  public constructor({ domain, hint, message, sensitive = true }: ServerErrorOptions) {
+  public constructor({
+    domain,
+    hint,
+    message,
+    sensitive = true,
+  }: ServerErrorOptions) {
     super(message);
 
     this.name = "ServerError";
