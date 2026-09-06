@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - workspace-data:/workspaces/project
+      - .:/workspaces/project/.devcontainer # sync this with the host.
     command: sleep infinity
     depends_on:
       db:
