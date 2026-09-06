@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/typescript-node:24
 
+USER root
 RUN apt-get update && apt-get install -y curl ripgrep git postgresql-client && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /opt/microsoft/powershell/7 \
@@ -7,5 +8,9 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     | tar -xz -C /opt/microsoft/powershell/7 \
     && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
+# create an empty placeholder directory.
+RUN mkdir -p /workspaces/project && chown -R node:node /workspaces/project
+
 COPY bootstrap.sh /usr/local/bin/bootstrap.sh
 RUN chmod +x /usr/local/bin/bootstrap.sh
+USER node

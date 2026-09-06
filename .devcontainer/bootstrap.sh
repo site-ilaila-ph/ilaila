@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-DEST="/workspace/app"
+DEST="/workspaces/project"
 REPO_URL="https://github.com/site-ilaila-ph/ilaila.git"
 
 if [ ! -d "$DEST/.git" ]; then

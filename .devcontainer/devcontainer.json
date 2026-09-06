@@ -2,7 +2,7 @@
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
   "postStartCommand": "pg_isready -h db -U postgres -t 30",
-  "workspaceFolder": "/workspace/app",
+  "workspaceFolder": "/workspaces/project",
   "onCreateCommand": "bootstrap.sh",
   "name": "ilaila",
   "remoteUser": "node",

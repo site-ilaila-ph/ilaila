@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - workspace-data:/workspace
+      - workspace-data:/workspaces/project
     command: sleep infinity
     depends_on:
       db:
