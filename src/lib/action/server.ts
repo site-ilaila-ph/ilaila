@@ -6,7 +6,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from "@prisma/client/runtime/client";
+} from "@/generated/prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
 import type {
   ActionFailure,

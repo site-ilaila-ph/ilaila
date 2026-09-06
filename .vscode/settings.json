@@ -18,5 +18,15 @@
     "*.json5": "jsonc"
   },
 
+  "chat.agentFilesLocations": {
+    ".github/agents": false,
+    ".agents/": true
+  },
+
+  "chat.agentSkillsLocations": {
+    ".github/skills": false,
+    ".agents/skills": true
+  },
+  
   "js/ts.tsdk.path": "node_modules/typescript/lib",
 }

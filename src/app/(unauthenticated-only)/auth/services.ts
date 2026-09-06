@@ -8,7 +8,7 @@ import { verify, hash } from "./lib/password";
 import z from "zod";
 import { SESSION_TOKEN_COOKIE_NAME, SESSION_TTL_SECONDS } from "@/config/auth";
 import { ServerError } from "@/lib/action/server";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { PrismaClientKnownRequestError } from "@/generated/prisma/client/runtime/client";
 
 export const signIn = async ({
   email,

@@ -1,6 +1,5 @@
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
-import { PrismaClient, User } from "@/generated/prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { PrismaClient, User } from "@/generated/prisma/client/runtime/client";
 import type { CookieMap, CacheManager } from "../infra";
 
 export interface SessionReaderDependencies {
