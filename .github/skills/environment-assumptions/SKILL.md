@@ -1,15 +1,14 @@
 ---
 name: environment-assumptions
-description: Use this skill for any task involving shell/terminal commands. This environment always runs on Windows — use PowerShell syntax, never Unix/bash syntax.
+description: Use this skill for any task involving shell/terminal commands. This environment always runs on Linux — use bash syntax, never PowerShell syntax.
 ---
 
-# Windows Shell Conventions
+# Linux Shell Conventions
 
-This environment is Windows-only. When using the execute tool:
+This environment is Linux-only. When using the execute tool:
 
-- Use PowerShell cmdlets, not Unix commands (`Get-ChildItem` not `ls`, `Remove-Item` not `rm`, `Copy-Item` not `cp`)
-- Path separators are backslashes (`\`), though PowerShell tolerates forward slashes
-- Environment variables: `$env:VAR_NAME`, not `$VAR_NAME`
-- Chaining commands: use `;` or `-and`/`-or`, not `&&`/`||` (unless PowerShell 7+, which does support `&&`)
-- No `sudo` — elevation is `Start-Process -Verb RunAs` or the user is already admin
-- Line continuation: backtick `` ` ``, not backslash
+- Use standard Linux bash commands (`ls`, `rm`, `cp`, `mv`, `grep`, `find`)
+- Path separators are forward slashes (`/`)
+- Environment variables: `$VAR_NAME`
+- Chaining commands: `&&`, `||`, `;`
+- Line continuation: `\`
