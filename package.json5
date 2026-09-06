@@ -23,7 +23,7 @@
 		"cd:app": "pnpm run cd:setup && pnpm next build",
 		"cd:bootstrap": "tsx scripts/bootstrap.mts",
 		"cd:db": "pnpm run cd:setup && pnpm exec prisma migrate deploy && pnpm run cd:bootstrap",
-    "postinstall": "prisma skills sync || exit 0"
+    // "postinstall": "prisma skills sync || exit 0"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.6.0",

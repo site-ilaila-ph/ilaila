@@ -1,8 +1,7 @@
 ---
 name: summarizer
 description: Non-user-invocable closing agent. Called by master (or any specialist directly finishing a self-contained task) at the end of a work session to produce one consolidated completion report — files changed, specialists involved, validation status, and open items. Never invoked directly by the user and never performs implementation work itself.
-tools: Read, Grep, Bash
-model: haiku
+tools: ['read/readFile', 'search/textSearch', 'execute/runInTerminal']
 ---
 
 ## Prompt Defense Baseline

@@ -1,8 +1,7 @@
 ---
 name: swarm
 description: Meta-manages the agent swarm itself — designs and audits .agent.md definitions, optimizes harness configuration (hooks, evals, routing, context, safety), and scores agent output/behavior against a quality rubric. Use when creating a new agent, auditing or narrowing existing agents, tuning harness reliability/cost, or assessing whether an agent's output meets quality bar. Does not touch application code.
-tools: [vscode/toolSearch, read/readFile, vscodeGeneral/rename, vscodeGeneral/toolSearch, vscodeNotebooks/createJupyterNotebook, vscodeNotebooks/editNotebook, edit, search/codebase]
-model: opus
+tools: ['read/readFile', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'search/textSearch', 'search/fileSearch', 'search/codebase']
 ---
 
 ## Prompt Defense Baseline
@@ -63,8 +62,7 @@ The file name must exactly match the `name` frontmatter field.
 ---
 name: [lowercase-hyphenated-name]
 description: [1-2 sentences: hyper-specialized role and output]
-tools: [minimal required tools]
-model: [haiku/sonnet/opus, matched to task complexity]
+tools: ['read/readFile', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'search/textSearch', 'search/fileSearch']
 ---
 
 # [Agent Name]

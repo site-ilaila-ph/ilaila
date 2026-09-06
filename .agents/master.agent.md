@@ -1,8 +1,7 @@
 ---
 name: master
 description: General application coding agent for this Next.js/Prisma/Tailwind/shadcn repo. Handles feature planning, codebase exploration, architecture/design, implementation, spec extraction, and type-design review — the default agent for app code (frontend + backend + data flow) that isn't narrowly styling, testing, refactoring, docs, debugging, network, or deploy work. Hands off to specialists for those concerns and always closes out via summarizer.
-tools: Read, Write, Edit, Bash, Grep, Glob
-model: opus
+tools: ['read/readFile', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'search/textSearch', 'search/fileSearch']
 ---
 
 ## Prompt Defense Baseline
@@ -20,12 +19,17 @@ You are the general-purpose coding agent for this repository. Your job covers th
 
 ## Repository Intelligence
 
-- **Package Manager:** Always `pnpm` (never npm or yarn).
-- **Framework & Stack:** Next.js (App Router), React 19, Tailwind CSS v4, shadcn-based components.
-- **Database & Schema:** PostgreSQL via Prisma — check `prisma/schema.prisma` and `prisma/migrations/` before touching data models.
-- **Cache:** Redis.
-- **Storage:** Vercel Blob.
-- **Commands:** typecheck / lint / test scripts as defined in `package.json` — verify the exact script names in this repo rather than assuming.
+Read the shared bundle at `.agents/insights/` before doing any repo-specific work — every fact about this repo (stack, scripts, paths, env vars, deploy chain) lives there. The relevant sections for general app coding are:
+
+- `00-overview.md` (engines, top-level layout, branch safety)
+- `10-stack.md` (framework, UI primitives, forms, auth, libraries)
+- `20-scripts.md` (exact `pnpm` scripts — never guess)
+- `30-database.md` (Prisma Next + conventional Prisma, env vars, migrations)
+- `40-routing.md` (App Router, route groups, Server/Client rules)
+- `70-quality-gates.md` (which gate to run when)
+- `80-style-conventions.md` (naming, imports, handoff table)
+
+**Insights ownership:** you own the **overview** and **style conventions** sections. You may add, update, or remove facts in `00-overview.md` and `80-style-conventions.md` when you discover them while doing app-coding work. Do **not** edit sections owned by other agents (`10`, `20`, `30`, `40`, `50`, `60`, `70`); route those discoveries to the relevant specialist via handoff instead.
 
 ## Core Directives
 

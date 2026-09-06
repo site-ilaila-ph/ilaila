@@ -46,4 +46,18 @@ For agents whose `Bash` access is meant to be read-only/verification-only:
 
 ---
 
-*Project-specific details (stack, package manager, exact commands, file paths) are intentionally NOT included here yet — these are generic, repo-agnostic instructions. The `swarm` agent will tailor a project-specific version once given the repo to inspect.*
+## Repository Intelligence
+
+Project-specific facts (stack, scripts, exact paths, env vars, deploy chain, conventions) live in the **insights bundle**, not in this file:
+
+- [`/agents/insights/00-overview.md`](../agents/insights/00-overview.md) — repo identity, engines, top-level layout.
+- [`/agents/insights/10-stack.md`](../agents/insights/10-stack.md) — framework, UI primitives, forms, auth, libraries.
+- [`/agents/insights/20-scripts.md`](../agents/insights/20-scripts.md) — every `pnpm` script and what it does.
+- [`/agents/insights/30-database.md`](../agents/insights/30-database.md) — Prisma Next + conventional Prisma, env vars, migrations.
+- [`/agents/insights/40-routing.md`](../agents/insights/40-routing.md) — App Router structure, route groups, Server/Client rules.
+- [`/agents/insights/50-testing.md`](../agents/insights/50-testing.md) — Vitest setup, test locations, E2E.
+- [`/agents/insights/60-deploy.md`](../agents/insights/60-deploy.md) — Vercel, GitHub Actions, secrets, branch safety.
+- [`/agents/insights/70-quality-gates.md`](../agents/insights/70-quality-gates.md) — CI chain, ESLint/TS rules, when to run each gate.
+- [`/agents/insights/80-style-conventions.md`](../agents/insights/80-style-conventions.md) — naming, imports, styling recap, handoff table.
+
+Every agent must read the relevant section(s) before acting on a repo-specific question. The bundle is the single source of truth — agents should not duplicate facts from it in their own definitions. If you change `package.json5`, `next.config.ts`, `vercel.json`, `.github/workflows/*`, `prisma/schema.prisma`, `src/prisma/contract.ts`, `eslint.config.ts`, or `vitest.config.mts`, update the matching section of the bundle in the same change.
