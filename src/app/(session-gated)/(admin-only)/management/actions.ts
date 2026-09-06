@@ -1,12 +1,12 @@
 "use server";
 
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb, acquireStorageManager } from "@/lib/infra";
+import { PrismaClient} from "@/generated/prisma/client";
+import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
 import z from "zod";
-import type { PrismaClient } from "@/generated/prisma/client";
 
 const adminActionDependencies = () => ({
-  db: acquireDb(),
+  db: acquirePrismaClient(),
 });
 
 async function saveImage(dataUrl: string, key: string) {
@@ -42,32 +42,39 @@ const createBusinessSchema = z.object({
 export const createBusinessAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createBusinessSchema>,
-    deps: { db: Pick<PrismaClient, "business" | "businessTag" | "businessImage"> } = adminActionDependencies(),
+    deps: { db: PrismaClient } = adminActionDependencies(),
   ) => {
     const db = deps.db;
 
-    const business = await db.business.create({
-      data: {
-        name: input.name,
-        description: input.description,
-        history: input.history,
-        address: input.address,
-        latitude: input.latitude,
-        longitude: input.longitude,
-        hours: input.hours,
-        createdById: "system", // Will be updated with actual user ID from session
-      },
+    const business = await db.orm.Business.create({
+      id: crypto.randomUUID(),
+      name: input.name,
+      description: input.description,
+      history: input.history || null,
+      address: input.address,
+      latitude: input.latitude,
+      longitude: input.longitude,
+      hours: input.hours,
+      createdById: "system",
+      isPublished: true,
     });
 
     if (input.imageData) {
-      await db.businessImage.create({ data: { businessId: business.id, description: "Business image", url: await saveImage(input.imageData, `businesses/${business.id}`) } });
+      await db.businesses.create({
+        id: crypto.randomUUID(),
+        businessId: business.id,
+        description: "Business image",
+        url: await saveImage(input.imageData, `businesses/${business.id}`),
+      });
     }
 
     if (input.tags && input.tags.length > 0) {
       await Promise.all(
         input.tags.map(tag =>
-          db.businessTag.create({
-            data: { value: tag, businessId: business.id },
+          db.orm.BusinessTag.create({
+            id: crypto.randomUUID(),
+            value: tag,
+            businessId: business.id,
           })
         )
       );
@@ -95,28 +102,32 @@ const updateBusinessSchema = z.object({
 export const updateBusinessAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateBusinessSchema>,
-    deps: { db: Pick<PrismaClient, "business" | "businessImage"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
     const { id, ...data } = input;
     
-    const business = await db.business.update({
-      where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.description && { description: data.description }),
-        ...(data.history !== undefined && { history: data.history }),
-        ...(data.address && { address: data.address }),
-        ...(data.latitude !== undefined && { latitude: data.latitude }),
-        ...(data.longitude !== undefined && { longitude: data.longitude }),
-        ...(data.hours && { hours: data.hours }),
-        ...(data.isPublished !== undefined && { isPublished: data.isPublished }),
-      },
-    });
+    const updateData: Record<string, any> = {};
+    if (data.name) updateData.name = data.name;
+    if (data.description) updateData.description = data.description;
+    if (data.history !== undefined) updateData.history = data.history;
+    if (data.address) updateData.address = data.address;
+    if (data.latitude !== undefined) updateData.latitude = data.latitude;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude;
+    if (data.hours) updateData.hours = data.hours;
+    if (data.isPublished !== undefined) updateData.isPublished = data.isPublished;
+
+    await db.orm.Business.where({ id }).update(updateData);
+    const business = await db.orm.Business.where({ id }).first();
 
     if (input.imageData) {
-      await db.businessImage.create({ data: { businessId: id, description: "Business image", url: await saveImage(input.imageData, `businesses/${id}-${Date.now()}`) } });
+      await db.orm.BusinessImage.create({
+        id: crypto.randomUUID(),
+        businessId: id,
+        description: "Business image",
+        url: await saveImage(input.imageData, `businesses/${id}-${Date.now()}`),
+      });
     }
 
     return business;
@@ -128,10 +139,11 @@ export const updateBusinessAction = toServerAction({
 export const deleteBusinessAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.business.delete({ where: { id } });
+    await db.orm.Business.where({ id }).delete();
+    return { success: true };
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -154,31 +166,37 @@ const createFoodSchema = z.object({
 export const createFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food" | "foodTag" | "foodImage"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
-    const food = await db.food.create({
-      data: {
-        name: input.name,
-        description: input.description,
-        history: input.history,
-        preparation: input.preparation,
-        recipe: input.recipe,
-        culturalSignificance: input.culturalSignificance,
-        isHeritage: input.isHeritage,
-      },
+    const food = await db.orm.Food.create({
+      id: crypto.randomUUID(),
+      name: input.name,
+      description: input.description,
+      history: input.history,
+      preparation: input.preparation,
+      recipe: input.recipe,
+      culturalSignificance: input.culturalSignificance,
+      isHeritage: input.isHeritage,
     });
 
     if (input.imageData) {
-      await db.foodImage.create({ data: { foodId: food.id, description: "Food image", url: await saveImage(input.imageData, `foods/${food.id}`) } });
+      await db.orm.FoodImage.create({
+        id: crypto.randomUUID(),
+        foodId: food.id,
+        description: "Food image",
+        url: await saveImage(input.imageData, `foods/${food.id}`),
+      });
     }
 
     if (input.tags && input.tags.length > 0) {
       await Promise.all(
         input.tags.map(tag =>
-          db.foodTag.create({
-            data: { value: tag, foodId: food.id },
+          db.orm.FoodTag.create({
+            id: crypto.randomUUID(),
+            value: tag,
+            foodId: food.id,
           })
         )
       );
@@ -205,27 +223,31 @@ const updateFoodSchema = z.object({
 export const updateFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food" | "foodImage"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     
     const { id, ...data } = input;
     
-    const food = await db.food.update({
-      where: { id },
-      data: {
-        ...(data.name && { name: data.name }),
-        ...(data.description && { description: data.description }),
-        ...(data.history && { history: data.history }),
-        ...(data.preparation && { preparation: data.preparation }),
-        ...(data.recipe && { recipe: data.recipe }),
-        ...(data.culturalSignificance && { culturalSignificance: data.culturalSignificance }),
-        ...(data.isHeritage !== undefined && { isHeritage: data.isHeritage }),
-      },
-    });
+    const updateData: Record<string, any> = {};
+    if (data.name) updateData.name = data.name;
+    if (data.description) updateData.description = data.description;
+    if (data.history) updateData.history = data.history;
+    if (data.preparation) updateData.preparation = data.preparation;
+    if (data.recipe) updateData.recipe = data.recipe;
+    if (data.culturalSignificance) updateData.culturalSignificance = data.culturalSignificance;
+    if (data.isHeritage !== undefined) updateData.isHeritage = data.isHeritage;
+
+    await db.orm.Food.where({ id }).update(updateData);
+    const food = await db.orm.Food.where({ id }).first();
 
     if (input.imageData) {
-      await db.foodImage.create({ data: { foodId: id, description: "Food image", url: await saveImage(input.imageData, `foods/${id}-${Date.now()}`) } });
+      await db.orm.FoodImage.create({
+        id: crypto.randomUUID(),
+        foodId: id,
+        description: "Food image",
+        url: await saveImage(input.imageData, `foods/${id}-${Date.now()}`),
+      });
     }
 
     return food;
@@ -237,10 +259,11 @@ export const updateFoodAction = toServerAction({
 export const deleteFoodAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.food.delete({ where: { id } });
+    await db.orm.Food.where({ id }).delete();
+    return { success: true };
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -251,10 +274,11 @@ export const deleteFoodAction = toServerAction({
 export const deleteReviewAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.review.delete({ where: { id } });
+    await db.orm.Review.where({ id }).delete();
+    return { success: true };
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -263,12 +287,11 @@ export const deleteReviewAction = toServerAction({
 export const updateReviewStatusAction = toServerAction({
   serviceFn: async (
     { id, isApproved }: { id: string; isApproved: boolean },
-    deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
     void isApproved;
-    // Would update a review status/moderation field if added to schema
-    return await db.review.findUnique({ where: { id } });
+    return await db.orm.Review.where({ id }).first();
   },
   schema: z.object({ id: z.string(), isApproved: z.boolean() }),
   dependencies: adminActionDependencies,
@@ -279,13 +302,11 @@ export const updateReviewStatusAction = toServerAction({
 export const updateUserRoleAction = toServerAction({
   serviceFn: async (
     { userId, isAdmin }: { userId: string; isAdmin: boolean },
-    deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.user.update({
-      where: { id: userId },
-      data: { isAdmin },
-    });
+    await db.orm.User.where({ id: userId }).update({ isAdmin });
+    return await db.orm.User.where({ id: userId }).first();
   },
   schema: z.object({ userId: z.string(), isAdmin: z.boolean() }),
   dependencies: adminActionDependencies,
@@ -294,10 +315,11 @@ export const updateUserRoleAction = toServerAction({
 export const deleteUserAction = toServerAction({
   serviceFn: async (
     userId: string,
-    deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.user.delete({ where: { id: userId } });
+    await db.orm.User.where({ id: userId }).delete();
+    return { success: true };
   },
   schema: z.string(),
   dependencies: adminActionDependencies,

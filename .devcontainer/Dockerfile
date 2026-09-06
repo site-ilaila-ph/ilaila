@@ -15,8 +15,4 @@ COPY bootstrap.sh /usr/local/bin/bootstrap.sh
 RUN chmod +x /usr/local/bin/bootstrap.sh
 
 USER node
-RUN cat >> /home/node/.bashrc <<'ENDSTR' 
-if [ -f "/workspaces/project/bash_profile.sh" ]; then
-  source "/workspaces/project/bash_profile.sh"
-fi
-ENDSTR
+RUN printf 'if [ -f "/workspaces/project/bash_profile.sh" ]; then\n  source "/workspaces/project/bash_profile.sh"\nfi\n' >> /home/node/.bashrc

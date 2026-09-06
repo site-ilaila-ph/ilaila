@@ -1,60 +1,46 @@
 "use server";
 
-import { acquireDb } from "@/lib/infra";
+import { acquirePrismaClient } from "@/lib/infra";
 
 export async function getAllAppReviews() {
-  const db = acquireDb();
-  return await db.appReview.findMany({
-    include: {
-      user: {
-        select: { email: true, userName: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = acquirePrismaClient();
+  return await db.orm.AppReview
+    .include("user", (user) => user.select("email", "userName"))
+    .orderBy((r) => r.createdAt.desc())
+    .all();
 }
 
 export async function getApprovedAppReviews() {
-  const db = acquireDb();
-  return await db.appReview.findMany({
-    where: { isApproved: true },
-    include: {
-      user: {
-        select: { email: true, userName: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = acquirePrismaClient();
+  return await db.orm.AppReview
+    .where({ isApproved: true })
+    .include("user", (user) => user.select("email", "userName"))
+    .orderBy((r) => r.createdAt.desc())
+    .all();
 }
 
 export async function getPendingAppReviews() {
-  const db = acquireDb();
-  return await db.appReview.findMany({
-    where: { isApproved: false },
-    include: {
-      user: {
-        select: { email: true, userName: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = acquirePrismaClient();
+  return await db.orm.AppReview
+    .where({ isApproved: false })
+    .include("user", (user) => user.select("email", "userName"))
+    .orderBy((r) => r.createdAt.desc())
+    .all();
 }
 
 export async function getAppReviewStats() {
-  const db = acquireDb();
-  const [total, approved, pending, averageRating] = await Promise.all([
-    db.appReview.count(),
-    db.appReview.count({ where: { isApproved: true } }),
-    db.appReview.count({ where: { isApproved: false } }),
-    db.appReview.aggregate({
-      _avg: { rating: true },
-    }),
+  const db = acquirePrismaClient();
+  const [total, approved, pending, avgRatingResult] = await Promise.all([
+    db.orm.AppReview.count(),
+    db.orm.AppReview.where({ isApproved: true }).count(),
+    db.orm.AppReview.where({ isApproved: false }).count(),
+    db.orm.AppReview.aggregate((a) => ({ avg: a.avg("rating") })),
   ]);
 
   return {
     total,
     approved,
     pending,
-    averageRating: averageRating._avg.rating || 0,
+    averageRating: avgRatingResult.avg || 0,
   };
 }

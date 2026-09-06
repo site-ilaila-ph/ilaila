@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/infra";
+import { acquireCacheManager, acquirePrismaClient, acquireNextJSCookieMap } from "@/lib/infra";
 import { createSessionReader } from "@/lib/session/server";
 
 export default async function AdminOnlyLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = createSessionReader({
-    db: acquireDb(),
+    db: acquirePrismaClient(),
     cache: acquireCacheManager(),
     cookieMap: await acquireNextJSCookieMap(),
   });

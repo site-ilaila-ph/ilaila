@@ -34,3 +34,15 @@
 | `.agents/` | Agent definitions + this insights bundle. |
 | `.claude/`, `.cursor/`, `.devin/` | Per-tool agent configuration surfaces. |
 | `.vscode/` | Workspace settings. |
+
+## Development Environment
+### Shells
+
+* `pwsh` - Present for complex scripting.
+* `bash` (ubuntu builtin) - Present for simple scripting and primary shell.
+
+### Tools
+
+* `ripgrep` (rg) - present for better searching.
+* `curl` - present for connecting to the internet.
+* `git` - version control.

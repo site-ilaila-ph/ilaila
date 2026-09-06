@@ -2,18 +2,19 @@
 
 import z from "zod";
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb } from "@/lib/infra";
-import type { PrismaClient } from "@/generated/prisma/client";
+import { acquirePrismaClient } from "@/lib/infra";
+import type { Contract } from "@/prisma/contract.d";
+import type { PostgresClient } from "@internal/postgres/runtime";
 import { getAllFood, getFoodById, getFoodByName, getTopRatedFoods } from "@/app/(session-gated)/foods/services";
 
 const foodActionDependencies = () => ({
-  db: acquireDb(),
+  db: acquirePrismaClient(),
 });
 
 export const getFoodItemsAction = toServerAction({
   serviceFn: async (
     _params: Record<string, never>,
-    deps: { db: Pick<PrismaClient, "food"> } = foodActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = foodActionDependencies(),
   ) => getAllFood(deps.db),
   schema: z.object({}),
   dependencies: foodActionDependencies,
@@ -22,7 +23,7 @@ export const getFoodItemsAction = toServerAction({
 export const getFoodItemByIdAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: Pick<PrismaClient, "food"> } = foodActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = foodActionDependencies(),
   ) => getFoodById(id, deps.db),
   schema: z.string().min(1),
   dependencies: foodActionDependencies,
@@ -31,7 +32,7 @@ export const getFoodItemByIdAction = toServerAction({
 export const getFoodItemByNameAction = toServerAction({
   serviceFn: async (
     name: string,
-    deps: { db: Pick<PrismaClient, "food"> } = foodActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = foodActionDependencies(),
   ) => getFoodByName(name, deps.db),
   schema: z.string().min(1),
   dependencies: foodActionDependencies,
@@ -40,7 +41,7 @@ export const getFoodItemByNameAction = toServerAction({
 export const getTopRatedFoodsAction = toServerAction({
   serviceFn: async (
     limit: number = 3,
-    deps: { db: Pick<PrismaClient, "food" | "businessFood" | "review"> } = foodActionDependencies(),
+    deps: { db: PostgresClient<Contract> } = foodActionDependencies(),
   ) => getTopRatedFoods(limit, deps.db),
   schema: z.number().int().min(1).default(3),
   dependencies: foodActionDependencies,

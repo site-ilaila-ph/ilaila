@@ -1,109 +1,94 @@
 "use server";
 
-import { acquireCacheManager, acquireDb } from "@/lib/infra";
+import { acquireCacheManager, acquirePrismaClient } from "@/lib/infra";
 
 export async function getAllBusinessesForManagement() {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: "allBusinessesForManagement",
     fn: async () =>
-      await db.business.findMany({
-        include: {
-          tags: true,
-          createdBy: { select: { email: true } },
-          _count: { select: { reviews: true, foods: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      }),
-    ttlSeconds: 60 * 1000, // 1 minute
+      await db.orm.Business
+        .include("tags")
+        .include("createdBy", (u) => u.select("email"))
+        .orderBy((b) => b.createdAt.desc())
+        .all(),
+    ttlSeconds: 60 * 1000,
   });
 }
 
 export async function getBusinessById(id: string) {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: `business:${id}`,
     fn: async () =>
-      await db.business.findUnique({
-        where: { id },
-        include: {
-          tags: true,
-          images: true,
-          foods: { include: { food: true } },
-          reviews: { include: { user: { select: { email: true } } } },
-        },
-      }),
-    ttlSeconds: 60 * 1000, // 1 minute
+      await db.orm.Business
+        .where({ id })
+        .include("tags")
+        .include("images")
+        .include("foods", (f) => f.include("food"))
+        .include("reviews", (r) => r.include("user", (u) => u.select("email")))
+        .first(),
+    ttlSeconds: 60 * 1000,
   });
 }
 
 export async function getAllFoodsForManagement() {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: "allFoodsForManagement",
     fn: async () =>
-      await db.food.findMany({
-        include: {
-          tags: true,
-          _count: { select: { businesses: true, images: true } },
-        },
-        orderBy: { name: "asc" },
-      }),
-    ttlSeconds: 60 * 1000, // 1 minute
+      await db.orm.Food
+        .include("tags")
+        .orderBy((f) => f.name.asc())
+        .all(),
+    ttlSeconds: 60 * 1000,
   });
 }
 
 export async function getFoodById(id: string) {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: `food:${id}`,
     fn: async () =>
-      await db.food.findUnique({
-        where: { id },
-        include: {
-          tags: true,
-          images: true,
-          businesses: { include: { business: true } },
-        },
-      }),
-    ttlSeconds: 60 * 1000, // 1 minute
+      await db.orm.Food
+        .where({ id })
+        .include("tags")
+        .include("images")
+        .include("businesses", (b) => b.include("business"))
+        .first(),
+    ttlSeconds: 60 * 1000,
   });
 }
 
 export async function getAllReviewsForManagement() {
-  const db = acquireDb();
-  return await db.review.findMany({
-    include: {
-      user: { select: { email: true, userName: true } },
-      business: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = acquirePrismaClient();
+  return await db.orm.Review
+    .include("user", (u) => u.select("email", "userName"))
+    .include("business", (b) => b.select("name"))
+    .orderBy((r) => r.createdAt.desc())
+    .all();
 }
 
 export async function getAllUsersForManagement() {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: "allUsersForManagement",
     fn: async () =>
-      await db.user.findMany({
-        include: {
-          _count: { select: { reviews: true, bookmarks: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      }),
-    ttlSeconds: 60 * 1000, // 1 minute
+      await db.orm.User
+        .orderBy((u) => u.createdAt.desc())
+        .all(),
+    ttlSeconds: 60 * 1000,
   });
 }
 
 export async function getManagementStats() {
   const cache = acquireCacheManager();
-  const db = acquireDb();
+  const db = acquirePrismaClient();
   return cache.cached({
     key: "managementStats",
     fn: async () => {
@@ -115,12 +100,12 @@ export async function getManagementStats() {
         appReviewCount,
         pendingAppReviewCount,
       ] = await Promise.all([
-        db.user.count(),
-        db.business.count(),
-        db.food.count(),
-        db.review.count(),
-        db.appReview.count(),
-        db.appReview.count({ where: { isApproved: false } }),
+        db.orm.User.count(),
+        db.orm.Business.count(),
+        db.orm.Food.count(),
+        db.orm.Review.count(),
+        db.orm.AppReview.count(),
+        db.orm.AppReview.where({ isApproved: false }).count(),
       ]);
 
       return {

@@ -3,19 +3,18 @@ import signUpSchema from "./validation/schemas/sign-up";
 
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import { acquireCacheManager, acquireDb } from "@/lib/infra";
+import { acquireCacheManager, acquirePrismaClient } from "@/lib/infra";
 import { verify, hash } from "./lib/password";
 import z from "zod";
 import { SESSION_TOKEN_COOKIE_NAME, SESSION_TTL_SECONDS } from "@/config/auth";
 import { ServerError } from "@/lib/action/server";
-import { PrismaClientKnownRequestError } from "@/generated/prisma/client/runtime/client";
 
 export const signIn = async ({
   email,
   password,
 }: z.output<typeof signInSchema>) => {
-  const db = acquireDb();
-  const user = await db.user.findUnique({ where: { email } });
+  const db = acquirePrismaClient();
+  const user = await db.user.findFirst({ where: { email: String(email) } });
 
   if (!user) {
     throw new ServerError({
@@ -48,10 +47,9 @@ export const signIn = async ({
 
   await db.session.create({
     data: {
-      id: sessionId,
       userId: user.id,
       expiresAt,
-    },
+    }
   });
 
   const cache = acquireCacheManager();
@@ -76,17 +74,15 @@ export const signUp = async ({
   email,
   password,
 }: z.output<typeof signUpSchema>) => {
+  const db = acquirePrismaClient();
   const passwordHash = await hash(password);
 
   try {
-    const db = acquireDb();
     const user = await db.user.create({
-      data: {
-        id: crypto.randomUUID(),
-        userName,
-        email,
-        passwordHash,
-      },
+      userName: userName || null,
+      email,
+      passwordHash,
+      isAdmin: false,
     });
 
     return {
@@ -94,11 +90,10 @@ export const signUp = async ({
       userName: user.userName,
       email: user.email,
     };
-  } catch (error) {
-    if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-      const target = (error.meta?.target as string[]) || [];
-
-      if (target.includes('email')) {
+  } catch (error: any) {
+    if (error?.code === '23505' || (error?.message && error.message.includes('unique'))) {
+      const detail = error?.detail || error?.message || '';
+      if (detail.includes('email')) {
         throw new ServerError({
           domain: 'authentication',
           hint: 'email-exists',
@@ -107,7 +102,7 @@ export const signUp = async ({
         });
       }
 
-      if (target.includes('userName')) {
+      if (detail.includes('userName') || detail.includes('username')) {
         throw new ServerError({
           domain: 'authentication',
           hint: 'username-exists',
@@ -126,7 +121,7 @@ export const signUp = async ({
   }
 };
 
-export const signOut = async ({}: Record<string, never>) => {
+export const signOut = async ({ }: Record<string, never>) => {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_TOKEN_COOKIE_NAME)?.value ?? null;
 

@@ -9,27 +9,7 @@ services:
       - workspace-data:/workspaces/project
       - .:/workspaces/project/.devcontainer # sync this with the host.
     command: sleep infinity
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/app
-
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: app
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 2s
-      timeout: 5s
-      retries: 20
-
+    network_mode: host
+    
 volumes:
   workspace-data:
-  postgres-data:

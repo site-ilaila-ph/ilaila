@@ -1,101 +1,59 @@
-import type { PrismaClient, Prisma } from "@/generated/prisma/client";
+import type { Contract } from "@/prisma/contract.d";
+import type { PostgresClient } from "@internal/postgres/runtime";
 
-export type BusinessWithIncludes = Prisma.BusinessGetPayload<{
-  include: {
-    images: true;
-    tags: true;
-    menuItems: true;
-    foods: {
-      include: {
-        food: true;
-      };
-    };
-    reviews: {
-      include: {
-        user: true;
-      };
-    };
-  };
-}>;
-
-type BusinessMenuItem = BusinessWithIncludes["menuItems"][number];
-
-export type SerializableBusinessWithIncludes = Omit<BusinessWithIncludes, "menuItems"> & {
-  menuItems: Array<Omit<BusinessMenuItem, "price"> & { price: number }>;
-};
-
-export type BusinessListItem = Prisma.BusinessGetPayload<{
-  include: {
-    images: true;
-    tags: true;
-    reviews: true;
-  };
-}>;
+export type BusinessWithIncludes = any;
+export type SerializableBusinessWithIncludes = any;
+export type BusinessListItem = any;
 
 export async function getAllBusinesses(
-  db?: Pick<PrismaClient, "business">,
-): Promise<BusinessListItem[]> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
+  db?: PostgresClient<Contract>,
+): Promise<any[]> {
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
 
-  return resolvedDb.business.findMany({
-    where: { isPublished: true },
-    include: {
-      images: true,
-      tags: true,
-      reviews: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  return await resolvedDb.orm.Business
+    .where({ isPublished: true })
+    .include("images")
+    .include("tags")
+    .include("reviews")
+    .orderBy((b) => b.createdAt.desc())
+    .all();
 }
 
 export async function getBusinessById(
   id: string,
-  db?: Pick<PrismaClient, "business">,
-): Promise<SerializableBusinessWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
+  db?: PostgresClient<Contract>,
+): Promise<any | null> {
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
 
   const requested = decodeURIComponent(id);
-  const include = {
-    images: true,
-    tags: true,
-    menuItems: true,
-    foods: { include: { food: true } },
-    reviews: { include: { user: true }, orderBy: { createdAt: "desc" as const } },
-  };
-  const byId = await resolvedDb.business.findUnique({
-    where: { id: requested },
-    include,
-  });
+  const byId = await resolvedDb.orm.Business
+    .where({ id: requested })
+    .include("images")
+    .include("tags")
+    .include("menuItems")
+    .include("foods", (f) => f.include("food"))
+    .include("reviews", (r) => r.include("user").orderBy((rev) => rev.createdAt.desc()))
+    .first();
+
   if (byId) return serializeBusiness(byId);
 
-  const businesses = await resolvedDb.business.findMany({
-    where: { isPublished: true },
-    include: {
-      images: true,
-      tags: true,
-      menuItems: true,
-      foods: {
-        include: {
-          food: true,
-        },
-      },
-      reviews: {
-        include: {
-          user: true,
-        },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+  const businesses = await resolvedDb.orm.Business
+    .where({ isPublished: true })
+    .include("images")
+    .include("tags")
+    .include("menuItems")
+    .include("foods", (f) => f.include("food"))
+    .include("reviews", (r) => r.include("user").orderBy((rev) => rev.createdAt.desc()))
+    .all();
 
-  const business = businesses.find((business) => business.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === requested.toLowerCase());
+  const business = businesses.find((business: any) => business.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") === requested.toLowerCase());
   return business ? serializeBusiness(business) : null;
 }
 
-function serializeBusiness(business: BusinessWithIncludes): SerializableBusinessWithIncludes {
+function serializeBusiness(business: any): any {
   return {
     ...business,
-    menuItems: business.menuItems.map((item) => ({
+    menuItems: (business.menuItems || []).map((item: any) => ({
       ...item,
       price: Number(item.price),
     })),
@@ -104,17 +62,17 @@ function serializeBusiness(business: BusinessWithIncludes): SerializableBusiness
 
 export async function getAverageRatingForBusiness(
   businessId: string,
-  db?: Pick<PrismaClient, "review">,
+  db?: PostgresClient<Contract>,
 ): Promise<number> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquireDb();
+  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
 
-  const reviews = await resolvedDb.review.findMany({
-    where: { businessId },
-  });
+  const reviews = await resolvedDb.orm.Review
+    .where({ businessId })
+    .all();
 
   if (reviews.length === 0) return 0;
 
-  const totalScore = reviews.reduce((sum, review) => {
+  const totalScore = reviews.reduce((sum: number, review: any) => {
     const avg = (review.foodQuality + review.service + review.ambiance + review.value) / 4;
     return sum + avg;
   }, 0);

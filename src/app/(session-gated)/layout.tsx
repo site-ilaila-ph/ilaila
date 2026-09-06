@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
-import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/infra";
+import { acquireCacheManager, acquirePrismaClient, acquireNextJSCookieMap } from "@/lib/infra";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
 import { createSessionReader } from "@/lib/session/server";
-import type { User } from "@/generated/prisma/client";
 
-function sanitizeUser(user: User): ClientReadonlySession["user"] {
+function sanitizeUser(user: any): ClientReadonlySession["user"] {
   return {
     id: user.id,
     userName: user.userName,
@@ -17,7 +16,7 @@ export default async function SessionGatedLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = createSessionReader({
-    db: acquireDb(),
+    db: acquirePrismaClient(),
     cache: acquireCacheManager(),
     cookieMap: await acquireNextJSCookieMap(),
   });

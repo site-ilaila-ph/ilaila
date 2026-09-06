@@ -1,32 +1,32 @@
 {
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
-  "postStartCommand": "pg_isready -h db -U postgres -t 30",
   "workspaceFolder": "/workspaces/project",
   "onCreateCommand": "bootstrap.sh",
   "name": "ilaila",
   "remoteUser": "node",
+  "runArgs": ["--network=host"],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    }
+  },
   "customizations": {
     "vscode": {
       "settings": {
-        "github.copilot.nextEditSuggestions.enabled": false,
-        "git.enableSmartCommit": true,
-        "chat.viewSessions.enabled": false,
-        "gitlens.ai.vscode.model": "copilotcli:",
-        "gitlens.ai.gitkraken.model": "gemini:gemini-2.5-flash",
+        "github.copilot.nextEditSuggestions.enabled": true,
+        "git.enableSmartCommit": false,
+        "chat.viewSessions.enabled": true,
         "gitlens.graph.details.location": "auto",
         "github.copilot.enable": {
-          "markdown": false,
-          "*": false,
           "dotenv": false,
-          "plaintext": false,
-          "scminput": false
+          "*": false
         },
         "[jsonc]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
+        "workbench.experimental.modernUI": true,
         "window.density.layout": "compact",
-        "chat.byokUtilityModelDefault": "mainAgent",
         "[html]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
@@ -44,8 +44,35 @@
         },
         "explorer.confirmDragAndDrop": false,
         "terminal.integrated.initialHint": false,
-        "gitlens.ai.model": "gitkraken",
-        "js/ts.updateImportsOnFileMove.enabled": "always"
+        "js/ts.updateImportsOnFileMove.enabled": "always",
+        "files.exclude": {
+          "**/.git": true,
+          "**/.svn": true,
+          "**/.hg": true,
+          "**/.DS_Store": true,
+          "**/Thumbs.db": true
+        },
+        "chat.agentFilesLocations": {
+          ".github/agents": false,
+          ".agents/": true
+        },
+        "chat.agentSkillsLocations": {
+          ".github/skills": false,
+          ".agents/skills": true
+        },
+        "js/ts.tsdk.path": "node_modules/typescript/lib",
+        "launch": {
+          "version": "0.2.0",
+          "configurations": [
+            {
+              "name": "Debug: App",
+              "type": "node-terminal",
+              "request": "launch",
+              "command": "pnpm dev",
+              "cwd": "${workspaceFolder}"
+            }
+          ]
+        }
       },
       "extensions": [
         "bradlc.vscode-tailwindcss",
