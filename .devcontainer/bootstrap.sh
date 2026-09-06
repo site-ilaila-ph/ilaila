@@ -14,7 +14,5 @@ else
 fi
 
 cd "$DEST"
-pnpm install
-pnpm exec prisma db push
-pnpm exec prisma generate
-pnpm exec prisma db seed || true
+pnpm run dev:setup
+pnpm run dev:seed || true
