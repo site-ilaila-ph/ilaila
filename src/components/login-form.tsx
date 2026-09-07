@@ -5,7 +5,6 @@ import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { safeNextPath } from '@/components/blocks/safe-next-path/lib/safe-next-path'
-import { createClient } from '@/components/clients/nextjs/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -27,17 +26,19 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       })
-      if (error) throw error
-      // Update this route to redirect to an authenticated route. The user already has an active session.
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to sign in')
+      
       const next = new URLSearchParams(window.location.search).get('next')
       router.push(safeNextPath(next, '/protected'))
     } catch (error: unknown) {
