@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { getBusinessesAction } from "@/app/(session-gated)/business/actions";
 import type { BusinessListItem } from "@/app/(session-gated)/business/services";
-import { Button } from "@/lib/components/actions/button";
+import { Button } from "@/components/ui/button";
 
 function ratingFor(business: BusinessListItem) {
   if (!business.reviews.length) return 0;

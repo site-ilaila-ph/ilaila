@@ -137,9 +137,9 @@ Barrel `index.ts` files force the bundler to walk the entire module graph even w
 import { Button, Card, Modal } from "@/components";
 
 // CORRECT
-import { Button } from "@/components/Button";
-import { Card } from "@/components/Card";
-import { Modal } from "@/components/Modal";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Modal } from "@/components/ui/Modal";
 ```
 
 Next.js 13.5+ has [Optimize Package Imports](https://nextjs.org/docs/app/api-reference/next-config-js/optimizePackageImports) that automates this for listed packages — use it; manual direct imports still required for non-listed libs.

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getApprovedAppReviews } from "@/app/(session-gated)/app-reviews/services";
-import { Card, CardContent } from "@/lib/components/display/card";
-import { Button } from "@/lib/components/actions/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface AppReview {
   id: string;

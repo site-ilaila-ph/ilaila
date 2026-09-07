@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MoreHorizontal, Search, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { getAllUsersForManagement } from "@/app/(session-gated)/(admin-only)/management/services";
 import { updateUserRoleAction, deleteUserAction } from "@/app/(session-gated)/(admin-only)/management/actions";
-import { Button } from "@/lib/components/actions/button";
+import { Button } from "@/components/ui/button";
 
 interface User {
   id: string;

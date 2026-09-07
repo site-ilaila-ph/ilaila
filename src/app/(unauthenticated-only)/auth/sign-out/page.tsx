@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent } from "@/lib/components/display/card";
-import { Separator } from "@/lib/components/layout/separator";
-import { Viewport } from "@/lib/components/layout/viewport";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Viewport } from "@/components/ui/viewport";
 import { HomeIcon } from "lucide-react";
 
 export default function SignOut() {

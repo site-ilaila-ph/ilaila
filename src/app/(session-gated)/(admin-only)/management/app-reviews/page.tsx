@@ -10,9 +10,9 @@ import {
   updateAppReviewStatusAction,
   deleteAppReviewAction,
 } from "@/app/(session-gated)/app-reviews/actions";
-import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent } from "@/lib/components/display/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/lib/components/navigation/tabs";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AppReview {
   id: string;

@@ -13,11 +13,11 @@ import {
   FormSubmitButton, 
   FormTitle,
   FormError,
-} from "@/lib/components/form/form";
-import { Viewport } from "@/lib/components/layout/viewport";
-import { ActionFormExtension } from "@/lib/components/form/action";
-import { Input } from "@/lib/components/form/inputs";
-import { Label } from "@/lib/components/form/label";
+} from "@/components/ui/form";
+import { Viewport } from "@/components/ui/viewport";
+import { ActionFormExtension } from "@/components/ui/action";
+import { Input } from "@/components/ui/inputs";
+import { Label } from "@/components/ui/label";
 import { useFormContext } from "react-hook-form";
 import { redirect } from "next/navigation";
 

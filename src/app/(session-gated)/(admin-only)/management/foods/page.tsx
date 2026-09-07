@@ -9,10 +9,10 @@ import {
   updateFoodAction,
   deleteFoodAction,
 } from "@/app/(session-gated)/(admin-only)/management/actions";
-import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
-import { Input } from "@/lib/components/form/inputs";
-import { Label } from "@/lib/components/form/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/inputs";
+import { Label } from "@/components/ui/label";
 
 interface Food {
   id: string;

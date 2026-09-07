@@ -4,8 +4,8 @@ import { startTransition, useEffect, useState } from "react";
 import { MoreHorizontal, Search, Star } from "lucide-react";
 import { getAllReviewsForManagement } from "@/app/(session-gated)/(admin-only)/management/services";
 import { deleteReviewAction } from "@/app/(session-gated)/(admin-only)/management/actions";
-import { Button } from "@/lib/components/actions/button";
-import { Card, CardContent } from "@/lib/components/display/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Review {
   id: string;

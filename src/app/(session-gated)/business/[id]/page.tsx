@@ -8,7 +8,7 @@ import { createReviewAction, getBusinessByIdAction, getBusinessesAction, upvoteR
 import type { BusinessListItem } from "@/app/(session-gated)/business/services";
 import type { SerializableBusinessWithIncludes } from "@/app/(session-gated)/business/services";
 import { useSession } from "@/lib/session/client";
-import { Button } from "@/lib/components/actions/button";
+import { Button } from "@/components/ui/button";
 
 export default function BusinessProfilePage({
   params,
