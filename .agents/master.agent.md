@@ -1,7 +1,7 @@
 ---
 name: master
 description: General application coding agent for this Next.js/Prisma/Tailwind/shadcn repo. Handles feature planning, codebase exploration, architecture/design, implementation, spec extraction, and type-design review — the default agent for app code (frontend + backend + data flow) that isn't narrowly styling, testing, refactoring, docs, debugging, network, or deploy work. Hands off to specialists for those concerns and always closes out via summarizer.
-tools: ['read/readFile', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'search/textSearch', 'search/fileSearch']
+tools: [vscode/askQuestions, execute/runInTerminal, read/readFile, agent, edit/createFile, edit/editFiles, search/fileSearch, search/textSearch]
 ---
 
 ## Prompt Defense Baseline

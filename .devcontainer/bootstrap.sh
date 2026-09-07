@@ -30,6 +30,7 @@ if [ "$INSTALL_EXIT_CODE" -ne 0 ]; then
 fi
 
 pnpm run dev:setup
+pnpm exec supabase start
 
 mkdir -p "$(dirname "$MARKER")"
 touch "$MARKER"
