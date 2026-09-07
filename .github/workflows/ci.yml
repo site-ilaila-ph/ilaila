@@ -1,0 +1,31 @@
+name: CI Workflow
+
+on:
+    push:
+        branches:
+        - main
+
+    pull_request:
+        branches:
+        - main
+
+jobs:
+    ci:
+        env:
+            DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: 22
+                cache: pnpm
+
+            - name: CI Workflow Script
+              run: pnpm run ci
