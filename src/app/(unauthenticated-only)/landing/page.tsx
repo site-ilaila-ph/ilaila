@@ -3,13 +3,13 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <nav className="border-b border-border bg-(--surface)/80 backdrop-blur">
+      <nav className="border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
           >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
               I
             </span>
             Ilaila
@@ -36,11 +36,13 @@ export default function LandingPage() {
           Explore San Pedro&apos;s food culture
         </span>
         <h1 className="mb-4 text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
-          Find the food and<br />
+          Find the food and
+          <br />
           people that matter
         </h1>
         <p className="mb-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-          Look for restaurants, food traditions, and recipes from San Pedro. See what people think. Connect with the community.
+          Look for restaurants, food traditions, and recipes from San Pedro. See
+          what people think. Connect with the community.
         </p>
         <div className="mb-16 flex flex-wrap justify-center gap-3">
           <Link
@@ -62,7 +64,8 @@ export default function LandingPage() {
             <div className="mb-4 text-4xl">🏪</div>
             <h3 className="mb-2 text-lg font-semibold">Local Restaurants</h3>
             <p className="text-sm text-muted-foreground">
-              Find where to eat in San Pedro. See what&apos;s good, what&apos;s popular, and where your friends go.
+              Find where to eat in San Pedro. See what&apos;s good, what&apos;s
+              popular, and where your friends go.
             </p>
           </div>
 
@@ -70,7 +73,8 @@ export default function LandingPage() {
             <div className="mb-4 text-4xl">🍲</div>
             <h3 className="mb-2 text-lg font-semibold">Traditional Dishes</h3>
             <p className="text-sm text-muted-foreground">
-              Learn about the foods that are part of San Pedro. Recipes, stories, and what makes them special.
+              Learn about the foods that are part of San Pedro. Recipes,
+              stories, and what makes them special.
             </p>
           </div>
 
@@ -78,7 +82,8 @@ export default function LandingPage() {
             <div className="mb-4 text-4xl">📍</div>
             <h3 className="mb-2 text-lg font-semibold">Real Reviews</h3>
             <p className="text-sm text-muted-foreground">
-              Read what people actually think. Leave your own review. Help others find great food.
+              Read what people actually think. Leave your own review. Help
+              others find great food.
             </p>
           </div>
         </div>
@@ -87,27 +92,39 @@ export default function LandingPage() {
           <h2 className="mb-6 text-3xl font-bold">Why use Ilaila</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h3 className="mb-2 font-semibold text-primary">It&apos;s just for San Pedro</h3>
+              <h3 className="mb-2 font-semibold text-primary">
+                It&apos;s just for San Pedro
+              </h3>
               <p className="text-sm text-muted-foreground">
-                We focus on one place. You get real information about the food and restaurants here, not generic content from everywhere.
+                We focus on one place. You get real information about the food
+                and restaurants here, not generic content from everywhere.
               </p>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold text-primary">Help local places</h3>
+              <h3 className="mb-2 font-semibold text-primary">
+                Help local places
+              </h3>
               <p className="text-sm text-muted-foreground">
-                When you review a restaurant or share about a food, you&apos;re directly helping the people who run these places.
+                When you review a restaurant or share about a food, you&apos;re
+                directly helping the people who run these places.
               </p>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold text-primary">Keep stories alive</h3>
+              <h3 className="mb-2 font-semibold text-primary">
+                Keep stories alive
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Traditional dishes and family recipes matter. We document them so they don&apos;t get forgotten.
+                Traditional dishes and family recipes matter. We document them
+                so they don&apos;t get forgotten.
               </p>
             </div>
             <div>
-              <h3 className="mb-2 font-semibold text-primary">Find what&apos;s good</h3>
+              <h3 className="mb-2 font-semibold text-primary">
+                Find what&apos;s good
+              </h3>
               <p className="text-sm text-muted-foreground">
-                See honest reviews from real people. Discover places and foods you&apos;ll actually enjoy.
+                See honest reviews from real people. Discover places and foods
+                you&apos;ll actually enjoy.
               </p>
             </div>
           </div>
@@ -116,7 +133,8 @@ export default function LandingPage() {
         <section className="w-full rounded-xl border border-border bg-linear-to-r from-primary/10 to-secondary p-8 text-center">
           <h2 className="mb-4 text-2xl font-bold">Ready to start exploring?</h2>
           <p className="mb-6 text-muted-foreground">
-            Sign up to save restaurants, leave reviews, and see what other people recommend
+            Sign up to save restaurants, leave reviews, and see what other
+            people recommend
           </p>
           <Link
             href="/auth/sign-up"
@@ -139,22 +157,52 @@ export default function LandingPage() {
             <div>
               <h4 className="mb-4 font-semibold">Browse</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/business/discovery" className="hover:text-primary">Restaurants</Link></li>
-                <li><Link href="/foods" className="hover:text-primary">Dishes</Link></li>
+                <li>
+                  <Link
+                    href="/business/discovery"
+                    className="hover:text-primary"
+                  >
+                    Restaurants
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/foods" className="hover:text-primary">
+                    Dishes
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="mb-4 font-semibold">Learn</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about/the-website" className="hover:text-primary">About</Link></li>
-                <li><Link href="/about/san-pedro" className="hover:text-primary">San Pedro</Link></li>
+                <li>
+                  <Link
+                    href="/about/the-website"
+                    className="hover:text-primary"
+                  >
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about/san-pedro" className="hover:text-primary">
+                    San Pedro
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <h4 className="mb-4 font-semibold">Account</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/auth/sign-in" className="hover:text-primary">Sign In</Link></li>
-                <li><Link href="/auth/sign-up" className="hover:text-primary">Sign Up</Link></li>
+                <li>
+                  <Link href="/auth/sign-in" className="hover:text-primary">
+                    Sign In
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/auth/sign-up" className="hover:text-primary">
+                    Sign Up
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
