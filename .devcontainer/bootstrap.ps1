@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# pwsh+bash
+# pwsh+bash (runs on devcontainer)
 
 [string]$dest = "/workspaces/project";
 [string]$repoUrl = "https://github.com/site-ilaila-ph/ilaila.git";
@@ -119,9 +119,9 @@ function Test-State
 
 # --- setup flow ---
 
-[string]$setupDir = Split-Path $stateFile -Parent;
+Ensure-SetupDir
 
-if (Test-Path $setupDir -PathType Container)
+if (Test-State -Key "cloned")
 {
     Write-Host "Setup already initialized at $dest — skipping clone.";
 }
@@ -139,7 +139,7 @@ else
 
     mv "$tempDir/." $dest;
     chown -R "$(whoami):$(id -gn)" $dest;
-    Ensure-SetupDir;
+    Add-State -Key "cloned" -Value $true
 }
 
 Set-Location $dest;
@@ -150,18 +150,53 @@ if (Test-State -Key "installed")
 }
 else
 {
-    pnpm install --frozen-lockfile;
+    $installOutput = pnpm install --frozen-lockfile 2>&1 | Out-String;
     [int]$installExitCode = $LASTEXITCODE;
 
     if ($installExitCode -ne 0)
     {
-        Write-Host "Retrying with approve-builds...";
-        pnpm approve-builds;
-        pnpm install --frozen-lockfile;
+        if ($installOutput -match "approve-builds|Ignored build scripts")
+        {
+            Write-Host "Build scripts require approval — running approve-builds...";
+            
+            pnpm approve-builds;
+            [int]$approveExitCode = $LASTEXITCODE;
+
+            if ($approveExitCode -ne 0)
+            {
+                throw "pnpm approve-builds failed with exit code $approveExitCode.";
+            }
+
+            pnpm install --frozen-lockfile;
+            [int]$retryInstallExitCode = $LASTEXITCODE;
+
+            if ($retryInstallExitCode -ne 0)
+            {
+                throw "pnpm install failed after approving build scripts with exit code $retryInstallExitCode.";
+            }
+        }
+        else
+        {
+            Write-Error $installOutput;
+            throw "pnpm install failed with exit code $installExitCode.";
+        }
     }
 
     pnpm run dev:setup;
+    [int]$setupExitCode = $LASTEXITCODE;
+
+    if ($setupExitCode -ne 0)
+    {
+        throw "pnpm run dev:setup failed with exit code $setupExitCode.";
+    }
+
     Add-State -Key "installed" -Value $true;
 }
 
 pnpm supabase start;
+[int]$supabaseExitCode = $LASTEXITCODE;
+
+if ($supabaseExitCode -ne 0)
+{
+    throw "pnpm supabase start failed with exit code $supabaseExitCode.";
+}

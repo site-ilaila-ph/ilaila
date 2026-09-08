@@ -11,9 +11,6 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
 # create an empty placeholder directory.
 RUN mkdir -p /workspaces/project && chown -R node:node /workspaces/project
 
-COPY bootstrap.sh /usr/local/bin/bootstrap.sh
-RUN chmod +x /usr/local/bin/bootstrap.sh
-
 USER node
 RUN cat >> /home/node/.bashrc <<'ENDSTR' 
 if [ -f "/workspaces/project/bash_profile.sh" ]; then

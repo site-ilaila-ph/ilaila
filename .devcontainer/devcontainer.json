@@ -2,50 +2,11 @@
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
   "workspaceFolder": "/workspaces/project",
-  "onCreateCommand": "bootstrap.sh",
+  "onCreateCommand": "bootstrap.ps1",
   "name": "ilaila",
   "remoteUser": "node",
   "customizations": {
     "vscode": {
-      "settings": {
-        "github.copilot.nextEditSuggestions.enabled": false,
-        "git.enableSmartCommit": true,
-        "chat.viewSessions.enabled": false,
-        "gitlens.ai.vscode.model": "copilotcli:",
-        "gitlens.ai.gitkraken.model": "gemini:gemini-2.5-flash",
-        "gitlens.graph.details.location": "auto",
-        "github.copilot.enable": {
-          "markdown": false,
-          "*": false,
-          "dotenv": false,
-          "plaintext": false,
-          "scminput": false
-        },
-        "[jsonc]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "window.density.layout": "compact",
-        "chat.byokUtilityModelDefault": "mainAgent",
-        "[html]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[typescript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[javascript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[typescriptreact]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "[json]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
-        },
-        "explorer.confirmDragAndDrop": false,
-        "terminal.integrated.initialHint": false,
-        "gitlens.ai.model": "gitkraken",
-        "js/ts.updateImportsOnFileMove.enabled": "always"
-      },
       "extensions": [
         "bradlc.vscode-tailwindcss",
         "dbaeumer.vscode-eslint",
