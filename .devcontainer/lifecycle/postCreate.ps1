@@ -10,12 +10,13 @@ if (Test-State -Key "installed")
 }
 else
 {
-    $installOutput = pnpm install --frozen-lockfile 2>&1 | Out-String;
+    pnpm install --frozen-lockfile 2>&1 | Tee-Object -Variable installOutputLines;
     [int]$installExitCode = $LASTEXITCODE;
+    [string]$installOutput = $installOutputLines | Out-String;
 
     if ($installExitCode -ne 0)
     {
-        if ($installOutput -match "approve-builds|Ignored build scripts")
+        if ($installOutput -match "\[ERR_PNPM_IGNORED_BUILDS\]")
         {
             Write-Host "Build scripts require approval — running approve-builds...";
 
@@ -37,7 +38,6 @@ else
         }
         else
         {
-            Write-Error $installOutput;
             throw "pnpm install failed with exit code $installExitCode.";
         }
     }

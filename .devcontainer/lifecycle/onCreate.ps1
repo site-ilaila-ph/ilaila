@@ -14,15 +14,8 @@ if (Test-State -Key "cloned")
 
 [string]$tempDir = mktemp -d -p (Split-Path $dest -Parent);
 
-git clone $repoUrl $tempDir;
-[int]$cloneExitCode = $LASTEXITCODE;
+git clone $repoUrl $dest;
 
-if ($cloneExitCode -ne 0)
-{
-    throw "Git clone failed with exit code $cloneExitCode.";
-}
-
-mv "$tempDir/." $dest;
 [int]$moveExitCode = $LASTEXITCODE;
 
 if ($moveExitCode -ne 0)
