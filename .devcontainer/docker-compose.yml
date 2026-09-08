@@ -5,10 +5,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - pnpm-store-data:/workspaces/project/.pnpm-store
-
-      # important that these are synced with the host.
-      - .:/workspaces/project/.devcontainer
-      - ../.git:/workspaces/project/.git
+      
     command: sleep infinity
 
 volumes:
