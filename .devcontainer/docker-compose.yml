@@ -4,14 +4,18 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
+      # these should exists in docker's system, not
+      # host(windows) system.
       - workspace-data:/workspaces/project
       - workspace-setup-data:/workspaces/project/.setup
-      - workspace-data:/workspaces/project
       - pnpm-store-data:/workspaces/project/.pnpm-store
-      - .:/workspaces/project/.devcontainer # sync this with the host.
+
+      # important that these are synced with the host.
+      - .:/workspaces/project/.devcontainer
       - ../.git:/workspaces/project/.git
     command: sleep infinity
 
 volumes:
   workspace-data:
   workspace-setup-data:
+  pnpm-store-data:

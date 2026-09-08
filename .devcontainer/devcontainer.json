@@ -2,7 +2,9 @@
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
   "workspaceFolder": "/workspaces/project",
-  "onCreateCommand": "bootstrap.ps1",
+  "onCreateCommand": "pwsh -File /workspaces/project/.devcontainer/lifecycle/onCreate.ps1",
+  "postCreateCommand": "pwsh -File /workspaces/project/.devcontainer/lifecycle/postCreate.ps1",
+  "postStartCommand": "pwsh -File /workspaces/project/.devcontainer/lifecycle/onStart.ps1",
   "name": "ilaila",
   "remoteUser": "node",
   "customizations": {
