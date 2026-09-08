@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-[string]$dest = "/workspaces/project";
+[string]$dest = "/workspace";
 Set-Location $dest;
 
 pnpm supabase start;

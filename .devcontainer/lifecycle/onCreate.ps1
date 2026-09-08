@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 . "$PSScriptRoot/libstate.ps1";
 
-[string]$dest = "/workspaces/project";
+[string]$dest = "/workspace";
 [string]$repoUrl = "https://github.com/site-ilaila-ph/ilaila.git";
 
 Ensure-SetupDir;
