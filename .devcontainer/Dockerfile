@@ -8,8 +8,8 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     | tar -xz -C /opt/microsoft/powershell/7 \
     && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
-RUN mkdir -p /workspaces \
-    && chown -R node:node /workspaces \
+RUN mkdir -p /workspace \
+    && chown -R node:node /workspace \
     && mkdir -p /setup \
     && chown -R node:node /setup
     

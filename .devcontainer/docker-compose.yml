@@ -5,9 +5,4 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./lifecycle:/setup/lifecycle
-      - pnpm-store-data:/setup/pnpm-store
-      
     command: sleep infinity
-
-volumes:
-  pnpm-store-data:

@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 . "$PSScriptRoot/libstate.ps1";
 
-[string]$dest = "/workspaces/project";
+[string]$dest = "/workspace";
 Set-Location $dest;
 
 if (Test-State -Key "installed")
