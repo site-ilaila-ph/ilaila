@@ -9,4 +9,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 USER node
 ENV REMOTE_REPOSITORY_URL="https://github.com/site-ilaila-ph/ilaila.git"
+ENV PATH="/workspace/bin:$PATH"
 COPY . /setup
