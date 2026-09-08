@@ -4,14 +4,5 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - workspace-data:/workspaces/project
-      - workspace-setup-data:/workspaces/project/.setup
-      - workspace-data:/workspaces/project
-      - pnpm-store-data:/workspaces/project/.pnpm-store
-      - .:/workspaces/project/.devcontainer # sync this with the host.
-      - ../.git:/workspaces/project/.git
+      - ./lifecycle:/setup/lifecycle
     command: sleep infinity
-
-volumes:
-  workspace-data:
-  workspace-setup-data:

@@ -1,10 +1,17 @@
 {
   "service": "app",
   "dockerComposeFile": "docker-compose.yml",
-  "workspaceFolder": "/workspaces/project",
-  "onCreateCommand": "bootstrap.ps1",
+  "workspaceFolder": "/workspace",
+  "onCreateCommand": "pwsh -File /setup/lifecycle/onCreate.ps1",
+  "postCreateCommand": "pwsh -File /setup/lifecycle/postCreate.ps1",
+  "postStartCommand": "pwsh -File /setup/lifecycle/onStart.ps1",
   "name": "ilaila",
   "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [

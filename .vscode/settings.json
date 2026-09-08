@@ -43,15 +43,15 @@
   "js/ts.updateImportsOnFileMove.enabled": "always",
   "terminal.integrated.profiles.linux": {
     "Developer Bash": {
-      "path": "bash",
-      "args": ["--rcfile", ".vscode/Developer Bash.sh", "-i"],
+      "path": "bin/dbash.sh",
+      "args": [],
       "icon": "terminal-bash"
     },
     "Developer Powershell": {
-      "path": "pwsh",
-      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".vscode/Developer Powershell.ps1"],
+      "path": "bin/dpwsh.ps1",
+      "args": [],
       "icon": "terminal-powershell"
     }
   },
-  "terminal.integrated.defaultProfile.linux": "Developer Bash"
+  "terminal.integrated.defaultProfile.linux": "bash"
 }
