@@ -1,7 +1,11 @@
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
 import { PrismaClient, User } from "@/generated/prisma/client";
+<<<<<<< HEAD
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import type { CookieMap, CacheManager } from "../infra";
+=======
+import { CookieMap, CacheManager } from "../live";
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 export interface SessionReaderDependencies {
   cookieMap: CookieMap;
@@ -32,6 +36,7 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
       const userId = await cache?.cached({
         key: ["session", "via-id", sessionId],
         fn: async () => {
+<<<<<<< HEAD
           try {
             const session = await db.session.findUnique({
               where: { id: sessionId },
@@ -47,6 +52,13 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
             console.error(error);
             throw error;
           }
+=======
+          const session = await db.session.findUnique({
+            where: { id: sessionId },
+            select: { userId: true },
+          });
+          return session?.userId ?? null;
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
         },
         ttlSeconds: 60 * 15,
       });

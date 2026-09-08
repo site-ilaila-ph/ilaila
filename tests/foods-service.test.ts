@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
+<<<<<<< HEAD
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllFood, getFoodById } from "@/app/(session-gated)/foods/services";
+=======
+import { PrismaClient } from "@/generated/prisma/client";
+import { getAllFood, getFoodById } from "@/app/foods/services";
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 describe("food service", () => {
   it("getAllFood returns all food items with related images and tags", async () => {
@@ -38,7 +43,10 @@ describe("food service", () => {
         images: true,
         tags: true,
       },
+<<<<<<< HEAD
       orderBy: { name: "asc" },
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
     });
 
     expect(result).toEqual(foodItems);
@@ -98,12 +106,16 @@ describe("food service", () => {
         tags: true,
         businesses: {
           include: {
+<<<<<<< HEAD
             business: {
               include: {
                 images: true,
                 tags: true,
               },
             },
+=======
+            business: true,
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
           },
         },
       },

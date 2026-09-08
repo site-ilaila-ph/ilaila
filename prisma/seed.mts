@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { hash } from "@/app/(unauthenticated-only)/auth/lib/password";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -5,10 +6,37 @@ import { PrismaPg } from "@prisma/adapter-pg";
 async function main() {
   const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
   const client = new PrismaClient({ adapter });
+=======
+import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { hash } from "@/app/auth/lib/password";
+import 'dotenv/config'; // Loads default .env
+import { config } from 'dotenv';
+import path from 'path';
+
+// load local .env if not in production.
+if (process.env.NODE_ENV !== "production") {
+  config({ path: path.join(path.dirname(import.meta.dirname), '.env.development') });
+}
+
+async function main() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const client = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
   console.log("Cleaning existing database records...");
   await client.review.deleteMany();
   await client.bookmark.deleteMany();
+<<<<<<< HEAD
+=======
+  await client.appReview.deleteMany();
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   await client.menuItem.deleteMany();
   await client.businessImage.deleteMany();
   await client.businessTag.deleteMany();
@@ -169,9 +197,15 @@ async function main() {
       history: "Started as a small roadside stall by Aling Nena, now run by her children.",
       isPublished: true,
       createdById: admin.id,
+<<<<<<< HEAD
       address: "123 Rizal St, San Pedro, Laguna",
       latitude: 14.3595,
       longitude: 121.0473,
+=======
+      address: "123 Rizal St, Calamba, Laguna",
+      latitude: 14.2117,
+      longitude: 121.1653,
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       hours: "Mon-Sat 7:00 AM - 8:00 PM",
       tags: {
         create: [{ value: "carinderia" }, { value: "family-owned" }, { value: "budget-friendly" }],
@@ -203,6 +237,7 @@ async function main() {
 
   const business2 = await client.business.create({
     data: {
+<<<<<<< HEAD
       name: "San Pedro Heritage Cafe",
       description: "A welcoming San Pedro cafe offering classic Filipino sweets and local heritage dishes.",
       history: "Built around family recipes and a love of preserving the flavors shared across Laguna homes.",
@@ -211,6 +246,16 @@ async function main() {
       address: "45 San Antonio St, San Pedro, Laguna",
       latitude: 14.3568,
       longitude: 121.0551,
+=======
+      name: "Manila Heritage Cafe",
+      description: "An authentic historic cafe in Intramuros offering classic colonial sweets and local heritage dishes.",
+      history: "Located in a restored Spanish-era ancestral house overlooking historic cobblestone streets.",
+      isPublished: true,
+      createdById: chefMario.id,
+      address: "45 General Luna St, Intramuros, Manila",
+      latitude: 14.5896,
+      longitude: 120.9750,
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       hours: "Tue-Sun 10:00 AM - 9:00 PM",
       tags: {
         create: [{ value: "historic" }, { value: "cafe" }, { value: "desserts" }, { value: "ambiance" }],
@@ -240,6 +285,7 @@ async function main() {
     },
   });
 
+<<<<<<< HEAD
   await client.business.create({
     data: {
       name: "Laguna Lechon Haus & Grill",
@@ -253,6 +299,21 @@ async function main() {
       hours: "Daily 10:00 AM - 10:00 PM",
       tags: {
         create: [{ value: "lechon" }, { value: "grill" }, { value: "san-pedro" }, { value: "meat" }],
+=======
+  const business3 = await client.business.create({
+    data: {
+      name: "Cebu Lechon Haus & Grill",
+      description: "World-class crispy Cebu lechon roasted fresh daily with aromatic herbs and spices.",
+      history: "Proudly bringing authentic island roasting traditions straight from the Queen City of the South.",
+      isPublished: true,
+      createdById: chefMario.id,
+      address: "88 Mango Avenue, Cebu City",
+      latitude: 10.3157,
+      longitude: 123.8854,
+      hours: "Daily 10:00 AM - 10:00 PM",
+      tags: {
+        create: [{ value: "lechon" }, { value: "grill" }, { value: "cebu" }, { value: "meat" }],
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       },
       images: {
         create: [{ description: "Freshly carved crunchy lechon belly" }],
@@ -312,6 +373,32 @@ async function main() {
     },
   });
 
+<<<<<<< HEAD
+=======
+  console.log("Seeding app reviews...");
+  await client.appReview.create({
+    data: {
+      userId: regularUser.id,
+      userName: "Juan Dela Cruz",
+      email: "juan@example.com",
+      rating: 5,
+      text: "Ilaila is a fantastic digital museum! Loving the rich historical insights on Filipino food.",
+      isApproved: true,
+    },
+  });
+
+  await client.appReview.create({
+    data: {
+      userId: maria.id,
+      userName: "Maria Santos",
+      email: "maria@example.com",
+      rating: 5,
+      text: "Very user-friendly website. Great tool for finding heritage spots.",
+      isApproved: true,
+    },
+  });
+
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   console.log("Seed complete.");
   await client.$disconnect();
 }

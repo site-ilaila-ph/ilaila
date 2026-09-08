@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { describe, expect, it, vi } from "vitest";
 import { acquireCacheManager } from "@/lib/infra";
+=======
+import { describe, expect, it } from "vitest";
+import { acquireCacheManager } from "@/lib/live";
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 describe("CacheManager", () => {
   it("supports detached cached() calls without object context", async () => {
@@ -15,6 +20,7 @@ describe("CacheManager", () => {
     expect(value).toEqual({ ok: true, value: 42 });
     expect(await cache.get({ key: ["regression", "detached-cached"] })).toEqual({ ok: true, value: 42 });
   });
+<<<<<<< HEAD
 
   it("supports string keys, encoded array keys, and invalidation", async () => {
     const cache = acquireCacheManager();
@@ -56,4 +62,6 @@ describe("CacheManager", () => {
     await expect(cache.cached({ key: "once", fn: loader })).resolves.toBe("loaded");
     expect(loader).toHaveBeenCalledTimes(1);
   });
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 });

@@ -26,6 +26,7 @@ All agents must stay within the user's stated goal, files, constraints, and requ
 ## Master Agent Workflow
 
 The `master` agent is the single general-purpose project agent. It may inspect, edit, test, and repair code directly, including navigation questions. It delegates only to the narrowest domain specialist when that specialist is materially better suited to the request. Domain specialists return their work to `master`.
+<<<<<<< HEAD
 
 ## Branch And Commit Safety
 
@@ -33,4 +34,6 @@ The `master` agent is the single general-purpose project agent. It may inspect, 
 - Before committing, verify the current branch with `git branch --show-current`.
 - If the current branch is `main`, create or switch to a dedicated working branch first, then commit there.
 - Do not switch branches or create a branch automatically when no commit has been requested; preserve the user's current worktree and branch.
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 <!-- END:agent-workflow-instructions -->

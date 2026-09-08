@@ -272,7 +272,11 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon />
+<<<<<<< HEAD
       <span className="sr-only">Ipakita o itago ang sidebar</span>
+=======
+      <span className="sr-only">Toggle Sidebar</span>
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
     </Button>
   )
 }
@@ -284,10 +288,17 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
     <button
       data-sidebar="rail"
       data-slot="sidebar-rail"
+<<<<<<< HEAD
       aria-label="Ipakita o itago ang sidebar"
       tabIndex={-1}
       onClick={toggleSidebar}
       title="Ipakita o itago ang sidebar"
+=======
+      aria-label="Toggle Sidebar"
+      tabIndex={-1}
+      onClick={toggleSidebar}
+      title="Toggle Sidebar"
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:inset-s-1/2 after:w-0.5 hover:after:bg-sidebar-border sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
         "in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize",

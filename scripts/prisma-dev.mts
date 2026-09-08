@@ -54,6 +54,7 @@ async function run(
 }
 
 async function writeLock() {
+<<<<<<< HEAD
   await fsx.ensureDir(join(rootDir, ".tmp"));
   await fsx.writeJSON(join(rootDir, ".tmp", ".prisma-dev-lock"), { pid: process.pid });
 }
@@ -83,11 +84,24 @@ async function respectLock() {
 
     console.warn(`Stale prisma-dev lock found (pid ${pid} not running). Removing it.`);
     await fsx.rm(lockPath, { force: true });
+=======
+  await fsx.writeJSON(join(rootDir, ".prisma-dev-lock"), { pid: process.pid });
+}
+
+async function respectLock() {
+  if (await fsx.exists(join(rootDir, ".prisma-dev-lock"))) {
+    console.error("An instance of prisma-dev is already running.");
+    process.exit(1);
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   }
 }
 
 async function removeLock() {
+<<<<<<< HEAD
   await fsx.rm(join(rootDir, ".tmp", ".prisma-dev-lock"), { force: true });
+=======
+  await fsx.rm(join(rootDir, ".prisma-dev-lock"), { force: true });
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 }
 
 async function main() {
@@ -123,12 +137,18 @@ async function main() {
     });
   }
 
+<<<<<<< HEAD
   async function regenerateAndPush({ seed = false }: { seed?: boolean } = {}) {
     await run("pnpm", ["exec", "prisma", "db", "push"], { cwd: rootDir });
     await run("pnpm", ["exec", "prisma", "generate"], { cwd: rootDir });
     if (seed) {
       await run("pnpm", ["exec", "prisma", "db", "seed"], { cwd: rootDir });
     }
+=======
+  async function regenerateAndPush() {
+    await run("pnpm", ["exec", "prisma", "db", "push"], { cwd: rootDir });
+    await run("pnpm", ["exec", "prisma", "generate"], { cwd: rootDir });
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   }
 
   async function cleanupDatabase() {
@@ -149,33 +169,56 @@ async function main() {
   }
 
   let shuttingDown = false;
+<<<<<<< HEAD
   async function shutdown() {
+=======
+  async function shutdown(exitCode = 0) {
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
     if (shuttingDown) return;
     shuttingDown = true;
     await watcher.close();
     await cleanupDatabase();
     await removeLock();
+<<<<<<< HEAD
     process.exit(0);
   }
 
   process.on("SIGINT", () => shutdown());
   process.on("SIGTERM", () => shutdown());
+=======
+    process.exit(exitCode);
+  }
+
+  process.on("SIGINT", () => shutdown(0));
+  process.on("SIGTERM", () => shutdown(0));
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
   watcher.on("ready", async () => {
     try {
       await waitForDbReady();
+<<<<<<< HEAD
       await regenerateAndPush({ seed: true });
       
       await new Promise((resolve) => setTimeout(resolve, 1000));
+=======
+      await regenerateAndPush();
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
       watcher.on("change", async () => {
         try {
           await regenerateAndPush();
+<<<<<<< HEAD
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (err) {
           if (err instanceof CommandFailedError) {
             console.error(err.message);
             await shutdown();
+=======
+        } catch (err) {
+          if (err instanceof CommandFailedError) {
+            console.error(err.message);
+            await shutdown(err.exitCode);
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
           } else {
             throw err;
           }
@@ -186,7 +229,11 @@ async function main() {
     } catch (err) {
       if (err instanceof CommandFailedError) {
         console.error(err.message);
+<<<<<<< HEAD
         await shutdown();
+=======
+        await shutdown(err.exitCode);
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       } else {
         throw err;
       }
@@ -196,5 +243,9 @@ async function main() {
 
 main().catch((err) => {
   console.error("fatal:", err);
+<<<<<<< HEAD
   process.exit(0);
+=======
+  process.exit(1);
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 });

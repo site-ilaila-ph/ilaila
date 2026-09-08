@@ -11,4 +11,8 @@ export default defineConfig({
     environment: "jsdom",
     include: ["tests/**/*.{spec,test}.?(m|c)ts?(x)"],
   },
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8

@@ -1,0 +1,4 @@
+master:
+  - add-memory
+  - delete-memory
+  - update-memory

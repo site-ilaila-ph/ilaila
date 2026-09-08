@@ -64,6 +64,7 @@ export function ActionFormExtension<
         });
       }
 
+<<<<<<< HEAD
       if (result.type === "insensitive" || result.type === "sensitive") {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         methods.setError("root" as any, {
@@ -74,6 +75,8 @@ export function ActionFormExtension<
         });
       }
 
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       await onFailure?.(result);
 
       return { halt: true };

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
+<<<<<<< HEAD
 import {
   PrismaClientInitializationError,
   PrismaClientKnownRequestError,
@@ -13,6 +14,10 @@ import type {
   ActionResponse,
   ActionValidationErrors,
 } from "../common-server-action-protocol";
+=======
+import type { AnySerializable } from "../serializable";
+import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 // --- Service & action types -------------------------------------------------
 
@@ -20,7 +25,11 @@ type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
 type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
   params: TParams,
+<<<<<<< HEAD
   deps: TDeps,
+=======
+  deps: TDeps
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 ) => Promise<TReturn>;
 
 type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>;
@@ -58,9 +67,13 @@ function createConstraintApi(violations: ConstraintViolation[]): ConstraintApi {
   };
 }
 
+<<<<<<< HEAD
 function violationsToFieldErrors(
   violations: ConstraintViolation[],
 ): ActionValidationErrors {
+=======
+function violationsToFieldErrors(violations: ConstraintViolation[]): ActionValidationErrors {
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   const fieldErrors: ActionValidationErrors = {};
   for (const violation of violations) {
     if (violation.field === undefined) continue;
@@ -76,6 +89,7 @@ function violationsToGlobalErrors(violations: ConstraintViolation[]): string[] {
 type ServerActionBusinessConstraint<TParams, TDeps = any> = (
   params: TParams,
   deps: TDeps,
+<<<<<<< HEAD
   api: ConstraintApi,
 ) => void | Promise<void>;
 
@@ -83,6 +97,12 @@ type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<
   any,
   any
 >;
+=======
+  api: ConstraintApi
+) => void | Promise<void>;
+
+type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<any, any>;
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 interface ServiceFunctionToServerActionOptions<
   TFn extends AsyncServiceFunction,
@@ -95,11 +115,18 @@ interface ServiceFunctionToServerActionOptions<
   dependencies?: TDeps | (() => TDeps | Promise<TDeps>);
 }
 
+<<<<<<< HEAD
 type AnyServiceFunctionToServerActionOptions =
   ServiceFunctionToServerActionOptions<
     AnyAsyncServiceFunction,
     AnyParameterSchema
   >;
+=======
+type AnyServiceFunctionToServerActionOptions = ServiceFunctionToServerActionOptions<
+  AnyAsyncServiceFunction,
+  AnyParameterSchema
+>;
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 
 interface FunctionCoercedServerAction<
   TFn extends AnyAsyncServiceFunction,
@@ -117,6 +144,7 @@ type InferFunctionCoercedServerActionResultData<
   TFn extends AnyFunctionCoercedServerAction,
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
 
+<<<<<<< HEAD
 function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
   if (error instanceof PrismaClientKnownRequestError) {
     if (error.code === "P2002") {
@@ -179,6 +207,8 @@ function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
   return null;
 }
 
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 // --- Implementation ----------------------------------------------------------
 
 function toServerAction<
@@ -186,6 +216,7 @@ function toServerAction<
   TSchema extends z.ZodType<Parameters<TFn>[0]>,
   TDeps = Parameters<TFn>[1],
 >(
+<<<<<<< HEAD
   options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>,
 ): FunctionCoercedServerAction<TFn, TSchema> {
   const { serviceFn, schema, constraints = [], dependencies } = options;
@@ -193,6 +224,13 @@ function toServerAction<
   return async (
     input: z.input<TSchema>,
   ): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
+=======
+  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>
+): FunctionCoercedServerAction<TFn, TSchema> {
+  const { serviceFn, schema, constraints = [], dependencies } = options;
+
+  return async (input: z.input<TSchema>): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
     const parsed = await schema.safeParseAsync(input);
 
     if (!parsed.success) {
@@ -205,6 +243,7 @@ function toServerAction<
 
     const validParams = parsed.data as Parameters<TFn>[0];
 
+<<<<<<< HEAD
     try {
       const resolvedDeps: TDeps | undefined =
         typeof dependencies === "function"
@@ -233,6 +272,36 @@ function toServerAction<
         };
       }
 
+=======
+    const resolvedDeps: TDeps | undefined =
+      typeof dependencies === "function"
+        ? await (dependencies as () => TDeps | Promise<TDeps>)()
+        : dependencies;
+
+    const violations: ConstraintViolation[] = [];
+    const constraintApi = createConstraintApi(violations);
+
+    try {
+      for (const constraint of constraints) {
+        await constraint(validParams, resolvedDeps as TDeps, constraintApi);
+      }
+    } catch (error: any) {
+      if (!(error instanceof ConstraintFailSignal)) {
+        throw error;
+      }
+    }
+
+    if (violations.length > 0) {
+      return {
+        success: false,
+        type: "constraint",
+        fieldErrors: violationsToFieldErrors(violations),
+        globalErrors: violationsToGlobalErrors(violations),
+      };
+    }
+
+    try {
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       const data = await serviceFn(validParams, resolvedDeps);
 
       return {
@@ -240,10 +309,13 @@ function toServerAction<
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
+<<<<<<< HEAD
       console.error(error);
       const prismaFailure = prismaErrorToActionFailure(error);
       if (prismaFailure) return prismaFailure;
 
+=======
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       if (!(error instanceof ServerError)) {
         return {
           success: false,
@@ -282,12 +354,16 @@ class ServerError extends Error {
   public readonly hint?: string;
   public readonly sensitive: boolean;
 
+<<<<<<< HEAD
   public constructor({
     domain,
     hint,
     message,
     sensitive = true,
   }: ServerErrorOptions) {
+=======
+  public constructor({ domain, hint, message, sensitive = true }: ServerErrorOptions) {
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
     super(message);
 
     this.name = "ServerError";

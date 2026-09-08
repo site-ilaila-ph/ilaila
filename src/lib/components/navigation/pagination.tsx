@@ -8,7 +8,11 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
       role="navigation"
+<<<<<<< HEAD
       aria-label="pagpapa-pahina"
+=======
+      aria-label="pagination"
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
       {...props}
@@ -64,12 +68,20 @@ function PaginationLink({
 
 function PaginationPrevious({
   className,
+<<<<<<< HEAD
   text = "Nakaraan",
+=======
+  text = "Previous",
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
+<<<<<<< HEAD
       aria-label="Pumunta sa nakaraang pahina"
+=======
+      aria-label="Go to previous page"
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       size="default"
       className={cn("pl-2!", className)}
       {...props}
@@ -82,12 +94,20 @@ function PaginationPrevious({
 
 function PaginationNext({
   className,
+<<<<<<< HEAD
   text = "Susunod",
+=======
+  text = "Next",
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   return (
     <PaginationLink
+<<<<<<< HEAD
       aria-label="Pumunta sa susunod na pahina"
+=======
+      aria-label="Go to next page"
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
       size="default"
       className={cn("pr-2!", className)}
       {...props}

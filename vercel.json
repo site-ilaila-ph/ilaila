@@ -1,8 +1,14 @@
 {
+<<<<<<< HEAD
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": false
   },
 
   "buildCommand": "pnpm cd:app"
+=======
+  "git": {
+    "deploymentEnabled": false
+  }
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
 }

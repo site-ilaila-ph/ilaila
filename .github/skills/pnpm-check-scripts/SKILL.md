@@ -1,5 +1,6 @@
 ---
 name: pnpm-check-scripts
+<<<<<<< HEAD
 description: Check script names before assuming scripts. Never guess pnpm script names (dev, start, build, test, etc) — always verify against package.json first, since naming varies by project.
 ---
 
@@ -21,3 +22,11 @@ Step 3: Run the confirmed script with `pnpm <script>`.
 
 - Do not run `pnpm dev`, `pnpm start`, `pnpm build`, etc. without having first confirmed that key exists in `scripts`.
 - If the intended action has no obviously matching script name, ask or report available scripts rather than guessing the closest-sounding one.
+=======
+description: Tells you what are the pnpm scripts in the project. Use when unsure what scripts to use.
+---
+
+# Skill Instructions
+Step 1: RUN IN POWERSHELL, replacing <project_root> with the actual project root path:
+`cd <project_root>; node -e "const packageJSON=require('./package.json'); console.log(JSON.stringify(packageJSON.scripts ?? {}));"`
+>>>>>>> b378b4f0ac00170818702674e7d768e7e1efb2f8
