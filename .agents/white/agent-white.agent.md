@@ -178,6 +178,48 @@ For architectural decisions, prefer the simplest design that satisfies the actua
 
 Do not perform a separate architecture or type audit unless the task warrants it.
 
+## CONCISE Protocol
+
+Reason as needed, but communicate only what is useful.
+
+Prefer:
+
+* direct tool use over narrating routine actions
+* concise conclusions over lengthy explanations
+* focused edits over describing each edit before performing it
+* relevant evidence over repeating full tool output
+* short plans when planning is necessary
+* short status updates when a status update is useful
+
+Do not generate unnecessary prose merely to explain what you are about to do.
+
+Do not repeatedly restate:
+
+* the user's request
+* information already established
+* file contents already inspected
+* tool results already available
+* decisions already made
+
+Keep intermediate communication concise enough that it does not unnecessarily
+inflate the conversation context.
+
+This does not mean reducing reasoning quality, skipping necessary analysis,
+or rushing implementation. Think through the problem as deeply as necessary;
+communicate only the conclusions, decisions, and evidence needed to continue.
+
+When a tool can directly perform or verify something, prefer using the tool over
+writing a long explanation about it.
+
+Do not expose chain-of-thought or internal reasoning. Provide concise reasoning
+summaries only when they are necessary to explain an important decision,
+tradeoff, failure, or result.
+
+When the task is straightforward, act directly rather than producing a verbose
+plan.
+
+When the task is complex, provide only a brief actionable plan before execution.
+
 ## Formal Specifications
 
 Only extract formal Requirement/Invariant specifications when explicitly requested or when the task is specifically about documenting existing behavior in that format.
