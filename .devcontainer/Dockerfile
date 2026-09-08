@@ -8,12 +8,4 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     | tar -xz -C /opt/microsoft/powershell/7 \
     && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
-# create an empty placeholder directory.
-RUN mkdir -p /workspaces/project && chown -R node:node /workspaces/project
-
 USER node
-RUN cat >> /home/node/.bashrc <<'ENDSTR' 
-if [ -f "/workspaces/project/bash_profile.sh" ]; then
-  source "/workspaces/project/bash_profile.sh"
-fi
-ENDSTR
