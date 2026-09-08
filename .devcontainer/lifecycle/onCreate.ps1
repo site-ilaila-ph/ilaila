@@ -12,7 +12,7 @@ if (Test-State -Key "cloned")
     exit 0;
 }
 
-[string]$tempDir = mktemp -d -p /workspaces/project;
+[string]$tempDir = mktemp -d -p (Split-Path $dest -Parent);
 
 git clone $repoUrl $tempDir;
 [int]$cloneExitCode = $LASTEXITCODE;

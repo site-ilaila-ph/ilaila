@@ -4,10 +4,6 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      # these should exists in docker's system, not
-      # host(windows) system.
-      - workspace-data:/workspaces/project
-      - workspace-setup-data:/workspaces/project/.setup
       - pnpm-store-data:/workspaces/project/.pnpm-store
 
       # important that these are synced with the host.
@@ -16,6 +12,4 @@ services:
     command: sleep infinity
 
 volumes:
-  workspace-data:
-  workspace-setup-data:
   pnpm-store-data:
