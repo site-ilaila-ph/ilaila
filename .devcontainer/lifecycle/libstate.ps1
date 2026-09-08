@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-[string]$script:stateFile = "/workspaces/project/.setup/state.json";
+[string]$script:stateFile = "/setup/state.json";
 
 function Ensure-SetupDir
 {

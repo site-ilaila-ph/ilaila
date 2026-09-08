@@ -4,7 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - pnpm-store-data:/workspaces/project/.pnpm-store
+      - ./lifecycle:/setup/lifecycle
+      - pnpm-store-data:/setup/pnpm-store
       
     command: sleep infinity
 

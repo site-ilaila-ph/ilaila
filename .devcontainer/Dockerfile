@@ -9,6 +9,8 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
 RUN mkdir -p /workspaces \
-    && chown -R node:node /workspaces
+    && chown -R node:node /workspaces \
+    && mkdir -p /setup \
+    && chown -R node:node /setup
     
 USER node
