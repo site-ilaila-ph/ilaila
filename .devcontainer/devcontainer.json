@@ -1,6 +1,6 @@
 {
   "service": "app",
-  "dockerComposeFile": "../.setup/docker-compose.yml",
+  "dockerComposeFile": "docker-compose.yml",
   "workspaceFolder": "/workspace",
   "postCreateCommand": "/setup/lifecycle/postCreate",
   "postStartCommand": "/setup/lifecycle/postStart",
