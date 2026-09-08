@@ -40,5 +40,18 @@
   },
   "explorer.confirmDragAndDrop": false,
   "terminal.integrated.initialHint": false,
-  "js/ts.updateImportsOnFileMove.enabled": "always"
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "terminal.integrated.profiles.linux": {
+    "Developer Bash": {
+      "path": "bash",
+      "args": ["--rcfile", ".vscode/Developer Bash.sh", "-i"],
+      "icon": "terminal-bash"
+    },
+    "Developer Powershell": {
+      "path": "pwsh",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".vscode/Developer Powershell.ps1"],
+      "icon": "terminal-powershell"
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "Developer Bash"
 }

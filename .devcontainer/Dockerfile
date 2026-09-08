@@ -8,4 +8,6 @@ RUN mkdir -p /opt/microsoft/powershell/7 \
     | tar -xz -C /opt/microsoft/powershell/7 \
     && ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 
+ENV PATH="/workspace/bin:${PATH}"
+
 USER node
