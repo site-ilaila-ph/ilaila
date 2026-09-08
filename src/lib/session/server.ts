@@ -1,19 +1,28 @@
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
-import { PrismaClient, User } from "@/generated/prisma/client";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import type { CookieMap, CacheManager } from "../infra";
+import type { Contract } from "@/prisma/contract.d";
+import type { PostgresClient } from "@internal/postgres/runtime";
 
 export interface SessionReaderDependencies {
   cookieMap: CookieMap;
-  db: PrismaClient;
+  db: PostgresClient<Contract>;
   cache: CacheManager;
 }
 
 
 
+export interface SessionUser {
+  id: string;
+  email: string;
+  userName: string | null;
+  isAdmin: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface SessionReader {
   getSessionId(): Promise<string | null>;
-  getSessionUser(): Promise<User | null>;
+  getSessionUser(): Promise<SessionUser | null>;
 }
 
 export function createSessionReader(deps: SessionReaderDependencies): SessionReader {
@@ -33,19 +42,12 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
         key: ["session", "via-id", sessionId],
         fn: async () => {
           try {
-            const session = await db.session.findUnique({
-              where: { id: sessionId },
-              select: { userId: true, expiresAt: true },
-            });
+            const session = await db.orm.Session.where({ id: sessionId }).select("userId", "expiresAt").first();
 
             if (!session || session.expiresAt <= new Date()) return null;
             return session.userId;
-          } catch (error) {
-            if (error instanceof PrismaClientKnownRequestError) {
-              return null;
-            }
-            console.error(error);
-            throw error;
+          } catch (error: any) {
+            return null;
           }
         },
         ttlSeconds: 60 * 15,
@@ -55,7 +57,7 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
 
       return await cache.cached({
         key: ["user", "via-id", userId],
-        fn: () => db.user.findUnique({ where: { id: userId } }),
+        fn: () => db.orm.User.where({ id: userId }).first(),
         ttlSeconds: 60 * 5,
       });
     },

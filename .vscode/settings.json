@@ -1,48 +1,44 @@
 {
-  "files.exclude": {
-    // base ignore.
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true
-
-    // normally we should not be editing these files.
-    // ".github": true,
-    // ".pnpm-store": true,
-    // "node_modules": true,
-    // ".next": true
+  "github.copilot.nextEditSuggestions.enabled": false,
+  "git.enableSmartCommit": true,
+  "chat.agentFilesLocations": {
+    ".agents/white": true,
+    ".agents/black": true
   },
-  "js/ts.tsdk.path": "node_modules/typescript/lib",
-
-  "terminal.integrated.profiles.windows": {
-    // Custom terminal profile for development environment.
-    "Development PowerShell": {
-      "overrideName": true,
-      "color": "terminal.ansiBlue",
-      "icon": "developer-tools",
-      "path": "powershell.exe",
-      "args": [
-        "-NoExit",
-        "-NoProfile",
-        "-Command",
-        "& { . '${workspaceFolder}\\.vscode\\Development Powershell Profile.ps1' -Interactive }"
-      ]
-    }
+  "chat.agentSkillsLocations": {
+    ".agents/white/skills": true,
+    ".agents/black/skills": true
   },
-
-  // Also use the custom terminal profile for automation tasks (e.g., preLaunchTask, postDebugTask).
-  "terminal.integrated.automationProfile.windows": {
-    "overrideName": true,
-    "icon": "developer-tools",
-    "path": "powershell.exe",
-    "args": [
-      "-NoExit",
-      "-NoProfile",
-      "-Command",
-      "& { . '${workspaceFolder}\\.vscode\\Development Powershell Profile.ps1' }"
-    ]
+  "chat.viewSessions.enabled": false,
+  "gitlens.graph.details.location": "auto",
+  "github.copilot.enable": {
+    "markdown": false,
+    "*": false,
+    "dotenv": false,
+    "plaintext": false,
+    "scminput": false
   },
-
-  "terminal.integrated.defaultProfile.windows": "Development PowerShell",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "window.density.layout": "compact",
+  "chat.byokUtilityModelDefault": "mainAgent",
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "terminal.integrated.initialHint": false,
+  "js/ts.updateImportsOnFileMove.enabled": "always"
 }

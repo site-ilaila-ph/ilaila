@@ -10,7 +10,7 @@ Prisma v7 changed several things from older tutorials you might find online — 
 
 ```powershell
 pnpm add -D prisma
-pnpm add @prisma/client @prisma/adapter-better-sqlite3
+pnpm add @/generated/prisma/client @prisma/adapter-better-sqlite3
 pnpm exec prisma init --datasource-provider sqlite
 ```
 

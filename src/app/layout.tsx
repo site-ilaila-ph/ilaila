@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope, Montserrat } from "next/font/google";
 import "@/app/styles/globals.css";
-import { cn } from "@/lib/client";
+import { cn } from "@/lib/utils";
 import { createSessionReader } from "@/lib/session/server";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
-import { acquireCacheManager, acquireDb, acquireNextJSCookieMap } from "@/lib/infra";
-import type { User } from "@/generated/prisma/client";
+import { acquireCacheManager, acquirePrismaClient, acquireNextJSCookieMap } from "@/lib/infra";
 
 const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
 
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
   description: "Isang website para sa mga restawran at cafe sa mga pamayanan ng San Pedro City, Laguna",
 };
 
-function sanitizeUser(user: User): ClientReadonlySession['user'] {
+function sanitizeUser(user: any): ClientReadonlySession['user'] {
   return {
     id: user.id,
     userName: user.userName,
@@ -40,7 +39,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = createSessionReader({ db: acquireDb(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
+  const session = createSessionReader({ db: acquirePrismaClient(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
   const sessionId = await session.getSessionId();
   const sessionUser = sessionId ? await session.getSessionUser() : null;
   const clientSession = sessionId && sessionUser

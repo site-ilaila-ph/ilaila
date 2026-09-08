@@ -50,3 +50,6 @@ src/generated/
 dev/tmp
 .eslintcache
 .prisma-dev-lock
+node_modules/
+dist/
+.env

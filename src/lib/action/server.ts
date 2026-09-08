@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
-import {
-  PrismaClientInitializationError,
-  PrismaClientKnownRequestError,
-  PrismaClientRustPanicError,
-  PrismaClientUnknownRequestError,
-  PrismaClientValidationError,
-} from "@prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
 import type {
   ActionFailure,
@@ -118,8 +111,9 @@ type InferFunctionCoercedServerActionResultData<
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
 
 function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
-  if (error instanceof PrismaClientKnownRequestError) {
-    if (error.code === "P2002") {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as any).code;
+    if (code === "P2002" || code === "23505") {
       return {
         success: false,
         type: "insensitive",
@@ -128,7 +122,7 @@ function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
       };
     }
 
-    if (error.code === "P2025") {
+    if (code === "P2025") {
       return {
         success: false,
         type: "insensitive",
@@ -141,38 +135,6 @@ function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
       success: false,
       type: "sensitive",
       hint: "database-request",
-    };
-  }
-
-  if (error instanceof PrismaClientValidationError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-validation",
-    };
-  }
-
-  if (error instanceof PrismaClientInitializationError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-initialization",
-    };
-  }
-
-  if (error instanceof PrismaClientUnknownRequestError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-unknown-request",
-    };
-  }
-
-  if (error instanceof PrismaClientRustPanicError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-engine",
     };
   }
 

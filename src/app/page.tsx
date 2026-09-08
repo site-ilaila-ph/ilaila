@@ -1,10 +1,10 @@
-import { acquireDb, acquireCacheManager, acquireNextJSCookieMap } from "@/lib/infra";
+import { acquirePrismaClient, acquireCacheManager, acquireNextJSCookieMap } from "@/lib/infra";
 import { createSessionReader } from "@/lib/session/server";
 import { redirect } from "next/navigation";
 
 export default async function RootPage() {
       const session = createSessionReader({
-        db: acquireDb(),
+        db: acquirePrismaClient(),
         cache: acquireCacheManager(),
         cookieMap: await acquireNextJSCookieMap(),
       });

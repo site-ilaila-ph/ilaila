@@ -4,7 +4,7 @@ import {
   PrismaClientRustPanicError,
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
-} from "@prisma/client/runtime/client";
+} from "@/generated/prisma/client/runtime/client";
 import { describe, expect, it } from "vitest";
 import { toServerAction } from "@/lib/action/server";
 import z from "zod";
