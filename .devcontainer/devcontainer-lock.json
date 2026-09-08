@@ -4,6 +4,11 @@
       "version": "1.10.0",
       "resolved": "ghcr.io/devcontainers/features/docker-outside-of-docker@sha256:c2c2cf829505ead8e4892c88c31b6594ae94a2bbb209e16e1fac456c1a3a624e",
       "integrity": "sha256:c2c2cf829505ead8e4892c88c31b6594ae94a2bbb209e16e1fac456c1a3a624e"
+    },
+    "ghcr.io/devcontainers/features/powershell:1": {
+      "version": "1.5.1",
+      "resolved": "ghcr.io/devcontainers/features/powershell@sha256:df7baa89598c93bfd15808641d9ec9eb03e0ccdf52e5de4cbbce9ab2d9755d18",
+      "integrity": "sha256:df7baa89598c93bfd15808641d9ec9eb03e0ccdf52e5de4cbbce9ab2d9755d18"
     }
   }
 }

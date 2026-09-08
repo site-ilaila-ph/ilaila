@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    init: true
     volumes:
-      - ./lifecycle:/setup/lifecycle
+      - workspace:/workspace
     command: sleep infinity
+volumes:
+  workspace:

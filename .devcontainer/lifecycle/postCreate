@@ -1,15 +1,19 @@
 #!/usr/bin/env pwsh
-. "$PSScriptRoot/libstate.ps1";
+. "$PSScriptRoot/lib";
 
 [string]$dest = "/workspace";
 Set-Location $dest;
 
-if (Test-State -Key "installed")
+[string]$currentFingerprint = Get-DependencyFingerprint;
+[string]$installedFingerprint = Get-State -Key "installedFingerprint";
+
+if (($null -ne $installedFingerprint) -and ($installedFingerprint -eq $currentFingerprint) -and ($currentFingerprint -ne ""))
 {
-    Write-Host "Install/dev:setup already done — skipping.";
+    Write-Host "Dependencies unchanged since last install — skipping.";
 }
 else
 {
+    bash -c "sudo chown -R node:node ."
     pnpm install --frozen-lockfile 2>&1 | Tee-Object -Variable installOutputLines;
     [int]$installExitCode = $LASTEXITCODE;
     [string]$installOutput = $installOutputLines | Out-String;
@@ -50,13 +54,5 @@ else
         throw "pnpm run dev:setup failed with exit code $setupExitCode.";
     }
 
-    Add-State -Key "installed" -Value $true;
-}
-
-pnpm supabase start;
-[int]$supabaseExitCode = $LASTEXITCODE;
-
-if ($supabaseExitCode -ne 0)
-{
-    throw "pnpm supabase start failed with exit code $supabaseExitCode.";
+    Set-State -Key "installedFingerprint" -Value $currentFingerprint;
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-[string]$script:stateFile = "/setup/state.json";
+[string]$script:stateFile = "/workspace/setup/state.json";
 
 function Ensure-SetupDir
 {
@@ -42,12 +42,40 @@ function Add-State
 
     if ($state.ContainsKey($key))
     {
-        Write-Warning "Key '$key' already exists with value '$($state[$key])' — use Update-State to overwrite.";
+        Write-Warning "Key '$key' already exists with value '$($state[$key])' — use Set-State to overwrite.";
         return;
     }
 
     $state[$key] = $value;
     Save-StateData $state;
+}
+
+function Set-State
+{
+    param(
+        [Parameter(Mandatory)][string]$key,
+        [Parameter(Mandatory)]$value
+    )
+
+    [hashtable]$state = Get-StateData;
+    $state[$key] = $value;
+    Save-StateData $state;
+}
+
+function Get-State
+{
+    param(
+        [Parameter(Mandatory)][string]$key
+    )
+
+    [hashtable]$state = Get-StateData;
+
+    if ($state.ContainsKey($key))
+    {
+        return $state[$key];
+    }
+
+    return $null;
 }
 
 function Test-State
@@ -58,4 +86,17 @@ function Test-State
 
     [hashtable]$state = Get-StateData;
     return ($state.ContainsKey($key)) -and ($state[$key] -eq $true);
+}
+
+function Get-DependencyFingerprint
+{
+    param(
+        [string[]]$Paths = @("pnpm-lock.yaml", "package.json")
+    )
+
+    [string[]]$hashes = $Paths | Where-Object { Test-Path $_ } | ForEach-Object {
+        (Get-FileHash -Algorithm SHA256 -Path $_).Hash;
+    };
+
+    return ($hashes -join "|");
 }

@@ -41,7 +41,7 @@
   "explorer.confirmDragAndDrop": false,
   "terminal.integrated.initialHint": false,
   "js/ts.updateImportsOnFileMove.enabled": "always",
-  "terminal.integrated.profiles.linux": {
+  "terminal.integrated.profiles.windows": {
     "Developer Bash": {
       "path": "bin/dbash.sh",
       "args": [],
@@ -53,5 +53,5 @@
       "icon": "terminal-powershell"
     }
   },
-  "terminal.integrated.defaultProfile.linux": "bash"
+  "terminal.integrated.defaultProfile.linux": "Developer Powershell"
 }
