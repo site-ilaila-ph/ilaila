@@ -2,28 +2,31 @@
 
 import z from "zod";
 import { toServerAction } from "@/lib/action/server";
-import { acquirePrismaClient } from "@/lib/infra";
-import type { Contract } from "@/prisma/contract.d";
-import type { PostgresClient } from "@internal/postgres/runtime";
+import { acquireDb } from "@/lib/live";
+import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllBusinesses, getBusinessById } from "@/app/business/services";
-import { createSessionReader } from "@/lib/session/server";
-import { acquireCacheManager, acquireNextJSCookieMap } from "@/lib/infra";
+import { acquireNextJSCookieMap } from "@/lib/live";
 
 async function requireCurrentUserId() {
-  const session = createSessionReader({ db: acquirePrismaClient(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
-  const user = await session.getSessionUser();
-  if (!user) throw new Error("Authentication required");
-  return user.id;
+  const sessionId = (await acquireNextJSCookieMap()).get("SESSION_TOKEN");
+  const session = sessionId
+    ? await acquireDb().session.findUnique({
+        where: { id: sessionId },
+        select: { userId: true, expiresAt: true },
+      })
+    : null;
+  if (!session || session.expiresAt <= new Date()) throw new Error("Authentication required");
+  return session.userId;
 }
 
 const businessActionDependencies = () => ({
-  db: acquirePrismaClient(),
+  db: acquireDb(),
 });
 
 export const getBusinessesAction = toServerAction({
   serviceFn: async (
     _params: Record<string, never>,
-    deps: { db: PostgresClient<Contract> } = businessActionDependencies(),
+    deps: { db: Pick<PrismaClient, "business"> } = businessActionDependencies(),
   ) => getAllBusinesses(deps.db),
   schema: z.object({}),
   dependencies: businessActionDependencies,
@@ -32,7 +35,7 @@ export const getBusinessesAction = toServerAction({
 export const getBusinessByIdAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: PostgresClient<Contract> } = businessActionDependencies(),
+    deps: { db: Pick<PrismaClient, "business"> } = businessActionDependencies(),
   ) => getBusinessById(id, deps.db),
   schema: z.string().min(1),
   dependencies: businessActionDependencies,
@@ -53,12 +56,12 @@ export const createReviewAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createReviewSchema>,
   ) => {
-    const db = acquirePrismaClient();
+    const db = acquireDb();
     const userId = await requireCurrentUserId();
     if (userId !== input.userId) throw new Error("You can only review as the signed-in user");
-    return await db.orm.Review.upsert({
+    return await db.review.upsert({
+      where: { userId_businessId: { userId: input.userId, businessId: input.businessId } },
       create: {
-        id: crypto.randomUUID(),
         userId: input.userId,
         businessId: input.businessId,
         text: input.text,
@@ -66,7 +69,6 @@ export const createReviewAction = toServerAction({
         service: input.service,
         ambiance: input.ambiance,
         value: input.value,
-        upvotes: 0,
       },
       update: {
         text: input.text,
@@ -88,9 +90,10 @@ const createBookmarkSchema = z.object({
 
 export const createBookmarkAction = toServerAction({
   serviceFn: async (input: z.infer<typeof createBookmarkSchema>) => {
-    const db = acquirePrismaClient();
-    return await db.orm.Bookmark.upsert({
-      create: { id: crypto.randomUUID(), userId: input.userId, businessId: input.businessId },
+    const db = acquireDb();
+    return await db.bookmark.upsert({
+      where: { userId_businessId: { userId: input.userId, businessId: input.businessId } },
+      create: { userId: input.userId, businessId: input.businessId },
       update: {},
     });
   },
@@ -104,11 +107,10 @@ const deleteBookmarkSchema = z.object({
 
 export const deleteBookmarkAction = toServerAction({
   serviceFn: async (input: z.infer<typeof deleteBookmarkSchema>) => {
-    const db = acquirePrismaClient();
-    const existing = await db.orm.Bookmark.where({ userId: input.userId, businessId: input.businessId }).first();
-    if (existing) {
-      await db.orm.Bookmark.where({ id: existing.id }).delete();
-    }
+    const db = acquireDb();
+    await db.bookmark.delete({
+      where: { userId_businessId: { userId: input.userId, businessId: input.businessId } },
+    });
   },
   schema: deleteBookmarkSchema,
 });
@@ -119,13 +121,12 @@ const upvoteReviewSchema = z.object({
 
 export const upvoteReviewAction = toServerAction({
   serviceFn: async ({ reviewId }: z.infer<typeof upvoteReviewSchema>) => {
-    const db = acquirePrismaClient();
+    const db = acquireDb();
     await requireCurrentUserId();
-    const rev = await db.orm.Review.where({ id: reviewId }).first();
-    if (rev) {
-      await db.orm.Review.where({ id: reviewId }).update({ upvotes: rev.upvotes + 1 });
-    }
-    return { success: true };
+    return await db.review.update({
+      where: { id: reviewId },
+      data: { upvotes: { increment: 1 } },
+    });
   },
   schema: upvoteReviewSchema,
 });

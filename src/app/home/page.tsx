@@ -57,10 +57,10 @@ export default function HomePage() {
           </Link>
           <div className="flex gap-3">
             <Link
-              href="/auth/sign-out"
+                href="/auth/sign-out"
               className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
             >
-              Mag-sign out
+              Sign Out
             </Link>
           </div>
         </div>
@@ -69,10 +69,10 @@ export default function HomePage() {
       <main className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-16 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">
-            Maligayang pagdating sa Ilaila
+            Welcome to Ilaila
           </h1>
           <p className="text-lg text-muted-foreground">
-            Tuklasin ang pamanang pagkain at mga negosyo ng San Pedro
+            Discover the heritage food and business ecosystem of San Pedro
           </p>
         </div>
 
@@ -82,9 +82,9 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">🏪</div>
-            <h2 className="mb-2 text-xl font-semibold">Tuklasin ang mga negosyo</h2>
+            <h2 className="mb-2 text-xl font-semibold">Discover Businesses</h2>
             <p className="text-sm text-muted-foreground">
-              Mag-browse ng mga lokal na negosyo at restawran sa San Pedro
+              Browse local businesses and restaurants in San Pedro
             </p>
           </Link>
 
@@ -93,9 +93,9 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">🍲</div>
-            <h2 className="mb-2 text-xl font-semibold">Mga pagkaing pamana</h2>
+            <h2 className="mb-2 text-xl font-semibold">Heritage Foods</h2>
             <p className="text-sm text-muted-foreground">
-              Alamin ang tungkol sa mga tradisyonal na pagkain at recipe
+              Learn about traditional foods and recipes
             </p>
           </Link>
 
@@ -104,9 +104,9 @@ export default function HomePage() {
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
             <div className="mb-4 text-3xl">📍</div>
-            <h2 className="mb-2 text-xl font-semibold">Tungkol sa San Pedro</h2>
+            <h2 className="mb-2 text-xl font-semibold">About San Pedro</h2>
             <p className="text-sm text-muted-foreground">
-              Tuklasin ang kasaysayan at kultura ng lugar
+              Discover the history and culture of the area
             </p>
           </Link>
         </div>
@@ -116,9 +116,9 @@ export default function HomePage() {
             {businesses.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Mga tampok na negosyo</h2>
+                  <h2 className="text-2xl font-bold">Featured Businesses</h2>
                   <Link href="/business/discovery" className="text-sm text-primary hover:underline">
-                    Tingnan lahat
+                    View all
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -146,9 +146,9 @@ export default function HomePage() {
             {foods.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Mga pagkaing pamana</h2>
+                  <h2 className="text-2xl font-bold">Heritage Foods</h2>
                   <Link href="/foods" className="text-sm text-primary hover:underline">
-                    Tingnan lahat
+                    View all
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -185,9 +185,9 @@ export default function HomePage() {
             {topRatedFoods.length > 0 && (
               <section className="mb-16">
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Pinakamataas ang rating na pagkain</h2>
+                  <h2 className="text-2xl font-bold">Top Rated Foods</h2>
                   <Link href="/foods" className="text-sm text-primary hover:underline">
-                    Tingnan lahat
+                    View all
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -232,22 +232,22 @@ export default function HomePage() {
         )}
 
         <section className="rounded-lg border border-border bg-card p-8 text-center">
-          <h2 className="mb-4 text-2xl font-bold">Gusto mo pa bang matuto?</h2>
+          <h2 className="mb-4 text-2xl font-bold">Want to learn more?</h2>
           <p className="mb-6 text-muted-foreground">
-            Bisitahin ang aming mga pahina upang higit pang makilala ang San Pedro at ang aming layunin
+            Visit our about pages to learn more about San Pedro and our mission
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/about/the-team"
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
-              Kilalanin ang koponan
+              Meet the Team
             </Link>
             <Link
               href="/about/the-website"
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
             >
-              Tungkol sa Ilaila
+              About Ilaila
             </Link>
           </div>
         </section>

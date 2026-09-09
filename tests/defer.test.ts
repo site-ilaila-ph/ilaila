@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { defer } from "@/lib/infra";
+import { defer } from "@/lib/live";
 
 const { after } = vi.hoisted(() => ({ after: vi.fn() }));
 vi.mock("next/server", () => ({ after }));

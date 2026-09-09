@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createAppReviewAction } from "@/app/app-reviews/actions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/inputs";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/lib/components/actions/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/lib/components/display/card";
+import { Input } from "@/lib/components/form/inputs";
+import { Label } from "@/lib/components/form/label";
 
 export default function SubmitAppReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,9 +70,9 @@ export default function SubmitAppReview() {
         </div>
 
         {submitted && (
-          <Card className="mb-8 border-emerald-200 bg-emerald-50">
+          <Card className="mb-8 border-green-200 bg-green-50">
             <CardContent className="py-4 text-center">
-              <p className="font-semibold text-emerald-700">
+              <p className="font-semibold text-green-700">
                 Thank you! Your review has been submitted and is pending approval.
               </p>
             </CardContent>

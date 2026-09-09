@@ -35,7 +35,7 @@ function Command({
 
 function CommandDialog({
   title = "Command Palette",
-  description = "Maghanap ng command na patatakbuhin...",
+  description = "Search for a command to run...",
   children,
   className,
   showCloseButton = false,

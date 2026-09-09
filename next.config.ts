@@ -5,10 +5,12 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: false,
   cleanDistDir: true,
-  turbopack: { root: import.meta.dirname },
-  watchOptions: {
-    pollIntervalMs: 20
-  }
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
+  turbopack: { root: import.meta.dirname }
 };
 
 export default nextConfig;

@@ -1,67 +1,128 @@
-import type { Contract } from "@/prisma/contract.d";
-import type { PostgresClient } from "@internal/postgres/runtime";
+import type { PrismaClient, Prisma } from "@/generated/prisma/client";
 
-export type FoodWithIncludes = any;
-export type FoodListItem = any;
+export type FoodWithIncludes = Prisma.FoodGetPayload<{
+  include: {
+    images: true;
+    tags: true;
+    businesses: {
+      include: {
+        business: {
+          include: {
+            images: true;
+            tags: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+export type FoodListItem = Prisma.FoodGetPayload<{
+  include: {
+    images: true;
+    tags: true;
+  };
+}>;
 
 export async function getAllFood(
-  db?: PostgresClient<Contract>,
+  db?: Pick<PrismaClient, "food">,
 ): Promise<FoodListItem[]> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
-  return await resolvedDb.orm.Food
-    .include("images")
-    .include("tags")
-    .orderBy((f) => f.name.asc())
-    .all();
+  return resolvedDb.food.findMany({
+    include: {
+      images: true,
+      tags: true,
+    },
+    orderBy: { name: "asc" },
+  });
 }
 
 export async function getFoodById(
   id: string,
-  db?: PostgresClient<Contract>,
+  db?: Pick<PrismaClient, "food">,
 ): Promise<FoodWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
-  return await resolvedDb.orm.Food
-    .where({ id })
-    .include("images")
-    .include("tags")
-    .include("businesses", (b) => b.include("business", (biz) => biz.include("images").include("tags")))
-    .first();
+  return resolvedDb.food.findUnique({
+    where: { id },
+    include: {
+      images: true,
+      tags: true,
+      businesses: {
+        include: {
+          business: {
+            include: {
+              images: true,
+              tags: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 export async function getFoodByName(
   name: string,
-  db?: PostgresClient<Contract>,
+  db?: Pick<PrismaClient, "food">,
 ): Promise<FoodWithIncludes | null> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
-  return await resolvedDb.orm.Food
-    .where((f) => f.name.ilike(`%${name}%`))
-    .include("images")
-    .include("tags")
-    .include("businesses", (b) => b.include("business", (biz) => biz.include("images").include("tags")))
-    .first();
+  return resolvedDb.food.findFirst({
+    where: {
+      name: {
+        contains: name,
+        mode: "insensitive",
+      },
+    },
+    include: {
+      images: true,
+      tags: true,
+      businesses: {
+        include: {
+          business: {
+            include: {
+              images: true,
+              tags: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }
 
 export async function getTopRatedFoods(
   limit: number = 3,
-  db?: PostgresClient<Contract>,
+  db?: Pick<PrismaClient, "food" | "businessFood" | "review">,
 ): Promise<(FoodListItem & { averageRating: number })[]> {
-  const resolvedDb = db ?? (await import("@/lib/infra")).acquirePrismaClient();
+  const resolvedDb = db ?? (await import("@/lib/live")).acquireDb();
 
-  const foods = await resolvedDb.orm.Food
-    .include("images")
-    .include("tags")
-    .include("businesses", (b) => b.include("business", (biz) => biz.include("reviews")))
-    .all();
+  // Get all foods with their associated businesses
+  const foods = await resolvedDb.food.findMany({
+    include: {
+      images: true,
+      tags: true,
+      businesses: {
+        include: {
+          business: {
+            include: {
+              reviews: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
+  // Calculate average rating for each food based on foodQuality ratings
   const foodsWithRatings = foods
-    .map((food: any) => {
-      const allReviews = (food.businesses || []).flatMap((bf: any) => bf.business?.reviews || []);
+    .map((food) => {
+      const allReviews = food.businesses.flatMap((bf) => bf.business.reviews);
       const averageRating =
         allReviews.length > 0
-          ? allReviews.reduce((sum: number, review: any) => sum + review.foodQuality, 0) /
+          ? allReviews.reduce((sum, review) => sum + review.foodQuality, 0) /
             allReviews.length
           : 0;
 
@@ -70,8 +131,8 @@ export async function getTopRatedFoods(
         averageRating,
       };
     })
-    .filter((food: any) => food.averageRating > 0)
-    .sort((a: any, b: any) => b.averageRating - a.averageRating)
+    .filter((food) => food.averageRating > 0) // Only include foods with reviews
+    .sort((a, b) => b.averageRating - a.averageRating)
     .slice(0, limit);
 
   return foodsWithRatings;

@@ -7,7 +7,7 @@ import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   return (
     <nav
-      aria-label="landas ng pag-navigate"
+      aria-label="breadcrumb"
       data-slot="breadcrumb"
       className={cn(className)}
       {...props}

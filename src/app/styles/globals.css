@@ -3,12 +3,9 @@
 @import "shadcn/tailwind.css";
 @import "./theme.css";
 
-/* Dark mode removed */
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-brand-deep: oklch(0.42 0.12 145);
-  --color-brand-accent: oklch(0.609 0.126 221.723);
-  --color-brand-muted: #405247;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);

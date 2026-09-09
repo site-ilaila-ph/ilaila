@@ -1,28 +1,18 @@
 import { SESSION_TOKEN_COOKIE_NAME } from "@/config/auth";
-import type { CookieMap, CacheManager } from "../infra";
-import type { Contract } from "@/prisma/contract.d";
-import type { PostgresClient } from "@internal/postgres/runtime";
+import { PrismaClient, User } from "@/generated/prisma/client";
+import { CookieMap, CacheManager } from "../live";
 
 export interface SessionReaderDependencies {
   cookieMap: CookieMap;
-  db: PostgresClient<Contract>;
+  db: PrismaClient;
   cache: CacheManager;
 }
 
 
 
-export interface SessionUser {
-  id: string;
-  email: string;
-  userName: string | null;
-  isAdmin: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 export interface SessionReader {
   getSessionId(): Promise<string | null>;
-  getSessionUser(): Promise<SessionUser | null>;
+  getSessionUser(): Promise<User | null>;
 }
 
 export function createSessionReader(deps: SessionReaderDependencies): SessionReader {
@@ -41,14 +31,11 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
       const userId = await cache?.cached({
         key: ["session", "via-id", sessionId],
         fn: async () => {
-          try {
-            const session = await db.orm.Session.where({ id: sessionId }).select("userId", "expiresAt").first();
-
-            if (!session || session.expiresAt <= new Date()) return null;
-            return session.userId;
-          } catch (error: any) {
-            return null;
-          }
+          const session = await db.session.findUnique({
+            where: { id: sessionId },
+            select: { userId: true },
+          });
+          return session?.userId ?? null;
         },
         ttlSeconds: 60 * 15,
       });
@@ -57,7 +44,7 @@ export function createSessionReader(deps: SessionReaderDependencies): SessionRea
 
       return await cache.cached({
         key: ["user", "via-id", userId],
-        fn: () => db.orm.User.where({ id: userId }).first(),
+        fn: () => db.user.findUnique({ where: { id: userId } }),
         ttlSeconds: 60 * 5,
       });
     },

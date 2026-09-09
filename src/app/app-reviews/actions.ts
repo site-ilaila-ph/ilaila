@@ -1,7 +1,7 @@
 "use server";
 
 import { toServerAction } from "@/lib/action/server";
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDb } from "@/lib/live";
 import z from "zod";
 
 const createAppReviewSchema = z.object({
@@ -14,16 +14,17 @@ const createAppReviewSchema = z.object({
 
 export const createAppReviewAction = toServerAction({
   serviceFn: async (input: z.infer<typeof createAppReviewSchema>) => {
-    const db = acquirePrismaClient();
+    const db = acquireDb();
     
-    return await db.orm.AppReview.create({
-      id: crypto.randomUUID(),
-      userId: input.userId || null,
-      userName: input.userName || null,
-      email: input.email || null,
-      rating: input.rating,
-      text: input.text,
-      isApproved: false,
+    return await db.appReview.create({
+      data: {
+        userId: input.userId || null,
+        userName: input.userName || null,
+        email: input.email || null,
+        rating: input.rating,
+        text: input.text,
+        isApproved: false,
+      },
     });
   },
   schema: createAppReviewSchema,
@@ -36,19 +37,20 @@ const updateAppReviewStatusSchema = z.object({
 
 export const updateAppReviewStatusAction = toServerAction({
   serviceFn: async (input: z.infer<typeof updateAppReviewStatusSchema>) => {
-    const db = acquirePrismaClient();
+    const db = acquireDb();
     
-    await db.orm.AppReview.where({ id: input.id }).update({ isApproved: input.isApproved });
-    return { success: true };
+    return await db.appReview.update({
+      where: { id: input.id },
+      data: { isApproved: input.isApproved },
+    });
   },
   schema: updateAppReviewStatusSchema,
 });
 
 export const deleteAppReviewAction = toServerAction({
   serviceFn: async (id: string) => {
-    const db = acquirePrismaClient();
-    await db.orm.AppReview.where({ id }).delete();
-    return { success: true };
+    const db = acquireDb();
+    return await db.appReview.delete({ where: { id } });
   },
   schema: z.string(),
 });

@@ -30,6 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# env files (can opt-in for committing if needed)
+.env*
+!.env.development
+
 # vercel
 .vercel
 
@@ -40,12 +44,9 @@ next-env.d.ts
 .pnpm-store
 
 # custom
-.tmp
 .local/
 
 src/generated/
 dev/tmp
 .eslintcache
 .prisma-dev-lock
-node_modules/
-dist/

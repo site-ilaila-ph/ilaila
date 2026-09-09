@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, ExternalLink, MapPin, Star, ThumbsUp } from "lucide-react";
 import { createReviewAction, getBusinessByIdAction, getBusinessesAction, upvoteReviewAction } from "@/app/business/actions";
 import type { BusinessListItem } from "@/app/business/services";
 import type { SerializableBusinessWithIncludes } from "@/app/business/services";
 import { useSession } from "@/lib/session/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/lib/components/actions/button";
 
 export default function BusinessProfilePage({
   params,
@@ -117,6 +116,11 @@ export default function BusinessProfilePage({
   const menuTags = ["All", ...new Set(business.menuItems.flatMap((item) => item.dietaryTags))];
   const visibleMenu = [...(menuFilter === "All" ? business.menuItems : business.menuItems.filter((item) => item.dietaryTags.includes(menuFilter)))].sort((a, b) => menuSort === "price-low" ? Number(a.price) - Number(b.price) : menuSort === "price-high" ? Number(b.price) - Number(a.price) : a.name.localeCompare(b.name));
   const businessId = business.id;
+  const coverImage = business.images.find((image) => image.isCover && image.url) ?? business.images[0];
+  const galleryImages = business.images.filter((image) => image.url && !(image.isCover && business.images.length > 1));
+  const mapEmbedUrl = business.latitude && business.longitude
+    ? `https://www.google.com/maps?q=${business.latitude},${business.longitude}&z=16&output=embed`
+    : `https://www.google.com/maps?q=${encodeURIComponent(business.address)}&output=embed`;
 
   async function submitReview(event: React.FormEvent) {
     event.preventDefault();
@@ -130,8 +134,8 @@ export default function BusinessProfilePage({
   }
 
   return (
-    <main className="min-h-screen bg-brand-bg text-foreground">
-      <nav className="border-b border-brand-border bg-brand-bg/90 backdrop-blur">
+    <main className="min-h-screen bg-[#f7f8f4] text-foreground">
+      <nav className="border-b border-[#dfe5dc] bg-[#f7f8f4]/90 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <Link
             href="/home"
@@ -146,19 +150,23 @@ export default function BusinessProfilePage({
       </nav>
 
       <article className="mx-auto max-w-7xl px-6 py-12">
-        <header className="mb-12 border-b border-brand-border pb-10">
-          <div className="mb-8 flex min-h-64 items-end bg-brand-deep p-7 text-white sm:p-10"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-muted">San Pedro, Laguna</p><h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">{business.name}</h1></div></div>
+        <header className="mb-12 border-b border-[#dfe5dc] pb-10">
+          <div className="relative mb-8 flex min-h-64 items-end overflow-hidden bg-[#234d43] p-7 text-white sm:p-10">
+            {coverImage?.url && <img src={coverImage.url} alt={`${business.name} cover`} className="absolute inset-0 size-full object-cover opacity-75" />}
+            <div className="absolute inset-0 bg-[#102f29]/45" />
+            <div className="relative"><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#d5e8d8]">San Pedro, Laguna</p><h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">{business.name}</h1></div>
+          </div>
           <p className="mb-7 max-w-3xl text-lg leading-relaxed text-muted-foreground">{business.description}</p>
           
           <div className="flex flex-wrap gap-4">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Rating</p>
-              <p className="flex items-center gap-2 text-2xl font-bold text-primary"><Star className="size-5 fill-brand-accent text-brand-accent" />{averageRating}/5</p>
+              <p className="flex items-center gap-2 text-2xl font-bold text-primary"><Star className="size-5 fill-[#e47b45] text-[#e47b45]" />{averageRating}/5</p>
               <p className="text-xs text-muted-foreground">({business.reviews.length} reviews)</p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Location</p>
-              <p className="text-lg font-semibold">{business.address}</p><a className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline" href={`https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Get directions <ExternalLink className="size-3" /></a>
+              <p className="text-lg font-semibold">{business.address}</p><a className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`} target="_blank" rel="noreferrer">Get directions <ExternalLink className="size-3" /></a>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Hours</p>
@@ -181,7 +189,7 @@ export default function BusinessProfilePage({
           {business.reviews.length > 0 && (
             <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-4">
               {metricRatings.map(([label, total]) => (
-                <div key={label as string} className="border-l-2 border-brand-accent pl-3">
+                <div key={label as string} className="border-l-2 border-[#e47b45] pl-3">
                   <p className="text-xs text-muted-foreground">{label as string}</p>
                   <p className="mt-1 font-semibold">{((total as number) / business.reviews.length).toFixed(1)} / 5</p>
                 </div>
@@ -298,23 +306,29 @@ export default function BusinessProfilePage({
                 </dl>
               </div>
 
-              {business.images && business.images.length > 0 && (
+              {galleryImages.length > 0 && (
                 <div className="rounded-lg border border-border bg-card p-6">
                   <h3 className="mb-4 text-lg font-semibold">Gallery</h3>
-                  <div className="space-y-2">
-                    {business.images.map((image) => (
-                      <div key={image.id} className="overflow-hidden rounded-lg border border-border bg-muted">
-                        {image.url ? (
-                          <Image src={image.url} alt={image.description} width={640} height={360} unoptimized className="aspect-video w-full object-cover" />
-                        ) : (
-                          <div className="p-3 text-sm text-muted-foreground">{image.description}</div>
-                        )}
-                      </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {galleryImages.map((image) => (
+                      <img key={image.id} src={image.url ?? ""} alt={`${business.name} gallery`} className="aspect-video w-full rounded-md object-cover" />
                     ))}
                   </div>
                 </div>
               )}
-              <div className="overflow-hidden border border-border bg-white"><h3 className="p-6 pb-3 text-lg font-semibold">Find it on the map</h3><iframe title={`Map showing ${business.name}`} className="h-52 w-full border-0" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${business.longitude - 0.01}%2C${business.latitude - 0.01}%2C${business.longitude + 0.01}%2C${business.latitude + 0.01}&layer=mapnik&marker=${business.latitude}%2C${business.longitude}`} /><a className="block p-4 text-sm text-primary hover:underline" href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Open directions</a></div>
+              <div className="border border-border bg-white p-6">
+                <h3 className="mb-3 text-lg font-semibold">Find it on the map</h3>
+                <iframe
+                  title={`${business.name} location map`}
+                  src={mapEmbedUrl}
+                  className="h-56 w-full rounded-md border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+                <a className="mt-3 block text-sm text-primary hover:underline" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(business.address)}`} target="_blank" rel="noreferrer">
+                  Open in Google Maps <ExternalLink className="ml-1 inline size-3" />
+                </a>
+              </div>
               {relatedBusinesses.length > 0 && <div className="border border-border bg-white p-6"><h3 className="mb-4 text-lg font-semibold">You may also like</h3><div className="space-y-4">{relatedBusinesses.map((item) => <Link key={item.id} href={`/business/${encodeURIComponent(item.name.toLowerCase().replaceAll(" ", "-"))}`} className="group block"><p className="font-semibold group-hover:text-primary">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p></Link>)}</div></div>}
             </div>
           </aside>

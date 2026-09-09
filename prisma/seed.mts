@@ -1,10 +1,24 @@
-import { hash } from "@/app/(unauthenticated-only)/auth/lib/password";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { hash } from "@/app/auth/lib/password";
+import 'dotenv/config'; // Loads default .env
+import { config } from 'dotenv';
+import path from 'path';
+
+// load local .env if not in production.
+if (process.env.NODE_ENV !== "production") {
+  config({ path: path.join(path.dirname(import.meta.dirname), '.env.development') });
+}
 
 async function main() {
-  const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
-  const client = new PrismaClient({ adapter });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  const client = new PrismaClient({
+    adapter: new PrismaPg({ connectionString }),
+  });
 
   console.log("Cleaning existing database records...");
   await client.review.deleteMany();

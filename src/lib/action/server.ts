@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
 import type { AnySerializable } from "../serializable";
-import type {
-  ActionFailure,
-  ActionResponse,
-  ActionValidationErrors,
-} from "../common-server-action-protocol";
+import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
 
 // --- Service & action types -------------------------------------------------
 
@@ -13,7 +9,7 @@ type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
 type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
   params: TParams,
-  deps: TDeps,
+  deps: TDeps
 ) => Promise<TReturn>;
 
 type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>;
@@ -51,9 +47,7 @@ function createConstraintApi(violations: ConstraintViolation[]): ConstraintApi {
   };
 }
 
-function violationsToFieldErrors(
-  violations: ConstraintViolation[],
-): ActionValidationErrors {
+function violationsToFieldErrors(violations: ConstraintViolation[]): ActionValidationErrors {
   const fieldErrors: ActionValidationErrors = {};
   for (const violation of violations) {
     if (violation.field === undefined) continue;
@@ -69,13 +63,10 @@ function violationsToGlobalErrors(violations: ConstraintViolation[]): string[] {
 type ServerActionBusinessConstraint<TParams, TDeps = any> = (
   params: TParams,
   deps: TDeps,
-  api: ConstraintApi,
+  api: ConstraintApi
 ) => void | Promise<void>;
 
-type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<
-  any,
-  any
->;
+type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<any, any>;
 
 interface ServiceFunctionToServerActionOptions<
   TFn extends AsyncServiceFunction,
@@ -88,11 +79,10 @@ interface ServiceFunctionToServerActionOptions<
   dependencies?: TDeps | (() => TDeps | Promise<TDeps>);
 }
 
-type AnyServiceFunctionToServerActionOptions =
-  ServiceFunctionToServerActionOptions<
-    AnyAsyncServiceFunction,
-    AnyParameterSchema
-  >;
+type AnyServiceFunctionToServerActionOptions = ServiceFunctionToServerActionOptions<
+  AnyAsyncServiceFunction,
+  AnyParameterSchema
+>;
 
 interface FunctionCoercedServerAction<
   TFn extends AnyAsyncServiceFunction,
@@ -110,37 +100,6 @@ type InferFunctionCoercedServerActionResultData<
   TFn extends AnyFunctionCoercedServerAction,
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
 
-function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
-  if (error && typeof error === "object" && "code" in error) {
-    const code = (error as any).code;
-    if (code === "P2002" || code === "23505") {
-      return {
-        success: false,
-        type: "insensitive",
-        hint: "unique-constraint",
-        message: "This value is already in use.",
-      };
-    }
-
-    if (code === "P2025") {
-      return {
-        success: false,
-        type: "insensitive",
-        hint: "record-not-found",
-        message: "The requested record could not be found.",
-      };
-    }
-
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-request",
-    };
-  }
-
-  return null;
-}
-
 // --- Implementation ----------------------------------------------------------
 
 function toServerAction<
@@ -148,13 +107,11 @@ function toServerAction<
   TSchema extends z.ZodType<Parameters<TFn>[0]>,
   TDeps = Parameters<TFn>[1],
 >(
-  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>,
+  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>
 ): FunctionCoercedServerAction<TFn, TSchema> {
   const { serviceFn, schema, constraints = [], dependencies } = options;
 
-  return async (
-    input: z.input<TSchema>,
-  ): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
+  return async (input: z.input<TSchema>): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
     const parsed = await schema.safeParseAsync(input);
 
     if (!parsed.success) {
@@ -167,34 +124,34 @@ function toServerAction<
 
     const validParams = parsed.data as Parameters<TFn>[0];
 
+    const resolvedDeps: TDeps | undefined =
+      typeof dependencies === "function"
+        ? await (dependencies as () => TDeps | Promise<TDeps>)()
+        : dependencies;
+
+    const violations: ConstraintViolation[] = [];
+    const constraintApi = createConstraintApi(violations);
+
     try {
-      const resolvedDeps: TDeps | undefined =
-        typeof dependencies === "function"
-          ? await (dependencies as () => TDeps | Promise<TDeps>)()
-          : dependencies;
-
-      const violations: ConstraintViolation[] = [];
-      const constraintApi = createConstraintApi(violations);
-
-      try {
-        for (const constraint of constraints) {
-          await constraint(validParams, resolvedDeps as TDeps, constraintApi);
-        }
-      } catch (error: any) {
-        if (!(error instanceof ConstraintFailSignal)) {
-          throw error;
-        }
+      for (const constraint of constraints) {
+        await constraint(validParams, resolvedDeps as TDeps, constraintApi);
       }
-
-      if (violations.length > 0) {
-        return {
-          success: false,
-          type: "constraint",
-          fieldErrors: violationsToFieldErrors(violations),
-          globalErrors: violationsToGlobalErrors(violations),
-        };
+    } catch (error: any) {
+      if (!(error instanceof ConstraintFailSignal)) {
+        throw error;
       }
+    }
 
+    if (violations.length > 0) {
+      return {
+        success: false,
+        type: "constraint",
+        fieldErrors: violationsToFieldErrors(violations),
+        globalErrors: violationsToGlobalErrors(violations),
+      };
+    }
+
+    try {
       const data = await serviceFn(validParams, resolvedDeps);
 
       return {
@@ -202,10 +159,6 @@ function toServerAction<
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
-      console.error(error);
-      const prismaFailure = prismaErrorToActionFailure(error);
-      if (prismaFailure) return prismaFailure;
-
       if (!(error instanceof ServerError)) {
         return {
           success: false,
@@ -244,12 +197,7 @@ class ServerError extends Error {
   public readonly hint?: string;
   public readonly sensitive: boolean;
 
-  public constructor({
-    domain,
-    hint,
-    message,
-    sensitive = true,
-  }: ServerErrorOptions) {
+  public constructor({ domain, hint, message, sensitive = true }: ServerErrorOptions) {
     super(message);
 
     this.name = "ServerError";

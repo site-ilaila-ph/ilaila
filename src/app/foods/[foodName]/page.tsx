@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { getFoodItemByNameAction } from "@/app/foods/actions";
 import type { FoodWithIncludes } from "@/app/foods/services";
 
@@ -127,11 +126,9 @@ export default function SingleFoodPage({
                       key={image.id}
                       className="overflow-hidden rounded-lg border border-border bg-muted"
                     >
-                      {image.url ? (
-                        <Image src={image.url} alt={image.description} width={640} height={360} unoptimized className="aspect-video w-full object-cover" />
-                      ) : (
-                        <div className="aspect-video bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center"><span className="text-sm text-muted-foreground">{image.description}</span></div>
-                      )}
+                      <div className="aspect-video bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                        <span className="text-sm text-muted-foreground">{image.description}</span>
+                      </div>
                     </div>
                   ))}
                 </div>

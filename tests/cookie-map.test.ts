@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { acquireNextJSCookieMap } from "@/lib/infra";
+import { acquireNextJSCookieMap } from "@/lib/live";
 
 const { cookieStore, cookies } = vi.hoisted(() => {
   const store = { get: vi.fn(), has: vi.fn(), set: vi.fn(), delete: vi.fn() };
