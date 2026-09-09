@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { acquireDb, acquireNextJSCookieMap } from "@/lib/live";
 import {
   BarChart3,
   ClipboardList,
@@ -9,7 +11,19 @@ import {
   Users,
 } from "lucide-react";
 
-export default function ManagementLayout({ children }: { children: React.ReactNode }) {
+export default async function ManagementLayout({ children }: { children: React.ReactNode }) {
+  const sessionId = (await acquireNextJSCookieMap()).get("SESSION_TOKEN");
+  const session = sessionId
+    ? await acquireDb().session.findUnique({
+        where: { id: sessionId },
+        include: { user: true },
+      })
+    : null;
+  const user = session && session.expiresAt > new Date() ? session.user : null;
+
+  if (!user) redirect("/landing");
+  if (!user.isAdmin) redirect("/home");
+
   return (
     <div className="min-h-screen bg-[#eef4ff] text-slate-800">
       <div className="mx-auto flex min-h-screen max-w-[1600px] gap-5 p-4 lg:p-6">

@@ -3,7 +3,7 @@ import {
   BUSINESS_IMAGE_LIMIT,
   uploadBusinessImages,
   validateBusinessImageFiles,
-} from "@/app/(session-gated)/(admin-only)/management/business-image-upload";
+} from "@/app/management/business-image-upload";
 
 describe("business image upload rules", () => {
   it("rejects more than 10 files", () => {

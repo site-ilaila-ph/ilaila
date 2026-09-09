@@ -28,11 +28,6 @@ export const signIn = async ({
 
   const cookieStore = await cookies();
 
-  // if the device already has a session.
-  if (cookieStore.has(SESSION_TOKEN_COOKIE_NAME)) {
-    return; // no need to do anything, user is already authenticated.
-  }
-
   if (!(await verify(password, user.passwordHash))) {
     throw new ServerError({
       domain: "authentication",
@@ -40,6 +35,12 @@ export const signIn = async ({
       message: "Incorrect credentials.",
       sensitive: false,
     });
+  }
+
+  const existingSessionId = cookieStore.get(SESSION_TOKEN_COOKIE_NAME)?.value;
+  if (existingSessionId) {
+    await db.session.deleteMany({ where: { id: existingSessionId } });
+    await acquireCacheManager().invalidate({ key: ["session", "via-id", existingSessionId] });
   }
 
   // issue a session after verification.

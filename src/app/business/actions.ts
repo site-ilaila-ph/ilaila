@@ -5,14 +5,18 @@ import { toServerAction } from "@/lib/action/server";
 import { acquireDb } from "@/lib/live";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { getAllBusinesses, getBusinessById } from "@/app/business/services";
-import { createSessionReader } from "@/lib/session/server";
-import { acquireCacheManager, acquireNextJSCookieMap } from "@/lib/live";
+import { acquireNextJSCookieMap } from "@/lib/live";
 
 async function requireCurrentUserId() {
-  const session = createSessionReader({ db: acquireDb(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
-  const user = await session.getSessionUser();
-  if (!user) throw new Error("Authentication required");
-  return user.id;
+  const sessionId = (await acquireNextJSCookieMap()).get("SESSION_TOKEN");
+  const session = sessionId
+    ? await acquireDb().session.findUnique({
+        where: { id: sessionId },
+        select: { userId: true, expiresAt: true },
+      })
+    : null;
+  if (!session || session.expiresAt <= new Date()) throw new Error("Authentication required");
+  return session.userId;
 }
 
 const businessActionDependencies = () => ({

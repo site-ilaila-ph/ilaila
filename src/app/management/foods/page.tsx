@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllFoodsForManagement } from "@/app/management/services";
+import { getAllBusinessesForManagement, getAllFoodsForManagement } from "@/app/management/services";
 import {
   createFoodAction,
   updateFoodAction,
@@ -25,6 +25,7 @@ interface Food {
 
 export default function ManageFoods() {
   const [foods, setFoods] = useState<Food[]>([]);
+  const [businesses, setBusinesses] = useState<{ id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export default function ManageFoods() {
     recipe: "",
     culturalSignificance: "",
     isHeritage: true,
+    businessId: "",
   });
 
   useEffect(() => {
@@ -44,8 +46,12 @@ export default function ManageFoods() {
 
   async function loadFoods() {
     try {
-      const data = await getAllFoodsForManagement();
-      setFoods(data as Food[]);
+      const [foodData, businessData] = await Promise.all([
+        getAllFoodsForManagement(),
+        getAllBusinessesForManagement(),
+      ]);
+      setFoods(foodData as Food[]);
+      setBusinesses(businessData.map((business) => ({ id: business.id, name: business.name })));
     } catch (error) {
       console.error("Failed to load foods:", error);
     } finally {
@@ -57,9 +63,11 @@ export default function ManageFoods() {
     e.preventDefault();
     try {
       if (editingId) {
-        await updateFoodAction({ id: editingId, ...formData });
+        const result = await updateFoodAction({ id: editingId, ...formData });
+        if (!result.success) throw new Error("Food could not be updated. Check your admin session.");
       } else {
-        await createFoodAction(formData);
+        const result = await createFoodAction(formData);
+        if (!result.success) throw new Error("Food could not be created. Check your admin session.");
       }
       resetForm();
       await loadFoods();
@@ -88,6 +96,7 @@ export default function ManageFoods() {
       recipe: "",
       culturalSignificance: "",
       isHeritage: true,
+      businessId: "",
     });
     setEditingId(null);
     setShowForm(false);
@@ -147,6 +156,21 @@ export default function ManageFoods() {
                     rows={2}
                     required
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="businessId">Business</Label>
+                  <select
+                    id="businessId"
+                    value={formData.businessId}
+                    onChange={(e) => setFormData({ ...formData, businessId: e.target.value })}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2"
+                  >
+                    <option value="">Not associated with a business</option>
+                    {businesses.map((business) => (
+                      <option key={business.id} value={business.id}>{business.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -250,6 +274,7 @@ export default function ManageFoods() {
                           recipe: "",
                           culturalSignificance: "",
                           isHeritage: food.isHeritage,
+                          businessId: "",
                         });
                         setShowForm(true);
                       }}

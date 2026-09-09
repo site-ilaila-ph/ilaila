@@ -8,7 +8,6 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { acquireNextJSCookieMap, type CookieMap } from "./framework/cookies";
 import defer from "./framework/defer";
 import { createStorageManager, type StorageManager } from "./storage/common";
-import devStorageFactory from "./storage/dev";
 import liveStorageFactory from "./storage/live";
 import { PrismaPg } from "@prisma/adapter-pg";
 
@@ -34,11 +33,12 @@ export function acquirePrismaClient() {
 }
 
 export function acquireStorageManager(): StorageManager {
-    globalForInfra.storageManager = createStorageManager({
-        layer:
-            process.env.NODE_ENV !== "production" && !process.env.BLOB_READ_WRITE_TOKEN
-                ? devStorageFactory()
-                : liveStorageFactory(),
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        throw new Error("BLOB_READ_WRITE_TOKEN is not set. Persistent image storage is required.");
+    }
+
+    globalForInfra.storageManager ??= createStorageManager({
+        layer: liveStorageFactory(),
     });
 
     return globalForInfra.storageManager;

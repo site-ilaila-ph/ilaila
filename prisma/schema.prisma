@@ -89,6 +89,7 @@ model BusinessImage {
   businessId  String
   description String
   url         String?
+  isCover     Boolean  @default(false)
   business    Business @relation(fields: [businessId], references: [id])
 }
 

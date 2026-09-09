@@ -257,94 +257,6 @@ export interface StorageLayer {
   list(options?: Parameters<typeof list>[0]): Promise<ListBlobResult>;
 }
 
-// --- In-memory layer (dev/test without live Vercel Blob credentials) ---
-
-function createMemoryStorage(): StorageLayer {
-  interface Entry {
-    url: string;
-    pathname: string;
-    size: number;
-    uploadedAt: Date;
-    contentType?: string;
-    body: Uint8Array;
-  }
-  const store = new Map<string, Entry>();
-
-  async function toBytes(
-    fileOrBody: string | File | Blob | ArrayBuffer | ReadableStream
-  ): Promise<Uint8Array> {
-    if (typeof fileOrBody === "string") return new TextEncoder().encode(fileOrBody);
-    if (fileOrBody instanceof ArrayBuffer) return new Uint8Array(fileOrBody);
-    if (fileOrBody instanceof Blob) return new Uint8Array(await fileOrBody.arrayBuffer());
-    // ReadableStream isn't supported by this in-memory mock; store empty body.
-    return new Uint8Array(0);
-  }
-
-  return {
-    async upload(key, fileOrBody, options) {
-      const body = await toBytes(fileOrBody);
-      const entry: Entry = {
-        url: `https://memory-storage.local/${key}`,
-        pathname: key,
-        size: body.length,
-        uploadedAt: new Date(),
-        contentType: options?.contentType,
-        body,
-      };
-      store.set(key, entry);
-
-      return {
-        url: entry.url,
-        downloadUrl: entry.url,
-        pathname: entry.pathname,
-        contentType: entry.contentType ?? "application/octet-stream",
-        contentDisposition: `attachment; filename="${key}"`,
-        etag: "memory-etag",
-      };
-    },
-
-    async get(key) {
-      const item = store.get(key);
-      if (!item) return null;
-
-      return {
-        url: item.url,
-        downloadUrl: item.url,
-        pathname: item.pathname,
-        size: item.size,
-        uploadedAt: item.uploadedAt,
-        contentType: item.contentType ?? "application/octet-stream",
-        contentDisposition: `attachment; filename="${key}"`,
-        cacheControl: "max-age=0",
-        etag: "memory-etag",
-      };
-    },
-
-    async delete(key) {
-      store.delete(key);
-    },
-
-    async list(options) {
-      const prefix = options?.prefix;
-      const entries = Array.from(store.values()).filter(
-        (item) => !prefix || item.pathname.startsWith(prefix)
-      );
-
-      return {
-        blobs: entries.map((item) => ({
-          url: item.url,
-          downloadUrl: item.url,
-          pathname: item.pathname,
-          size: item.size,
-          uploadedAt: item.uploadedAt,
-          etag: "memory-etag",
-        })),
-        hasMore: false,
-      };
-    },
-  };
-}
-
 // --- Vercel Blob layer ---------------------------------------------------
 
 function createVercelBlobStorage(): StorageLayer {
@@ -382,9 +294,11 @@ export interface StorageManager {
 }
 
 export function acquireStorageManager(): StorageManager {
-  const useMemory = process.env.NODE_ENV !== "production" && !process.env.BLOB_READ_WRITE_TOKEN;
-  const layer = useMemory ? createMemoryStorage() : createVercelBlobStorage();
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error("BLOB_READ_WRITE_TOKEN is not set. Persistent image storage is required.");
+  }
 
+  const layer = createVercelBlobStorage();
   const formatKey = (key: StorageKey) => joinKey(key, "/");
 
   return {

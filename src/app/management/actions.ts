@@ -1,7 +1,7 @@
 "use server";
 
-import { toServerAction } from "@/lib/action/server";
-import { acquireDb } from "@/lib/live";
+import { ServerError, toServerAction } from "@/lib/action/server";
+import { acquireDb, acquireNextJSCookieMap } from "@/lib/live";
 import z from "zod";
 import type { PrismaClient } from "@/generated/prisma/client";
 
@@ -9,17 +9,41 @@ const adminActionDependencies = () => ({
   db: acquireDb(),
 });
 
+async function requireAdminUser() {
+  const cookieMap = await acquireNextJSCookieMap();
+  const sessionId = cookieMap.get("SESSION_TOKEN");
+  const session = sessionId
+    ? await acquireDb().session.findUnique({
+        where: { id: sessionId },
+        include: { user: true },
+      })
+    : null;
+
+  if (!session || session.expiresAt <= new Date() || !session.user.isAdmin) {
+    throw new ServerError({
+      domain: "authorization",
+      hint: "admin-required",
+      message: "Administrator access is required.",
+      sensitive: false,
+    });
+  }
+
+  return session.user;
+}
+
 // ============ BUSINESS MANAGEMENT ============
 
 const createBusinessSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   history: z.string().optional(),
-  address: z.string().min(1),
-  latitude: z.number(),
-  longitude: z.number(),
+  address: z.string().trim().min(5),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   hours: z.string().min(1),
   tags: z.array(z.string()).optional(),
+  coverImageUrl: z.string().min(1).optional(),
+  galleryImageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const createBusinessAction = toServerAction({
@@ -28,6 +52,7 @@ export const createBusinessAction = toServerAction({
     deps: { db: Pick<PrismaClient, "business" | "businessTag"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    const user = await requireAdminUser();
     
     const business = await db.business.create({
       data: {
@@ -35,10 +60,16 @@ export const createBusinessAction = toServerAction({
         description: input.description,
         history: input.history,
         address: input.address,
-        latitude: input.latitude,
-        longitude: input.longitude,
+        latitude: input.latitude ?? 14.3595,
+        longitude: input.longitude ?? 121.0473,
         hours: input.hours,
-        createdById: "system", // Will be updated with actual user ID from session
+        createdById: user.id,
+        images: input.coverImageUrl || input.galleryImageUrls?.length
+          ? { create: [
+              ...(input.coverImageUrl ? [{ url: input.coverImageUrl, description: "Cover image", isCover: true }] : []),
+              ...(input.galleryImageUrls ?? []).map((url) => ({ url, description: "Gallery image", isCover: false })),
+            ] }
+          : undefined,
       },
     });
 
@@ -63,23 +94,26 @@ const updateBusinessSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
   history: z.string().optional(),
-  address: z.string().min(1).optional(),
+  address: z.string().trim().min(5).optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   hours: z.string().min(1).optional(),
   isPublished: z.boolean().optional(),
+  coverImageUrl: z.string().min(1).optional(),
+  galleryImageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const updateBusinessAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof updateBusinessSchema>,
-    deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "business" | "businessImage"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     
     const { id, ...data } = input;
     
-    return await db.business.update({
+    const updatedBusiness = await db.business.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -92,6 +126,20 @@ export const updateBusinessAction = toServerAction({
         ...(data.isPublished !== undefined && { isPublished: data.isPublished }),
       },
     });
+
+    if (data.coverImageUrl || data.galleryImageUrls?.length) {
+      if (data.coverImageUrl) {
+        await db.businessImage.updateMany({ where: { businessId: id }, data: { isCover: false } });
+      }
+      await db.businessImage.createMany({
+        data: [
+          ...(data.coverImageUrl ? [{ businessId: id, url: data.coverImageUrl, description: "Cover image", isCover: true }] : []),
+          ...(data.galleryImageUrls ?? []).map((url) => ({ businessId: id, url, description: "Gallery image", isCover: false })),
+        ],
+      });
+    }
+
+    return updatedBusiness;
   },
   schema: updateBusinessSchema,
   dependencies: adminActionDependencies,
@@ -100,10 +148,22 @@ export const updateBusinessAction = toServerAction({
 export const deleteBusinessAction = toServerAction({
   serviceFn: async (
     id: string,
-    deps: { db: Pick<PrismaClient, "business"> } = adminActionDependencies(),
+    deps: { db: PrismaClient } = adminActionDependencies(),
   ) => {
     const db = deps.db;
-    return await db.business.delete({ where: { id } });
+    await requireAdminUser();
+
+    await db.$transaction([
+      db.businessImage.deleteMany({ where: { businessId: id } }),
+      db.businessTag.deleteMany({ where: { businessId: id } }),
+      db.menuItem.deleteMany({ where: { businessId: id } }),
+      db.businessFood.deleteMany({ where: { businessId: id } }),
+      db.review.deleteMany({ where: { businessId: id } }),
+      db.bookmark.deleteMany({ where: { businessId: id } }),
+      db.business.delete({ where: { id } }),
+    ]);
+
+    return { id };
   },
   schema: z.string(),
   dependencies: adminActionDependencies,
@@ -119,15 +179,17 @@ const createFoodSchema = z.object({
   recipe: z.string().min(1),
   culturalSignificance: z.string().min(1),
   isHeritage: z.boolean().default(true),
+  businessId: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
 
 export const createFoodAction = toServerAction({
   serviceFn: async (
     input: z.infer<typeof createFoodSchema>,
-    deps: { db: Pick<PrismaClient, "food" | "foodTag"> } = adminActionDependencies(),
+    deps: { db: Pick<PrismaClient, "food" | "foodTag" | "businessFood"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     
     const food = await db.food.create({
       data: {
@@ -149,6 +211,10 @@ export const createFoodAction = toServerAction({
           })
         )
       );
+    }
+
+    if (input.businessId) {
+      await db.businessFood.create({ data: { businessId: input.businessId, foodId: food.id } });
     }
 
     return food;
@@ -174,6 +240,7 @@ export const updateFoodAction = toServerAction({
     deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     
     const { id, ...data } = input;
     
@@ -200,6 +267,7 @@ export const deleteFoodAction = toServerAction({
     deps: { db: Pick<PrismaClient, "food"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     return await db.food.delete({ where: { id } });
   },
   schema: z.string(),
@@ -214,6 +282,7 @@ export const deleteReviewAction = toServerAction({
     deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     return await db.review.delete({ where: { id } });
   },
   schema: z.string(),
@@ -226,6 +295,7 @@ export const updateReviewStatusAction = toServerAction({
     deps: { db: Pick<PrismaClient, "review"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     void isApproved;
     // Would update a review status/moderation field if added to schema
     return await db.review.findUnique({ where: { id } });
@@ -242,6 +312,7 @@ export const updateUserRoleAction = toServerAction({
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     return await db.user.update({
       where: { id: userId },
       data: { isAdmin },
@@ -257,6 +328,7 @@ export const deleteUserAction = toServerAction({
     deps: { db: Pick<PrismaClient, "user"> } = adminActionDependencies(),
   ) => {
     const db = deps.db;
+    await requireAdminUser();
     return await db.user.delete({ where: { id: userId } });
   },
   schema: z.string(),

@@ -7,15 +7,15 @@ import { useEffect } from "react";
 const stats = [
   { label: "Land area", value: "24.05 km²" },
   { label: "Founded (Jan 18)", value: "1725" },
-  { label: "Barangays", value: "28" },
+  { label: "Barangays", value: "27" },
   { label: "Population (2020)", value: "~325k" },
 ];
 
 const barangays = [
   "Bagong Silang", "Calendola", "Chrysanthemum", "Cuyab", "Estrella", "Fatima",
-  "G.S.I.S.", "Landayan", "Langgam", "Laram", "Magsaysay", "Maharika",
+  "G.S.I.S.", "Landayan", "Langgam", "Laram", "Magsaysay", "Maharlika",
   "Narra", "Nueva", "Pacita I", "Pacita II", "Poblacion", "Riverside",
-  "Rosario", "Sampaguita Village", "San Antonio", "San Lorenzo", "San Lorenzo Ruiz",
+  "Rosario", "Sampaguita Village", "San Antonio", "San Lorenzo Ruiz",
   "San Roque", "San Vicente", "Santo Niño", "United Bayanihan", "United Better Living",
 ];
 
