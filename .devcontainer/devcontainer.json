@@ -1,0 +1,36 @@
+{
+  "service": "app",
+  "dockerComposeFile": "docker-compose.yml",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "/setup/lifecycle/postCreate",
+  "postStartCommand": "/setup/lifecycle/postStart",
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/powershell:2.0.3": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "formulahendry.auto-rename-tag",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "mikestead.dotenv",
+        "naumovs.color-highlight",
+        "pkief.material-icon-theme",
+        "prisma.prisma",
+        "timonwong.shellcheck",
+        "vitest.explorer",
+        "wix.vscode-import-cost",
+        "yoavbls.pretty-ts-errors",
+        "zhuangtongfa.material-theme"
+      ]
+    }
+  }
+}

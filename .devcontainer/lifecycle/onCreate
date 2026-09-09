@@ -1,0 +1,5 @@
+#!/usr/bin/env pwsh
+
+. "$PSScriptRoot/lib";
+git clone $REMOTE_REPOSITORY_URL /workspace;
+Add-State -key "cloned" -value $true;

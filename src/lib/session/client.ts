@@ -2,9 +2,12 @@
 
 import { createContext, useContext } from "react";
 
-import { User } from "@/generated/prisma/client";
-
-export type ClientSessionUser = Omit<User, 'createdAt' | 'updatedAt' | 'passwordHash'>;
+export type ClientSessionUser = {
+    id: string;
+    email: string;
+    userName: string | null;
+    isAdmin: boolean;
+};
 
 export type ClientReadonlySession = {
     id: string;
