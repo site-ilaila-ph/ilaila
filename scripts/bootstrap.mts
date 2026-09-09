@@ -1,6 +1,6 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { hash } from "@/app/(unauthenticated-only)/auth/lib/password";
+import { hash } from "@/app/auth/lib/password";
 
 async function main() {
   if (!process.env.DIRECT_URL) {

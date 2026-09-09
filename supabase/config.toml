@@ -28,6 +28,9 @@ enabled = true
 [auth]
 enabled = true
 
+[auth.email]
+enable_confirmations = false
+
 [analytics]
 enabled = true
 port = 54327

@@ -2,14 +2,11 @@
   "github.copilot.nextEditSuggestions.enabled": false,
   "git.enableSmartCommit": true,
   "chat.agentFilesLocations": {
-    ".agents/white": true,
-    ".agents/black": true
+    ".agents": true,
   },
   "chat.agentSkillsLocations": {
-    ".agents/white/skills": true,
-    ".agents/black/skills": true
+    ".agents/skills": true,
   },
-  "chat.viewSessions.enabled": false,
   "gitlens.graph.details.location": "auto",
   "github.copilot.enable": {
     "markdown": false,
@@ -40,5 +37,14 @@
   },
   "explorer.confirmDragAndDrop": false,
   "terminal.integrated.initialHint": false,
-  "js/ts.updateImportsOnFileMove.enabled": "always"
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+  "terminal.integrated.profiles.windows": {
+    "Developer Powershell": {
+      "path": "powershell",
+      "args": ["-NoExit", "-File", "${workspaceFolder}/.vscode/Developer Powershell Environment.ps1"],
+    }
+  },
+  "terminal.integrated.defaultProfile.windows": "Developer Powershell",
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib",
 }

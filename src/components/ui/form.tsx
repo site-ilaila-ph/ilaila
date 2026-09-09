@@ -527,7 +527,7 @@ export const ActionFormExtension: React.FC<
         return;
       }
 
-      if (result.type === "validation" || result.type === "constraint") {
+      if (result.type === "validation") {
         for (const [field, messages] of Object.entries(result.fieldErrors)) {
           const message = messages?.[0];
           if (message) {
@@ -535,23 +535,17 @@ export const ActionFormExtension: React.FC<
             methods.setError(field as any, { type: "server", message });
           }
         }
-      }
-
-      if (result.type === "constraint" && result.globalErrors.length > 0) {
+      } else {
+        // "insensitive" and "sensitive" both surface as a single root-level
+        // error — the only difference is whether the server-provided
+        // message is safe to show, or we fall back to a generic one.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         methods.setError("root" as any, {
           type: "server",
-          message: result.globalErrors[0],
-        });
-      }
-
-      if (result.type === "insensitive" || result.type === "sensitive") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        methods.setError("root" as any, {
-          type: "server",
-          message: result.type === "insensitive" && result.message
-            ? result.message
-            : "Something went wrong. Please try again.",
+          message:
+            result.type === "insensitive" && result.message
+              ? result.message
+              : "Something went wrong. Please try again.",
         });
       }
 

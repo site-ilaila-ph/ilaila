@@ -1,98 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
+import {
+  PrismaClientInitializationError,
+  PrismaClientKnownRequestError,
+  PrismaClientRustPanicError,
+  PrismaClientUnknownRequestError,
+  PrismaClientValidationError,
+} from "@prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
-import type {
-  ActionFailure,
-  ActionResponse,
-  ActionValidationErrors,
-} from "../common-server-action-protocol";
+import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
 
 // --- Service & action types -------------------------------------------------
 
 type AnyParameterSchema = z.ZodType<Record<string, AnySerializable>>;
 
-type AsyncServiceFunction<TParams = any, TReturn = any, TDeps = any> = (
-  params: TParams,
-  deps: TDeps,
+type AsyncServiceFunction<TParams = any, TReturn = any> = (
+  params: TParams
 ) => Promise<TReturn>;
 
-type AnyAsyncServiceFunction = AsyncServiceFunction<any, any, any>;
-
-// --- Constraint violation reporting -----------------------------------------
-
-interface ConstraintViolation {
-  field?: string;
-  hint?: string;
-  message: string;
-}
-
-interface ConstraintApi {
-  report(violation: ConstraintViolation): void;
-  fail(violation: ConstraintViolation): never;
-}
-
-class ConstraintFailSignal extends Error {
-  constructor() {
-    super("constraint fail-fast");
-    this.name = "ConstraintFailSignal";
-    Object.setPrototypeOf(this, ConstraintFailSignal.prototype);
-  }
-}
-
-function createConstraintApi(violations: ConstraintViolation[]): ConstraintApi {
-  return {
-    report(violation) {
-      violations.push(violation);
-    },
-    fail(violation): never {
-      violations.push(violation);
-      throw new ConstraintFailSignal();
-    },
-  };
-}
-
-function violationsToFieldErrors(
-  violations: ConstraintViolation[],
-): ActionValidationErrors {
-  const fieldErrors: ActionValidationErrors = {};
-  for (const violation of violations) {
-    if (violation.field === undefined) continue;
-    (fieldErrors[violation.field] ??= []).push(violation.message);
-  }
-  return fieldErrors;
-}
-
-function violationsToGlobalErrors(violations: ConstraintViolation[]): string[] {
-  return violations.filter((v) => v.field === undefined).map((v) => v.message);
-}
-
-type ServerActionBusinessConstraint<TParams, TDeps = any> = (
-  params: TParams,
-  deps: TDeps,
-  api: ConstraintApi,
-) => void | Promise<void>;
-
-type AnyServerActionBusinessConstraint = ServerActionBusinessConstraint<
-  any,
-  any
->;
-
-interface ServiceFunctionToServerActionOptions<
-  TFn extends AsyncServiceFunction,
-  TSchema extends z.ZodType<Parameters<TFn>[0]>,
-  TDeps = Parameters<TFn>[1],
-> {
-  serviceFn: TFn;
-  schema: TSchema;
-  constraints?: ServerActionBusinessConstraint<Parameters<TFn>[0], TDeps>[];
-  dependencies?: TDeps | (() => TDeps | Promise<TDeps>);
-}
-
-type AnyServiceFunctionToServerActionOptions =
-  ServiceFunctionToServerActionOptions<
-    AnyAsyncServiceFunction,
-    AnyParameterSchema
-  >;
+type AnyAsyncServiceFunction = AsyncServiceFunction<any, any>;
 
 interface FunctionCoercedServerAction<
   TFn extends AnyAsyncServiceFunction,
@@ -111,9 +37,8 @@ type InferFunctionCoercedServerActionResultData<
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
 
 function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
-  if (error && typeof error === "object" && "code" in error) {
-    const code = (error as any).code;
-    if (code === "P2002" || code === "23505") {
+  if (error instanceof PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
       return {
         success: false,
         type: "insensitive",
@@ -122,7 +47,7 @@ function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
       };
     }
 
-    if (code === "P2025") {
+    if (error.code === "P2025") {
       return {
         success: false,
         type: "insensitive",
@@ -138,23 +63,56 @@ function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
     };
   }
 
+  if (error instanceof PrismaClientValidationError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-validation",
+    };
+  }
+
+  if (error instanceof PrismaClientInitializationError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-initialization",
+    };
+  }
+
+  if (error instanceof PrismaClientUnknownRequestError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-unknown-request",
+    };
+  }
+
+  if (error instanceof PrismaClientRustPanicError) {
+    return {
+      success: false,
+      type: "sensitive",
+      hint: "database-engine",
+    };
+  }
+
   return null;
 }
 
 // --- Implementation ----------------------------------------------------------
 
-function toServerAction<
+/**
+ * Wraps a plain async service function into a schema-validated server action.
+ * Takes its dependencies directly as positional arguments rather than a
+ * config/options object.
+ */
+function actionify<
   TFn extends AsyncServiceFunction,
   TSchema extends z.ZodType<Parameters<TFn>[0]>,
-  TDeps = Parameters<TFn>[1],
 >(
-  options: ServiceFunctionToServerActionOptions<TFn, TSchema, TDeps>,
+  serviceFn: TFn,
+  schema: TSchema
 ): FunctionCoercedServerAction<TFn, TSchema> {
-  const { serviceFn, schema, constraints = [], dependencies } = options;
-
-  return async (
-    input: z.input<TSchema>,
-  ): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
+  return async (input: z.input<TSchema>): Promise<ActionResponse<Awaited<ReturnType<TFn>>>> => {
     const parsed = await schema.safeParseAsync(input);
 
     if (!parsed.success) {
@@ -168,45 +126,17 @@ function toServerAction<
     const validParams = parsed.data as Parameters<TFn>[0];
 
     try {
-      const resolvedDeps: TDeps | undefined =
-        typeof dependencies === "function"
-          ? await (dependencies as () => TDeps | Promise<TDeps>)()
-          : dependencies;
-
-      const violations: ConstraintViolation[] = [];
-      const constraintApi = createConstraintApi(violations);
-
-      try {
-        for (const constraint of constraints) {
-          await constraint(validParams, resolvedDeps as TDeps, constraintApi);
-        }
-      } catch (error: any) {
-        if (!(error instanceof ConstraintFailSignal)) {
-          throw error;
-        }
-      }
-
-      if (violations.length > 0) {
-        return {
-          success: false,
-          type: "constraint",
-          fieldErrors: violationsToFieldErrors(violations),
-          globalErrors: violationsToGlobalErrors(violations),
-        };
-      }
-
-      const data = await serviceFn(validParams, resolvedDeps);
+      const data = await serviceFn(validParams);
 
       return {
         success: true,
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
-      console.error(error);
       const prismaFailure = prismaErrorToActionFailure(error);
       if (prismaFailure) return prismaFailure;
 
-      if (!(error instanceof ServerError)) {
+      if (!(error instanceof ApplicationError)) {
         return {
           success: false,
           type: "sensitive",
@@ -218,63 +148,59 @@ function toServerAction<
         return {
           success: false,
           type: "sensitive",
-          hint: error.hint,
+          hint: error.code ?? "unknown",
         };
       }
 
       return {
         success: false,
         type: "insensitive",
-        hint: error.hint,
+        hint: error.code ?? "unknown",
         message: error.message,
       };
     }
   };
 }
 
-interface ServerErrorOptions {
-  domain: string;
-  hint?: string;
+/**
+ * A "known" ApplicationError carries a `code` identifying the specific error
+ * condition (e.g. "insufficient-funds"). An "unknown" one omits `code` — it's
+ * still an intentionally-thrown application error, just not one the caller
+ * needs to distinguish by type.
+ *
+ * `sensitive` controls whether `message` is safe to surface to the client:
+ * sensitive errors are swallowed (only a generic hint is returned), while
+ * insensitive errors return their message as-is.
+ */
+interface ApplicationErrorOptions {
+  code?: string;
   message: string;
   sensitive?: boolean;
 }
 
-class ServerError extends Error {
-  public readonly domain: string;
-  public readonly hint?: string;
+class ApplicationError extends Error {
+  public readonly code?: string;
   public readonly sensitive: boolean;
 
-  public constructor({
-    domain,
-    hint,
-    message,
-    sensitive = true,
-  }: ServerErrorOptions) {
+  public constructor({ code, message, sensitive = true }: ApplicationErrorOptions) {
     super(message);
 
-    this.name = "ServerError";
-    this.domain = domain;
-    this.hint = hint;
+    this.name = "ApplicationError";
+    this.code = code;
     this.sensitive = sensitive;
 
-    Object.setPrototypeOf(this, ServerError.prototype);
+    Object.setPrototypeOf(this, ApplicationError.prototype);
   }
 }
 
-export { toServerAction, ServerError };
+export { actionify, ApplicationError };
 
 export type {
   AnyParameterSchema,
   AsyncServiceFunction,
   AnyAsyncServiceFunction,
-  ServerActionBusinessConstraint,
-  AnyServerActionBusinessConstraint,
-  ServiceFunctionToServerActionOptions,
-  AnyServiceFunctionToServerActionOptions,
   FunctionCoercedServerAction,
   AnyFunctionCoercedServerAction,
   InferFunctionCoercedServerActionResultData,
-  ServerErrorOptions,
-  ConstraintViolation,
-  ConstraintApi,
+  ApplicationErrorOptions,
 };

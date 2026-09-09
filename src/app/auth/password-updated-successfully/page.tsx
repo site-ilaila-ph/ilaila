@@ -3,7 +3,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -17,17 +16,21 @@ export default function Page() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Matagumpay ang iyong pagpaparehistro!</CardTitle>
-              <CardDescription>Handa na ang iyong account</CardDescription>
+              <CardTitle className="text-2xl">
+                Matagumpay na nabago ang iyong password!
+              </CardTitle>
             </CardHeader>
+
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Matagumpay na nalikha ang iyong account. Maaari ka nang mag-sign in at gamitin ang iyong account.
+                Ang iyong bagong password ay aktibo na. Maaari ka nang mag-sign in gamit ang iyong bagong password.
               </p>
             </CardContent>
+
             <CardFooter>
               <CardAction>
                 <Button as={Link} href="/auth/login-or-signup?mode=login">
+                  Mag-sign in
                 </Button>
               </CardAction>
             </CardFooter>

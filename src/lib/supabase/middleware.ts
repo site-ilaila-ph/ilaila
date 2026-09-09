@@ -9,8 +9,8 @@ export async function updateSession(request: NextRequest) {
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -38,17 +38,18 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
   const user = data?.claims
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    // the OAuth consent route sends unauthenticated visitors to the login page
-    // itself, so that it can preserve the authorization in the `next` parameter
-    request.nextUrl.pathname !== '/oauth/consent'
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const pathname = request.nextUrl.pathname
+
+  // Allow unauthenticated users only on:
+  // - Landing page ('/' or '/landing')
+  // - Auth pages ('/auth/*')
+  // - API routes or static files if not matched by matcher, but let's be explicit
+  const isLandingPage = pathname === '/' || pathname === '/landing'
+  const isAuthPage = pathname.startsWith('/auth')
+
+  if (!user && !isLandingPage && !isAuthPage) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    url.pathname = '/auth/sign-up-or-login'
     return NextResponse.redirect(url)
   }
 

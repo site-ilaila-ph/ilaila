@@ -5,8 +5,6 @@ import {
 } from "./cache/common";
 import liveCacheFactory from "./cache/live";
 import { PrismaClient } from "@/generated/prisma/client";
-import { acquireNextJSCookieMap, type CookieMap } from "./framework/cookies";
-import defer from "./framework/defer";
 import { createStorageManager, type StorageManager } from "./storage/common";
 import devStorageFactory from "./storage/dev";
 import liveStorageFactory from "./storage/live";
@@ -44,5 +42,4 @@ export function acquireStorageManager(): StorageManager {
     return globalForInfra.storageManager;
 }
 
-export { acquireNextJSCookieMap, defer };
-export type { CacheManager, CookieMap, StorageManager };
+export type { CacheManager, StorageManager };

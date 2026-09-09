@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getFoodItemsAction } from "@/app/foods/actions";
 import type { FoodListItem } from "@/app/foods/services";
+import { useState, useEffect } from "react";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
@@ -49,12 +50,14 @@ export default function FoodsPage() {
               href="/home"
               className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
             >
+              <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
+              <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
               Ilaila
             </Link>
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Loading foods...</p>
+          <p className="text-muted-foreground">Naglo-load ng mga pagkain...</p>
         </div>
       </main>
     );
@@ -76,13 +79,13 @@ export default function FoodsPage() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="mb-12 text-center">
           <span className="mb-3 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
-            Culinary Heritage
+            Pamana ng Kainan
           </span>
           <h1 className="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Heritage Foods of San Pedro
+            Mga Pagkaing Pamana ng San Pedro
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Discover the authentic flavors, traditional recipes, and deep cultural heritage of San Pedro cuisine.
+            Tuklasin ang mga tunay na lasa, tradisyunal na resipe, at malalim na pamana ng kultura ng lutuing San Pedro.
           </p>
 
           <div className="mx-auto mt-8 max-w-md">
@@ -92,7 +95,7 @@ export default function FoodsPage() {
               </span>
               <input
                 type="text"
-                placeholder="Search traditional dishes, ingredients, tags..."
+                placeholder="Maghanap ng mga tradisyunal na ulam, sangkap, tag..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-xl border border-border bg-card py-3 pr-4 pl-10 text-sm text-foreground shadow-xs transition placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
@@ -104,9 +107,9 @@ export default function FoodsPage() {
         {filteredFoods.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-xs">
             <div className="mb-3 text-4xl">🍲</div>
-            <h3 className="text-lg font-semibold">No matching foods found</h3>
+            <h3 className="text-lg font-semibold">Walang nakitang tugmang pagkain</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Try adjusting your search query to find more heritage dishes.
+              Subukang isaayos ang iyong paghahanap upang makahanap ng higit pang mga pagkaing pamana.
             </p>
           </div>
         ) : (
@@ -121,7 +124,7 @@ export default function FoodsPage() {
                   <div className="mb-4 flex items-center justify-between">
                     <span className="rounded-lg bg-primary/10 p-2.5 text-xl">🍲</span>
                     <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition">
-                      View Recipe &rarr;
+                      Tingnan ang Resipe &rarr;
                     </span>
                   </div>
                   <h3 className="mb-2 text-xl font-bold tracking-tight group-hover:text-primary transition">

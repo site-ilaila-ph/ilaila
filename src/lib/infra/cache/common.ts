@@ -1,4 +1,4 @@
-import defer from "../framework/defer";
+import { after } from "next/server";
 import { joinKey } from "../utils";
 
 export type CacheKey = string | string[];
@@ -100,7 +100,7 @@ export function createCacheManager({ l1, l2 }: { l1: CacheLayer; l2: CacheLayer 
 
     // L2 write happens in the background, if present
     if (!l2) return;
-    defer({ fn: () => l2.set(k, value, ttl) });
+    after(() => l2.set(k, value, ttl));
   };
 
   const invalidate = async ({ key }: { key: CacheKey }) => {

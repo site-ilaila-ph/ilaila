@@ -1,6 +1,5 @@
 "use server";
 
-import { toServerAction } from "@/lib/action/server";
 import { acquirePrismaClient } from "@/lib/infra";
 import z from "zod";
 
@@ -12,43 +11,24 @@ const createAppReviewSchema = z.object({
   text: z.string().min(10).max(1000),
 });
 
-export const createAppReviewAction = toServerAction({
-  serviceFn: async (input: z.infer<typeof createAppReviewSchema>) => {
-    const db = acquirePrismaClient();
-    
-    return await db.orm.AppReview.create({
-      id: crypto.randomUUID(),
-      userId: input.userId || null,
-      userName: input.userName || null,
-      email: input.email || null,
-      rating: input.rating,
-      text: input.text,
-      isApproved: false,
-    });
-  },
-  schema: createAppReviewSchema,
-});
+export const createAppReviewAction = async (input: z.infer<typeof createAppReviewSchema>) => {
+  const db = acquirePrismaClient();
+  return await db.appReview.create({ data: { ...input, id: crypto.randomUUID() } });
+};
 
 const updateAppReviewStatusSchema = z.object({
   id: z.string(),
   isApproved: z.boolean(),
 });
 
-export const updateAppReviewStatusAction = toServerAction({
-  serviceFn: async (input: z.infer<typeof updateAppReviewStatusSchema>) => {
-    const db = acquirePrismaClient();
-    
-    await db.orm.AppReview.where({ id: input.id }).update({ isApproved: input.isApproved });
-    return { success: true };
-  },
-  schema: updateAppReviewStatusSchema,
-});
+export const updateAppReviewStatusAction = async (input: z.infer<typeof updateAppReviewStatusSchema>) => {
+  const db = acquirePrismaClient();
+  await db.appReview.update({ where: { id: input.id }, data: { isApproved: input.isApproved } });
+  return { success: true };
+};
 
-export const deleteAppReviewAction = toServerAction({
-  serviceFn: async (id: string) => {
-    const db = acquirePrismaClient();
-    await db.orm.AppReview.where({ id }).delete();
-    return { success: true };
-  },
-  schema: z.string(),
-});
+export const deleteAppReviewAction = async (id: string) => {
+  const db = acquirePrismaClient();
+  await db.appReview.delete({ where: { id } });
+  return { success: true };
+};

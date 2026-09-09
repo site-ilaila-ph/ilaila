@@ -30,9 +30,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# secrets
-.env*
-
 # vercel
 .vercel
 
@@ -52,4 +49,7 @@ dev/tmp
 .prisma-dev-lock
 node_modules/
 dist/
-.env
+
+# secrets
+.env*
+!.env.example

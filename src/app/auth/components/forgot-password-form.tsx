@@ -1,4 +1,4 @@
-import { signUpAction } from '@/app/auth/actions'
+﻿import { forgotPasswordAction } from '@/app/auth/actions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,16 +12,18 @@ import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 
-export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+          <CardDescription>
+            Type in your email and we&apos;ll send you a link to reset your password
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={signUpAction}>
+          <form action={forgotPasswordAction}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -33,19 +35,8 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                   required
                 />
               </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                />
-              </div>
               <Button type="submit" className="w-full">
-                Sign up
+                Send reset email
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">

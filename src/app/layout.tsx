@@ -4,7 +4,8 @@ import "@/app/styles/globals.css";
 import { cn } from "@/lib/utils";
 import { createSessionReader } from "@/lib/session/server";
 import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
-import { acquireCacheManager, acquirePrismaClient, acquireNextJSCookieMap } from "@/lib/infra";
+import { cookies } from "next/headers";
+import { acquireCacheManager, acquirePrismaClient } from "@/lib/infra";
 
 const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
 
@@ -39,7 +40,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = createSessionReader({ db: acquirePrismaClient(), cache: acquireCacheManager(), cookieMap: await acquireNextJSCookieMap() });
+  const cookieStore = await cookies();
+  const session = createSessionReader({ db: acquirePrismaClient(), cache: acquireCacheManager(), cookieMap: cookieStore });
   const sessionId = await session.getSessionId();
   const sessionUser = sessionId ? await session.getSessionUser() : null;
   const clientSession = sessionId && sessionUser
