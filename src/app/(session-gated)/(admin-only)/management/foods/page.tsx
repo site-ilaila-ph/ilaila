@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Search, Trash2 } from "lucide-react";
+import {
+  BUSINESS_IMAGE_LIMIT,
+  uploadManagedImages,
+} from "@/app/(session-gated)/(admin-only)/management/business-image-upload";
 import { getAllFoodsForManagement } from "@/app/(session-gated)/(admin-only)/management/services";
 import {
   createFoodAction,
@@ -31,6 +35,7 @@ export default function ManageFoods() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -39,7 +44,7 @@ export default function ManageFoods() {
     recipe: "",
     culturalSignificance: "",
     isHeritage: true,
-    imageData: "",
+    imageUrls: [] as string[],
   });
 
   useEffect(() => {
@@ -60,15 +65,19 @@ export default function ManageFoods() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const uploadedUrls = selectedImages.length > 0 ? await uploadManagedImages(selectedImages) : formData.imageUrls;
+      const payload = { ...formData, imageUrls: uploadedUrls.slice(0, BUSINESS_IMAGE_LIMIT) };
+
       if (editingId) {
-        await updateFoodAction({ id: editingId, ...formData });
+        await updateFoodAction({ id: editingId, ...payload });
       } else {
-        await createFoodAction(formData);
+        await createFoodAction(payload);
       }
       resetForm();
       await loadFoods();
     } catch (error) {
       console.error("Failed to save food:", error);
+      alert(error instanceof Error ? error.message : "Failed to save food.");
     }
   }
 
@@ -84,6 +93,7 @@ export default function ManageFoods() {
   }
 
   function resetForm() {
+    setSelectedImages([]);
     setFormData({
       name: "",
       description: "",
@@ -92,7 +102,7 @@ export default function ManageFoods() {
       recipe: "",
       culturalSignificance: "",
       isHeritage: true,
-      imageData: "",
+      imageUrls: [],
     });
     setEditingId(null);
     setShowForm(false);
@@ -167,17 +177,29 @@ export default function ManageFoods() {
                   <Input
                     id="food-image"
                     type="file"
+                    multiple
                     accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => setFormData((current) => ({ ...current, imageData: String(reader.result) }));
-                      reader.readAsDataURL(file);
+                      const nextFiles = Array.from(e.target.files ?? []);
+                      setSelectedImages(nextFiles.slice(0, BUSINESS_IMAGE_LIMIT));
                     }}
                   />
-                  {formData.imageData && (
-                    <Image src={formData.imageData} alt="Preview ng pagkain" width={240} height={140} unoptimized className="mt-3 h-28 w-48 rounded-lg object-cover" />
+                  <p className="mt-1 text-xs text-slate-500">Hanggang {BUSINESS_IMAGE_LIMIT} larawan ang pinapayagang i-upload.</p>
+                  {selectedImages.length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {selectedImages.map((file, index) => (
+                        <div key={`${file.name}-${index}`} className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ng pagkain ${index + 1}`}
+                            width={240}
+                            height={140}
+                            unoptimized
+                            className="h-28 w-full rounded-lg object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -268,6 +290,7 @@ export default function ManageFoods() {
                       size="sm"
                       onClick={() => {
                         setEditingId(food.id);
+                        setSelectedImages([]);
                         setFormData({
                           name: food.name,
                           description: food.description,
@@ -276,7 +299,7 @@ export default function ManageFoods() {
                           recipe: "",
                           culturalSignificance: "",
                           isHeritage: food.isHeritage,
-                          imageData: "",
+                          imageUrls: [],
                         });
                         setShowForm(true);
                       }}

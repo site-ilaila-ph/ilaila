@@ -1,29 +1,13 @@
 "use server";
 
 import { toServerAction } from "@/lib/action/server";
-import { acquireDb, acquireStorageManager } from "@/lib/infra";
+import { acquireDb } from "@/lib/infra";
 import z from "zod";
 import type { PrismaClient } from "@/generated/prisma/client";
 
 const adminActionDependencies = () => ({
   db: acquireDb(),
 });
-
-async function saveImage(dataUrl: string, key: string) {
-  const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif));base64,(.+)$/);
-  if (!match) throw new Error("Invalid image format");
-  if (process.env.NODE_ENV !== "production" && !process.env.BLOB_READ_WRITE_TOKEN) {
-    return dataUrl;
-  }
-  const [, contentType, encoded] = match;
-  const bytes = Uint8Array.from(Buffer.from(encoded, "base64"));
-  const blob = await acquireStorageManager().upload({
-    key: ["management", key],
-    fileOrBody: new Blob([bytes], { type: contentType }),
-    options: { access: "public", contentType },
-  });
-  return blob.url;
-}
 
 // ============ BUSINESS MANAGEMENT ============
 
@@ -36,7 +20,7 @@ const createBusinessSchema = z.object({
   longitude: z.number(),
   hours: z.string().min(1),
   tags: z.array(z.string()).optional(),
-  imageData: z.string().optional(),
+  imageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const createBusinessAction = toServerAction({
@@ -59,8 +43,10 @@ export const createBusinessAction = toServerAction({
       },
     });
 
-    if (input.imageData) {
-      await db.businessImage.create({ data: { businessId: business.id, description: "Business image", url: await saveImage(input.imageData, `businesses/${business.id}`) } });
+    if (input.imageUrls?.length) {
+      await db.businessImage.createMany({
+        data: input.imageUrls.map((url) => ({ businessId: business.id, description: "Business image", url })),
+      });
     }
 
     if (input.tags && input.tags.length > 0) {
@@ -89,7 +75,7 @@ const updateBusinessSchema = z.object({
   longitude: z.number().optional(),
   hours: z.string().min(1).optional(),
   isPublished: z.boolean().optional(),
-  imageData: z.string().optional(),
+  imageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const updateBusinessAction = toServerAction({
@@ -115,8 +101,10 @@ export const updateBusinessAction = toServerAction({
       },
     });
 
-    if (input.imageData) {
-      await db.businessImage.create({ data: { businessId: id, description: "Business image", url: await saveImage(input.imageData, `businesses/${id}-${Date.now()}`) } });
+    if (input.imageUrls?.length) {
+      await db.businessImage.createMany({
+        data: input.imageUrls.map((url) => ({ businessId: id, description: "Business image", url })),
+      });
     }
 
     return business;
@@ -148,7 +136,7 @@ const createFoodSchema = z.object({
   culturalSignificance: z.string().min(1),
   isHeritage: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
-  imageData: z.string().optional(),
+  imageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const createFoodAction = toServerAction({
@@ -170,8 +158,10 @@ export const createFoodAction = toServerAction({
       },
     });
 
-    if (input.imageData) {
-      await db.foodImage.create({ data: { foodId: food.id, description: "Food image", url: await saveImage(input.imageData, `foods/${food.id}`) } });
+    if (input.imageUrls?.length) {
+      await db.foodImage.createMany({
+        data: input.imageUrls.map((url) => ({ foodId: food.id, description: "Food image", url })),
+      });
     }
 
     if (input.tags && input.tags.length > 0) {
@@ -199,7 +189,7 @@ const updateFoodSchema = z.object({
   recipe: z.string().optional(),
   culturalSignificance: z.string().optional(),
   isHeritage: z.boolean().optional(),
-  imageData: z.string().optional(),
+  imageUrls: z.array(z.string().min(1)).max(10).optional(),
 });
 
 export const updateFoodAction = toServerAction({
@@ -224,8 +214,10 @@ export const updateFoodAction = toServerAction({
       },
     });
 
-    if (input.imageData) {
-      await db.foodImage.create({ data: { foodId: id, description: "Food image", url: await saveImage(input.imageData, `foods/${id}-${Date.now()}`) } });
+    if (input.imageUrls?.length) {
+      await db.foodImage.createMany({
+        data: input.imageUrls.map((url) => ({ foodId: id, description: "Food image", url })),
+      });
     }
 
     return food;

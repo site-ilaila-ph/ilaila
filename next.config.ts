@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   cacheComponents: false,
   cleanDistDir: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "20mb",
+    },
+  },
   turbopack: { root: import.meta.dirname }
 };
 

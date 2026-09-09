@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  BUSINESS_IMAGE_LIMIT,
+  uploadBusinessImages,
+} from "@/app/(session-gated)/(admin-only)/management/business-image-upload";
+import {
   getAllBusinessesForManagement,
 } from "@/app/(session-gated)/(admin-only)/management/services";
 import {
@@ -34,6 +38,7 @@ export default function ManageBusinesses() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -42,7 +47,7 @@ export default function ManageBusinesses() {
     longitude: 0,
     hours: "",
     history: "",
-    imageData: "",
+    imageUrls: [] as string[],
   });
 
   useEffect(() => {
@@ -63,15 +68,19 @@ export default function ManageBusinesses() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const uploadedUrls = selectedImages.length > 0 ? await uploadBusinessImages(selectedImages) : formData.imageUrls;
+      const payload = { ...formData, imageUrls: uploadedUrls.slice(0, BUSINESS_IMAGE_LIMIT) };
+
       if (editingId) {
-        await updateBusinessAction({ id: editingId, ...formData });
+        await updateBusinessAction({ id: editingId, ...payload });
       } else {
-        await createBusinessAction(formData);
+        await createBusinessAction(payload);
       }
       resetForm();
       await loadBusinesses();
     } catch (error) {
       console.error("Failed to save business:", error);
+      alert(error instanceof Error ? error.message : "Failed to save business.");
     }
   }
 
@@ -87,6 +96,7 @@ export default function ManageBusinesses() {
   }
 
   function resetForm() {
+    setSelectedImages([]);
     setFormData({
       name: "",
       description: "",
@@ -95,7 +105,7 @@ export default function ManageBusinesses() {
       longitude: 0,
       hours: "",
       history: "",
-      imageData: "",
+      imageUrls: [],
     });
     setEditingId(null);
     setShowForm(false);
@@ -160,17 +170,29 @@ export default function ManageBusinesses() {
                   <Input
                     id="business-image"
                     type="file"
+                    multiple
                     accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => setFormData((current) => ({ ...current, imageData: String(reader.result) }));
-                      reader.readAsDataURL(file);
+                      const nextFiles = Array.from(e.target.files ?? []);
+                      setSelectedImages(nextFiles.slice(0, BUSINESS_IMAGE_LIMIT));
                     }}
                   />
-                  {formData.imageData && (
-                    <Image src={formData.imageData} alt="Preview ng negosyo" width={240} height={140} unoptimized className="mt-3 h-28 w-48 rounded-lg object-cover" />
+                  <p className="mt-1 text-xs text-slate-500">Hanggang {BUSINESS_IMAGE_LIMIT} larawan ang pinapayagang i-upload.</p>
+                  {selectedImages.length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {selectedImages.map((file, index) => (
+                        <div key={`${file.name}-${index}`} className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            alt={`Preview ng negosyo ${index + 1}`}
+                            width={240}
+                            height={140}
+                            unoptimized
+                            className="h-28 w-full rounded-lg object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -264,6 +286,7 @@ export default function ManageBusinesses() {
                       size="sm"
                       onClick={() => {
                         setEditingId(business.id);
+                        setSelectedImages([]);
                         setFormData({
                           name: business.name,
                           description: business.description,
@@ -272,7 +295,7 @@ export default function ManageBusinesses() {
                           longitude: 0,
                           hours: business.hours,
                           history: "",
-                          imageData: "",
+                          imageUrls: [],
                         });
                         setShowForm(true);
                       }}
