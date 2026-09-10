@@ -27,7 +27,8 @@ export default function Page() {
             </CardContent>
             <CardFooter>
               <CardAction>
-                <Button as={Link} href="/auth/login-or-signup?mode=login">
+                <Button as={Link} href="/auth/sign-up-or-login?mode=login">
+                  Magpatuloy sa Login
                 </Button>
               </CardAction>
             </CardFooter>

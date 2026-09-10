@@ -3,14 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  getAllBusinessesForManagement,
-} from "@/logic/management";
-import {
-  createBusinessAction,
-  updateBusinessAction,
-  deleteBusinessAction,
-} from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,7 +43,9 @@ export default function ManageBusinesses() {
 
   async function loadBusinesses() {
     try {
-      const data = await getAllBusinessesForManagement();
+      const response = await fetch("/api/management/businesses");
+      if (!response.ok) throw new Error("Failed to load businesses");
+      const data = await response.json();
       setBusinesses(data as Business[]);
     } catch (error) {
       console.error("Failed to load businesses:", error);
@@ -63,10 +57,15 @@ export default function ManageBusinesses() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      if (editingId) {
-        await updateBusinessAction({ id: editingId, ...formData });
-      } else {
-        await createBusinessAction(formData);
+      const payload = { ...formData };
+      const response = await fetch("/api/management/businesses", {
+        method: editingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: "Failed to save business" }));
+        throw new Error(error.message ?? "Failed to save business");
       }
       resetForm();
       await loadBusinesses();
@@ -78,7 +77,8 @@ export default function ManageBusinesses() {
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang negosyong ito?")) {
       try {
-        await deleteBusinessAction(id);
+        const response = await fetch(`/api/management/businesses?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete business");
         await loadBusinesses();
       } catch (error) {
         console.error("Failed to delete business:", error);

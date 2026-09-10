@@ -3,15 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getFoodItemByIdAction } from "@/logic/foods-actions";
-import type { FoodWithIncludes } from "@/logic/foods";
+import type { FoodWithRelations } from "../types";
 
 export default function SingleFoodPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [food, setFood] = useState<FoodWithIncludes | null>(null);
+  const [food, setFood] = useState<FoodWithRelations | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,16 +18,12 @@ export default function SingleFoodPage({
 
     async function loadFood() {
       const resolvedParams = await params;
-      const result = await getFoodItemByIdAction(resolvedParams);
+      const response = await fetch(`/api/foods?id=${encodeURIComponent(resolvedParams.id)}`);
+      const data = await response.json();
 
       if (!isMounted) return;
 
-      if (result.success) {
-        setFood(result.data ?? null);
-      } else {
-        setFood(null);
-      }
-
+      setFood(data ?? null);
       setIsLoading(false);
     }
 
@@ -174,7 +169,7 @@ export default function SingleFoodPage({
                   {food.businesses.map((bf) => (
                     <Link
                       key={bf.id}
-                      href={`/business/${bf.business.id}`}
+                      href={`/businesses/${bf.business.id}`}
                       className="block rounded-lg border border-border p-4 transition hover:border-primary hover:bg-card/50"
                     >
                       <h3 className="font-semibold text-primary hover:underline">

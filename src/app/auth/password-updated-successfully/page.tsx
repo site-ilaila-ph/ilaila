@@ -29,7 +29,7 @@ export default function Page() {
 
             <CardFooter>
               <CardAction>
-                <Button as={Link} href="/auth/login-or-signup?mode=login">
+                <Button as={Link} href="/auth/sign-up-or-login?mode=login">
                   Mag-sign in
                 </Button>
               </CardAction>

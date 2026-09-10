@@ -13,8 +13,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
-import { Form, ActionFormExtension } from '@/components/ui/form'
-import { updatePasswordAction } from '@/logic/auth-actions'
+import { Form } from '@/components/ui/form'
 import { z } from 'zod'
 
 const schema = z.object({ password: z.string().min(6, 'Password must be at least 6 characters') })
@@ -30,8 +29,17 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
           <CardDescription>Please enter your new password below.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form schema={schema}>
-            <ActionFormExtension action={updatePasswordAction} onSuccess={() => router.push('/protected')} />
+          <Form schema={schema} onSubmit={async (data) => {
+            const response = await fetch('/api/auth/update-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: data.password }),
+            });
+
+            if (response.ok) {
+              router.push('/home');
+            }
+          }}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="password">New password</Label>

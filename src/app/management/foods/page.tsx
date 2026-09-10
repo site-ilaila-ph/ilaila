@@ -3,12 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Search, Trash2 } from "lucide-react";
-import { getAllFoodsForManagement } from "@/logic/management";
-import {
-  createFoodAction,
-  updateFoodAction,
-  deleteFoodAction,
-} from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -48,7 +42,9 @@ export default function ManageFoods() {
 
   async function loadFoods() {
     try {
-      const data = await getAllFoodsForManagement();
+      const response = await fetch("/api/management/foods");
+      if (!response.ok) throw new Error("Failed to load foods");
+      const data = await response.json();
       setFoods(data as Food[]);
     } catch (error) {
       console.error("Failed to load foods:", error);
@@ -60,10 +56,15 @@ export default function ManageFoods() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      if (editingId) {
-        await updateFoodAction({ id: editingId, ...formData });
-      } else {
-        await createFoodAction(formData);
+      const payload = { ...formData };
+      const response = await fetch("/api/management/foods", {
+        method: editingId ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: "Failed to save food" }));
+        throw new Error(error.message ?? "Failed to save food");
       }
       resetForm();
       await loadFoods();
@@ -75,7 +76,8 @@ export default function ManageFoods() {
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang pagkaing ito?")) {
       try {
-        await deleteFoodAction(id);
+        const response = await fetch(`/api/management/foods?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete food");
         await loadFoods();
       } catch (error) {
         console.error("Failed to delete food:", error);

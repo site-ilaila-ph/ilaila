@@ -43,11 +43,13 @@ export async function updateSession(request: NextRequest) {
   // Allow unauthenticated users only on:
   // - Landing page ('/' or '/landing')
   // - Auth pages ('/auth/*')
+  // - Public auth API endpoints (/api/auth/*)
   // - API routes or static files if not matched by matcher, but let's be explicit
   const isLandingPage = pathname === '/' || pathname === '/landing'
   const isAuthPage = pathname.startsWith('/auth')
+  const isAuthApi = pathname.startsWith('/api/auth')
 
-  if (!user && !isLandingPage && !isAuthPage) {
+  if (!user && !isLandingPage && !isAuthPage && !isAuthApi) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/sign-up-or-login'
     return NextResponse.redirect(url)

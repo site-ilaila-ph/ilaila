@@ -1,4 +1,3 @@
-import { forgotPasswordAction } from '@/logic/auth-actions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,7 +10,7 @@ import {
 import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { Form, ActionFormExtension } from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { z } from 'zod'
 
 const schema = z.object({ email: z.string().email('Invalid email format').trim() })
@@ -27,8 +26,13 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form schema={schema}>
-            <ActionFormExtension action={forgotPasswordAction} />
+          <Form schema={schema} onSubmit={async (data) => {
+            await fetch('/api/auth/forgot-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: data.email }),
+            });
+          }}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -46,7 +50,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{' '}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link href="/auth/sign-up-or-login?mode=login" className="underline underline-offset-4">
                 Sign in
               </Link>
             </div>

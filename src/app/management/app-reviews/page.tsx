@@ -1,15 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getAllAppReviews,
-  getAppReviewStats,
-  getPendingAppReviews,
-} from "@/logic/app-reviews-services";
-import {
-  updateAppReviewStatusAction,
-  deleteAppReviewAction,
-} from "@/logic/app-reviews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,10 +37,18 @@ export default function ManageAppReviews() {
 
   async function loadData() {
     try {
+      const [allResponse, pendingResponse, statsResponse] = await Promise.all([
+        fetch("/api/app-reviews"),
+        fetch("/api/app-reviews?type=pending"),
+        fetch("/api/app-reviews?type=stats"),
+      ]);
+      if (!allResponse.ok || !pendingResponse.ok || !statsResponse.ok) {
+        throw new Error("Failed to load app reviews");
+      }
       const [allReviews, pendingReviewsData, statsData] = await Promise.all([
-        getAllAppReviews(),
-        getPendingAppReviews(),
-        getAppReviewStats(),
+        allResponse.json(),
+        pendingResponse.json(),
+        statsResponse.json(),
       ]);
       setReviews(allReviews as AppReview[]);
       setPendingReviews(pendingReviewsData as AppReview[]);
@@ -63,7 +62,12 @@ export default function ManageAppReviews() {
 
   async function handleApprove(id: string) {
     try {
-      await updateAppReviewStatusAction({ id, isApproved: true });
+      const response = await fetch("/api/app-reviews", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isApproved: true }),
+      });
+      if (!response.ok) throw new Error("Failed to approve review");
       await loadData();
     } catch (error) {
       console.error("Failed to approve review:", error);
@@ -72,7 +76,12 @@ export default function ManageAppReviews() {
 
   async function handleReject(id: string) {
     try {
-      await updateAppReviewStatusAction({ id, isApproved: false });
+      const response = await fetch("/api/app-reviews", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, isApproved: false }),
+      });
+      if (!response.ok) throw new Error("Failed to reject review");
       await loadData();
     } catch (error) {
       console.error("Failed to reject review:", error);
@@ -82,7 +91,8 @@ export default function ManageAppReviews() {
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
-        await deleteAppReviewAction(id);
+        const response = await fetch(`/api/app-reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete review");
         await loadData();
       } catch (error) {
         console.error("Failed to delete review:", error);

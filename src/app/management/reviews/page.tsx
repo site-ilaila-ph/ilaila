@@ -2,8 +2,6 @@
 
 import { startTransition, useEffect, useState } from "react";
 import { MoreHorizontal, Search, Star } from "lucide-react";
-import { getAllReviewsForManagement } from "@/logic/management";
-import { deleteReviewAction } from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -31,7 +29,9 @@ export default function ManageReviews() {
 
   async function loadReviews() {
     try {
-      const data = await getAllReviewsForManagement();
+      const response = await fetch("/api/management/reviews");
+      if (!response.ok) throw new Error("Failed to load reviews");
+      const data = await response.json();
       setReviews(data as Review[]);
     } catch (error) {
       console.error("Failed to load reviews:", error);
@@ -49,9 +49,9 @@ export default function ManageReviews() {
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
-        await deleteReviewAction(id);
-        const data = await getAllReviewsForManagement();
-        setReviews(data as Review[]);
+        const response = await fetch(`/api/management/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete review");
+        await loadReviews();
       } catch (error) {
         console.error("Failed to delete review:", error);
       }

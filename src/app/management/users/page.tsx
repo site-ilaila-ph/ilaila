@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { MoreHorizontal, Search, ShieldCheck, Trash2, UserRound } from "lucide-react";
-import { getAllUsersForManagement } from "@/logic/management";
-import { updateUserRoleAction, deleteUserAction } from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 
 interface User {
@@ -30,7 +28,9 @@ export default function ManageUsers() {
 
   async function loadUsers() {
     try {
-      const data = await getAllUsersForManagement();
+      const response = await fetch("/api/management/users");
+      if (!response.ok) throw new Error("Failed to load users");
+      const data = await response.json();
       setUsers(data as User[]);
     } catch (error) {
       console.error("Failed to load users:", error);
@@ -41,7 +41,12 @@ export default function ManageUsers() {
 
   async function toggleAdminRole(userId: string, currentIsAdmin: boolean) {
     try {
-      await updateUserRoleAction({ userId, isAdmin: !currentIsAdmin });
+      const response = await fetch("/api/management/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, isAdmin: !currentIsAdmin }),
+      });
+      if (!response.ok) throw new Error("Failed to update user role");
       await loadUsers();
     } catch (error) {
       console.error("Failed to update user role:", error);
@@ -51,7 +56,8 @@ export default function ManageUsers() {
   async function handleDelete(userId: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang user na ito? Hindi na ito maaaring ibalik.")) {
       try {
-        await deleteUserAction(userId);
+        const response = await fetch(`/api/management/users?id=${encodeURIComponent(userId)}`, { method: "DELETE" });
+        if (!response.ok) throw new Error("Failed to delete user");
         await loadUsers();
       } catch (error) {
         console.error("Failed to delete user:", error);

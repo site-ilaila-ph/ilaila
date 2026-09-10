@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { getFoodItemsAction } from "@/logic/foods-actions";
-import type { FoodListItem } from "@/logic/foods";
+import type { FoodListItem } from "./types";
 import { useState, useEffect } from "react";
 
 export default function FoodsPage() {
@@ -15,14 +14,12 @@ export default function FoodsPage() {
     let isMounted = true;
 
     async function loadFoods() {
-      const result = await getFoodItemsAction({});
+      const response = await fetch("/api/foods");
+      const data = await response.json();
 
       if (!isMounted) return;
 
-      if (result.success) {
-        setFoods(result.data ?? []);
-      }
-
+      setFoods(data ?? []);
       setIsLoading(false);
     }
 

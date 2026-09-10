@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getApprovedAppReviews } from "@/logic/app-reviews-services";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -27,8 +26,10 @@ export function AppReviewsWidget({ limit = 3 }: { limit?: number }) {
   useEffect(() => {
     async function loadReviews() {
       try {
-        const data = await getApprovedAppReviews();
-        setReviews(data.slice(0, limit) as AppReview[]);
+        const response = await fetch("/api/app-reviews?type=approved");
+        if (!response.ok) throw new Error("Failed to fetch approved reviews");
+        const data = await response.json();
+        setReviews((data as AppReview[]).slice(0, limit));
       } catch (error) {
         console.error("Failed to load reviews:", error);
       } finally {

@@ -9,7 +9,7 @@ export function LogoutButton() {
 
   const logout = async () => {
     await fetch('/api/auth/sign-out', { method: 'POST' })
-    router.push('/auth/login')
+    router.push('/auth/sign-up-or-login?mode=login')
   }
 
   return <Button onClick={logout}>Sign out</Button>

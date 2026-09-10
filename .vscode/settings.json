@@ -2,10 +2,10 @@
   "github.copilot.nextEditSuggestions.enabled": false,
   "git.enableSmartCommit": true,
   "chat.agentFilesLocations": {
-    ".agents": true,
+    ".agents": true
   },
   "chat.agentSkillsLocations": {
-    ".agents/skills": true,
+    ".agents/skills": true
   },
   "gitlens.graph.details.location": "auto",
   "github.copilot.enable": {
@@ -42,9 +42,29 @@
   "terminal.integrated.profiles.windows": {
     "Developer Powershell": {
       "path": "powershell",
-      "args": ["-NoExit", "-File", "${workspaceFolder}/.vscode/Developer Powershell Environment.ps1"],
+      "args": [
+        "-NoExit",
+        "-File",
+        "${workspaceFolder}/.vscode/Developer Powershell Environment.ps1"
+      ]
     }
   },
   "terminal.integrated.defaultProfile.windows": "Developer Powershell",
-  "js/ts.tsdk.path": "node_modules\\typescript\\lib",
+  "terminal.integrated.automationProfile.windows": {
+    "path": "powershell",
+    "args": [
+      "-NoExit",
+      "-File",
+      "${workspaceFolder}/.vscode/Developer Powershell Environment.ps1"
+    ]
+  },
+  "chat.tools.terminal.terminalProfile.windows": {
+    "path": "powershell",
+    "args": [
+      "-NoExit",
+      "-File",
+      "${workspaceFolder}/.vscode/Developer Powershell Environment.ps1"
+    ]
+  },
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
 }

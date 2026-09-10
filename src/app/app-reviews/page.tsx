@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { createAppReviewAction } from "@/logic/app-reviews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,12 +22,19 @@ export default function SubmitAppReview() {
     setIsSubmitting(true);
 
     try {
-      await createAppReviewAction({
-        userName: formData.userName || undefined,
-        email: formData.email || undefined,
-        rating: formData.rating,
-        text: formData.text,
+      const response = await fetch("/api/app-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName: formData.userName || undefined,
+          email: formData.email || undefined,
+          rating: formData.rating,
+          text: formData.text,
+        }),
       });
+      if (!response.ok) {
+        throw new Error("Failed to submit app review");
+      }
 
       setSubmitted(true);
       setFormData({

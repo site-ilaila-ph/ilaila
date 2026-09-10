@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ExternalLink, MapPin, Star, ThumbsUp } from "lucide-react";
-import { createReviewAction, getBusinessByIdAction, getBusinessesAction, upvoteReviewAction } from "@/logic/business-actions";
 import { Button } from "@/components/ui/button";
-import { Business } from "@/generated/prisma/client";
-import { BusinessListItem } from "../types";
 import { createClient } from "@/lib/supabase/client";
+import type { BusinessListItem } from "../types";
 
 export default function BusinessProfilePage({
   params,
@@ -29,19 +27,23 @@ export default function BusinessProfilePage({
 
     async function loadBusiness() {
       const resolvedParams = await params;
-      const result = await getBusinessByIdAction(resolvedParams);
+      const [businessResponse, businessesResponse] = await Promise.all([
+        fetch(`/api/businesses?id=${encodeURIComponent(resolvedParams.id)}`),
+        fetch("/api/businesses"),
+      ]);
 
       if (!isMounted) return;
 
-      if (result.success) {
-        setBusiness(result.data ?? null);
-        const allBusinesses = await getBusinessesAction({});
-        if (allBusinesses.success && result.data) {
-          const tags = new Set(result.data.tags.map((tag) => tag.value));
-          setRelatedBusinesses((allBusinesses.data ?? []).filter((item) => item.id !== result.data?.id && item.tags.some((tag) => tags.has(tag.value))).slice(0, 3));
-        }
-      } else {
-        setBusiness(null);
+      const [businessData, businessesData] = await Promise.all([
+        businessResponse.json(),
+        businessesResponse.json(),
+      ]);
+
+      setBusiness(businessData ?? null);
+      if (businessData) {
+        const tags = new Set<string>(businessData.tags.map((tag: { value: string }) => tag.value));
+        const related = (businessesData ?? []).filter((item: BusinessListItem) => item.id !== businessData.id && item.tags.some((tag) => tags.has(tag.value))).slice(0, 3);
+        setRelatedBusinesses(related);
       }
 
       setIsLoading(false);
@@ -89,7 +91,7 @@ export default function BusinessProfilePage({
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
           <p className="text-muted-foreground">Business not found</p>
-          <Link href="/business/discovery" className="mt-4 inline-block text-primary hover:underline">
+          <Link href="/businesses/discovery" className="mt-4 inline-block text-primary hover:underline">
             Back to businesses
           </Link>
         </div>
@@ -114,14 +116,27 @@ export default function BusinessProfilePage({
     ["Value", business.reviews.reduce((sum, review) => sum + review.value, 0)],
   ];
 
-  const menuTags = ["All", ...new Set(business.menuItems.map((item) => item.category || "Other"))];
+  const menuTags = ["All"] as string[];
   const businessId = business.id;
+  const visibleMenu = business.menuItems;
 
   async function submitReview(event: React.FormEvent) {
     event.preventDefault();
     const supabase = createClient();
     const session = (await supabase.auth.getSession()).data.session!;
-    const result = await createReviewAction({ userId: session.user.id, businessId, text: reviewText, ...reviewScores });
+    const response = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "create",
+        userId: session.user.id,
+        businessId,
+        text: reviewText,
+        ...reviewScores,
+      }),
+    });
+
+    const result = await response.json();
     setReviewMessage(result.success ? "Your review was saved." : "We could not save your review yet.");
     if (result.success) setReviewText("");
   }
@@ -136,7 +151,7 @@ export default function BusinessProfilePage({
           >
             Ilaila
           </Link>
-          <Link href="/business/discovery" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/businesses/discovery" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="size-4" /> All businesses
           </Link>
         </div>
@@ -238,15 +253,9 @@ export default function BusinessProfilePage({
                         </div>
                         <p className="font-semibold text-primary">PHP {item.price.toString()}</p>
                       </div>
-                      {item.dietaryTags && item.dietaryTags.length > 0 && (
-                        <div className="mt-2 flex gap-2">
-                          {item.dietaryTags.map((tag, idx) => (
-                            <span key={idx} className="text-xs text-muted-foreground">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <div className="mt-2 flex gap-2">
+                        <span className="text-xs text-muted-foreground">Available</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -260,7 +269,7 @@ export default function BusinessProfilePage({
                   {business.reviews.map((review) => (
                     <div key={review.id} className="rounded-lg border border-border bg-card p-6">
                       <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-semibold">{review.user.userName}</h3>
+                        <h3 className="font-semibold">{review.user.authUser.email ?? "Local reviewer"}</h3>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                           <span>Food: {review.foodQuality}/5</span>
                           <span>Service: {review.service}/5</span>
@@ -269,7 +278,13 @@ export default function BusinessProfilePage({
                         </div>
                       </div>
                       <p className="text-muted-foreground">{review.text}</p>
-                      <button onClick={() => void upvoteReviewAction({ reviewId: review.id })} className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ThumbsUp className="size-3.5" /> {review.upvotes} helpful</button>
+                      <button onClick={async () => {
+                        await fetch("/api/reviews", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action: "upvote", reviewId: review.id }),
+                        });
+                      }} className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ThumbsUp className="size-3.5" /> {review.upvotes} helpful</button>
                     </div>
                   ))}
                 </div>
@@ -312,7 +327,7 @@ export default function BusinessProfilePage({
                 </div>
               )}
               <div className="overflow-hidden border border-border bg-white"><h3 className="p-6 pb-3 text-lg font-semibold">Find it on the map</h3><iframe title={`Map showing ${business.name}`} className="h-52 w-full border-0" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${business.longitude - 0.01}%2C${business.latitude - 0.01}%2C${business.longitude + 0.01}%2C${business.latitude + 0.01}&layer=mapnik&marker=${business.latitude}%2C${business.longitude}`} /><a className="block p-4 text-sm text-primary hover:underline" href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Open directions</a></div>
-              {relatedBusinesses.length > 0 && <div className="border border-border bg-white p-6"><h3 className="mb-4 text-lg font-semibold">You may also like</h3><div className="space-y-4">{relatedBusinesses.map((item) => <Link key={item.id} href={`/business/${encodeURIComponent(item.name.toLowerCase().replaceAll(" ", "-"))}`} className="group block"><p className="font-semibold group-hover:text-primary">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p></Link>)}</div></div>}
+              {relatedBusinesses.length > 0 && <div className="border border-border bg-white p-6"><h3 className="mb-4 text-lg font-semibold">You may also like</h3><div className="space-y-4">{relatedBusinesses.map((item) => <Link key={item.id} href={`/businesses/${encodeURIComponent(item.name.toLowerCase().replaceAll(" ", "-"))}`} className="group block"><p className="font-semibold group-hover:text-primary">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p></Link>)}</div></div>}
             </div>
           </aside>
         </div>
