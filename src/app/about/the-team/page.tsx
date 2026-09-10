@@ -5,7 +5,7 @@ import teamConfig from "@/attribution";
 
 export default function TheTeamPage() {
   return (
-    <>
+    <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <style>{`
         @keyframes fadeUp {
           0% {
@@ -119,8 +119,7 @@ export default function TheTeamPage() {
         }
       `}</style>
 
-      <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
-        <div className="pointer-events-none absolute inset-0">
+      <div className="pointer-events-none absolute inset-0">
           <div className="float-slow absolute -left-5 top-20 h-48 w-48 rounded-full bg-secondary opacity-70 blur-3xl" />
           <div className="float-slow absolute right-0 top-32 h-52 w-52 rounded-full bg-accent/10 opacity-80 blur-3xl" style={{ animationDelay: "1.2s" }} />
         </div>
@@ -180,7 +179,7 @@ export default function TheTeamPage() {
               <div className="grid gap-6 md:grid-cols-3">
                 {teamConfig.frontend.members.map((member, index) => (
                   <div
-                    key={member.name}
+                    key={`${member.name}-${index}`}
                     className="card-lift scale-in rounded-[1.5rem] border border-border bg-(--surface) p-6"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
@@ -204,7 +203,7 @@ export default function TheTeamPage() {
               <div className="grid gap-6 md:grid-cols-3">
                 {teamConfig.backend.members.map((member, index) => (
                   <div
-                    key={member.name}
+                    key={`${member.name}-${index}`}
                     className="card-lift fade-rotate rounded-[1.5rem] border border-border bg-(--surface) p-6"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
@@ -218,7 +217,6 @@ export default function TheTeamPage() {
             </div>
           </div>
         </section>
-      </main>
-    </>
+    </main>
   );
 }
