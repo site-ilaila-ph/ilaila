@@ -109,13 +109,13 @@ export default function ManageFoods() {
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="mb-2 text-xs font-medium text-slate-400">Mga Pahina / Mga Pagkain</p>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Mga Pagkain</h1>
+            <p className="mb-2 text-xs font-medium text-muted-foreground">Mga Pahina / Mga Pagkain</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Mga Pagkain</h1>
           </div>
           <div className="flex w-full items-center gap-2 sm:w-auto">
-            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" /></div>
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm border border-border sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground" /></div>
             <Button onClick={() => setShowForm(true)}>Magdagdag</Button>
-            <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm"><MoreHorizontal size={19} /></button>
+            <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground shadow-sm border border-border"><MoreHorizontal size={19} /></button>
           </div>
         </div>
 
@@ -257,13 +257,13 @@ export default function ManageFoods() {
             </CardContent>
           </Card>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(65,93,145,0.08)]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="min-w-[700px]">
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] gap-4 border-b border-slate-100 px-5 py-4 text-xs font-semibold text-slate-400"><span>Pagkain</span><span>Negosyo</span><span>Larawan</span><span>Uri</span><span /></div>
+              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] gap-4 border-b border-border px-5 py-4 text-xs font-semibold text-muted-foreground"><span>Pagkain</span><span>Negosyo</span><span>Larawan</span><span>Uri</span><span /></div>
             {visibleFoods.map((food) => (
-              <div key={food.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-0 hover:bg-slate-50/70">
-                  <div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-orange-100 text-orange-600">🍲</div><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-700">{food.name}</p><p className="truncate text-xs text-slate-400">{food.description}</p></div></div>
-                  <span className="text-sm text-slate-600">{food._count?.businesses || 0}</span><span className="text-sm text-slate-600">{food._count?.images || 0}</span><span className="text-sm text-slate-500">{food.isHeritage ? "Pamanang-kultura" : "Karaniwan"}</span>
+              <div key={food.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] items-center gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-muted/50">
+                  <div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">🍲</div><div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{food.name}</p><p className="truncate text-xs text-muted-foreground">{food.description}</p></div></div>
+                  <span className="text-sm text-foreground">{food._count?.businesses || 0}</span><span className="text-sm text-foreground">{food._count?.images || 0}</span><span className="text-sm text-muted-foreground">{food.isHeritage ? "Pamanang-kultura" : "Karaniwan"}</span>
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"

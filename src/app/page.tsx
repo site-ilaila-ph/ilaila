@@ -1,26 +1,26 @@
-import { acquireDb, acquireCacheManager, acquireNextJSCookieMap } from "@/lib/infra";
-import { createSessionReader } from "@/lib/session/server";
+import { acquirePrismaClient } from "@/lib/infra";
+import { createClient } from "@/lib/supabase/client";
 import { redirect } from "next/navigation";
 
 export default async function RootPage() {
-      const session = createSessionReader({
-        db: acquireDb(),
-        cache: acquireCacheManager(),
-        cookieMap: await acquireNextJSCookieMap(),
-      });
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-      const sessionId = await session.getSessionId();
-      const user = sessionId ? await session.getSessionUser() : null;
+  if (!user) {
+    redirect("/landing");
+  }
 
-      if (!user) {
-        redirect("/landing");
-      }
+  // safe here. trigger guarantees co-existence.
+  const userData = await acquirePrismaClient().userData.findFirstOrThrow({
+    select: { id: true, role: true },
+    where: { authId: user.id },
+  });
 
-      else if (user.isAdmin) {
-        redirect("/management");
-      }
-
-      else {
-        redirect("/home");
-      }
+  if (userData.role == "admin") {
+    redirect("/management");
+  } else {
+    redirect("/home");
+  }
 }

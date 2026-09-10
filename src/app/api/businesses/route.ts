@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
         include: {
           images: true,
           tags: true,
-          reviews: { include: { user: true } },
+          reviews: true,
           menuItems: true,
           foods: { include: { food: { include: { images: true, tags: true } } } },
         },
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       include: {
         images: true,
         tags: true,
-        reviews: { include: { user: true } },
+        reviews: true,
         menuItems: true,
         foods: { include: { food: { include: { images: true, tags: true } } } },
       },
@@ -39,7 +39,8 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(data, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, type: "generic", message: error.message ?? "Unknown" }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown";
+    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
   }
 }

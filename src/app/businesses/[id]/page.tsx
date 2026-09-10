@@ -15,7 +15,7 @@ export default function BusinessProfilePage({
 }) {
   const [business, setBusiness] = useState<BusinessListItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [menuFilter, setMenuFilter] = useState("All");
+  const [menuFilter, setMenuFilter] = useState("Lahat");
   const [menuSort, setMenuSort] = useState<"popular" | "price-low" | "price-high">("popular");
   const [reviewText, setReviewText] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
@@ -70,7 +70,7 @@ export default function BusinessProfilePage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Loading business details...</p>
+          <p className="text-muted-foreground">Nilo-load ang mga detalye ng negosyo...</p>
         </div>
       </main>
     );
@@ -90,9 +90,9 @@ export default function BusinessProfilePage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Business not found</p>
+          <p className="text-muted-foreground">Hindi natagpuan ang negosyo</p>
           <Link href="/businesses/discovery" className="mt-4 inline-block text-primary hover:underline">
-            Back to businesses
+            Bumalik sa mga negosyo
           </Link>
         </div>
       </main>
@@ -110,13 +110,13 @@ export default function BusinessProfilePage({
       ) / 10
     : 0;
   const metricRatings = [
-    ["Food quality", business.reviews.reduce((sum, review) => sum + review.foodQuality, 0)],
-    ["Service", business.reviews.reduce((sum, review) => sum + review.service, 0)],
+    ["Kalidad ng pagkain", business.reviews.reduce((sum, review) => sum + review.foodQuality, 0)],
+    ["Serbisyo", business.reviews.reduce((sum, review) => sum + review.service, 0)],
     ["Ambiance", business.reviews.reduce((sum, review) => sum + review.ambiance, 0)],
-    ["Value", business.reviews.reduce((sum, review) => sum + review.value, 0)],
+    ["Halaga", business.reviews.reduce((sum, review) => sum + review.value, 0)],
   ];
 
-  const menuTags = ["All"] as string[];
+  const menuTags = ["Lahat"] as string[];
   const businessId = business.id;
   const visibleMenu = business.menuItems;
 
@@ -137,7 +137,7 @@ export default function BusinessProfilePage({
     });
 
     const result = await response.json();
-    setReviewMessage(result.success ? "Your review was saved." : "We could not save your review yet.");
+    setReviewMessage(result.success ? "Na-save na ang iyong review." : "Hindi pa namin na-save ang iyong review.");
     if (result.success) setReviewText("");
   }
 
@@ -152,7 +152,7 @@ export default function BusinessProfilePage({
             Ilaila
           </Link>
           <Link href="/businesses/discovery" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="size-4" /> All businesses
+            <ArrowLeft className="size-4" /> Lahat ng negosyo
           </Link>
         </div>
       </nav>
@@ -166,14 +166,14 @@ export default function BusinessProfilePage({
             <div>
               <p className="text-sm font-medium text-muted-foreground">Rating</p>
               <p className="flex items-center gap-2 text-2xl font-bold text-primary"><Star className="size-5 fill-brand-accent text-brand-accent" />{averageRating}/5</p>
-              <p className="text-xs text-muted-foreground">({business.reviews.length} reviews)</p>
+              <p className="text-xs text-muted-foreground">({business.reviews.length} na review)</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Location</p>
-              <p className="text-lg font-semibold">{business.address}</p><a className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline" href={`https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Get directions <ExternalLink className="size-3" /></a>
+              <p className="text-sm font-medium text-muted-foreground">Lokasyon</p>
+              <p className="text-lg font-semibold">{business.address}</p><a className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline" href={`https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Kumuha ng direksyon <ExternalLink className="size-3" /></a>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Hours</p>
+              <p className="text-sm font-medium text-muted-foreground">Oras ng Bukas</p>
               <p className="text-lg font-semibold">{business.hours}</p>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function BusinessProfilePage({
           <div className="lg:col-span-2">
             {business.history && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">History</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Kasaysayan</h2>
                 <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
                   {business.history}
                 </p>
@@ -215,7 +215,7 @@ export default function BusinessProfilePage({
 
             {business.foods && business.foods.length > 0 && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">Foods Served</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Mga Pagkaing Inihahain</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {business.foods.map((bf) => (
                     <Link
@@ -238,7 +238,7 @@ export default function BusinessProfilePage({
             {business.menuItems && business.menuItems.length > 0 && (
               <section className="mb-12">
                 <h2 className="mb-4 text-2xl font-semibold">Menu</h2>
-                <div className="mb-5 flex flex-wrap gap-2"><div className="flex gap-2 overflow-x-auto pb-1">{menuTags.map((item) => <button key={item} onClick={() => setMenuFilter(item)} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs ${menuFilter === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-white"}`}>{item}</button>)}</div><select value={menuSort} onChange={(event) => setMenuSort(event.target.value as typeof menuSort)} className="rounded-full border border-border bg-white px-3 py-1.5 text-xs"><option value="popular">Sort menu</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></div>
+                <div className="mb-5 flex flex-wrap gap-2"><div className="flex gap-2 overflow-x-auto pb-1">{menuTags.map((item) => <button key={item} onClick={() => setMenuFilter(item)} className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs ${menuFilter === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-white"}`}>{item}</button>)}</div><select value={menuSort} onChange={(event) => setMenuSort(event.target.value as typeof menuSort)} className="rounded-full border border-border bg-white px-3 py-1.5 text-xs"><option value="popular">Ayusin ang menu</option><option value="price-low">Presyo: mababa hanggang mataas</option><option value="price-high">Presyo: mataas hanggang mababa</option></select></div>
                 <div className="space-y-4">
                   {visibleMenu.map((item) => (
                     <div key={item.id} className="border-b border-border pb-4 last:border-b-0">
@@ -264,17 +264,17 @@ export default function BusinessProfilePage({
 
             {business.reviews && business.reviews.length > 0 && (
               <section className="mb-12">
-                <h2 className="mb-4 text-2xl font-semibold">Reviews</h2>
+                <h2 className="mb-4 text-2xl font-semibold">Mga Review</h2>
                 <div className="space-y-4">
                   {business.reviews.map((review) => (
                     <div key={review.id} className="rounded-lg border border-border bg-card p-6">
                       <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-semibold">{review.user.authUser.email ?? "Local reviewer"}</h3>
+                        <h3 className="font-semibold">{review.user.authUser.email ?? "Lokal na reviewer"}</h3>
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span>Food: {review.foodQuality}/5</span>
-                          <span>Service: {review.service}/5</span>
+                          <span>Pagkain: {review.foodQuality}/5</span>
+                          <span>Serbisyo: {review.service}/5</span>
                           <span>Ambiance: {review.ambiance}/5</span>
-                          <span>Value: {review.value}/5</span>
+                          <span>Halaga: {review.value}/5</span>
                         </div>
                       </div>
                       <p className="text-muted-foreground">{review.text}</p>
@@ -284,27 +284,27 @@ export default function BusinessProfilePage({
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ action: "upvote", reviewId: review.id }),
                         });
-                      }} className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ThumbsUp className="size-3.5" /> {review.upvotes} helpful</button>
+                      }} className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ThumbsUp className="size-3.5" /> {review.upvotes} nakatulong</button>
                     </div>
                   ))}
                 </div>
               </section>
             )}
 
-            <section className="border-t border-border pt-8"><h2 className="mb-4 font-heading text-2xl font-bold">Share your experience</h2><form onSubmit={submitReview} className="space-y-3"><div className="grid gap-3 sm:grid-cols-4">{Object.entries(reviewScores).map(([key, score]) => <label key={key} className="text-xs font-medium text-muted-foreground">{key.replace(/([A-Z])/g, " $1")}<select value={score} onChange={(event) => setReviewScores({ ...reviewScores, [key]: Number(event.target.value) })} className="mt-1 block w-full border border-border bg-white px-2 py-2 text-sm text-foreground">{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label>)}</div><textarea value={reviewText} onChange={(event) => setReviewText(event.target.value)} placeholder="What should people know before they go?" rows={4} className="w-full border border-border bg-white p-3 text-sm outline-none focus:border-primary" /><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">Your review covers food, service, ambiance, and value.</span><Button type="submit">Publish review</Button></div>{reviewMessage && <p className="text-sm text-muted-foreground">{reviewMessage}</p>}</form></section>
+            <section className="border-t border-border pt-8"><h2 className="mb-4 font-heading text-2xl font-bold">Ibahagi ang iyong karanasan</h2><form onSubmit={submitReview} className="space-y-3"><div className="grid gap-3 sm:grid-cols-4">{Object.entries(reviewScores).map(([key, score]) => <label key={key} className="text-xs font-medium text-muted-foreground">{key.replace(/([A-Z])/g, " $1")}<select value={score} onChange={(event) => setReviewScores({ ...reviewScores, [key]: Number(event.target.value) })} className="mt-1 block w-full border border-border bg-white px-2 py-2 text-sm text-foreground">{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label>)}</div><textarea value={reviewText} onChange={(event) => setReviewText(event.target.value)} placeholder="Ano ang dapat malaman ng mga tao bago pumunta?" rows={4} className="w-full border border-border bg-white p-3 text-sm outline-none focus:border-primary" /><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">Sinasaklaw ng iyong review ang pagkain, serbisyo, ambiance, at halaga.</span><Button type="submit">I-publish ang review</Button></div>{reviewMessage && <p className="text-sm text-muted-foreground">{reviewMessage}</p>}</form></section>
           </div>
 
           <aside className="lg:col-span-1">
             <div className="sticky top-6 space-y-4">
               <div className="rounded-lg border border-border bg-card p-6">
-                <h3 className="mb-4 text-lg font-semibold">Contact Info</h3>
+                <h3 className="mb-4 text-lg font-semibold">Impormasyon sa Pakikipag-ugnayan</h3>
                 <dl className="space-y-3 text-sm">
                   <div>
                     <dt className="flex items-center gap-1 font-medium text-muted-foreground"><MapPin className="size-3.5" />Address</dt>
                     <dd className="mt-1">{business.address}</dd>
                   </div>
                   <div>
-                    <dt className="font-medium text-muted-foreground">Hours</dt>
+                    <dt className="font-medium text-muted-foreground">Oras ng Bukas</dt>
                     <dd className="mt-1">{business.hours}</dd>
                   </div>
                 </dl>
@@ -326,8 +326,8 @@ export default function BusinessProfilePage({
                   </div>
                 </div>
               )}
-              <div className="overflow-hidden border border-border bg-white"><h3 className="p-6 pb-3 text-lg font-semibold">Find it on the map</h3><iframe title={`Map showing ${business.name}`} className="h-52 w-full border-0" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${business.longitude - 0.01}%2C${business.latitude - 0.01}%2C${business.longitude + 0.01}%2C${business.latitude + 0.01}&layer=mapnik&marker=${business.latitude}%2C${business.longitude}`} /><a className="block p-4 text-sm text-primary hover:underline" href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Open directions</a></div>
-              {relatedBusinesses.length > 0 && <div className="border border-border bg-white p-6"><h3 className="mb-4 text-lg font-semibold">You may also like</h3><div className="space-y-4">{relatedBusinesses.map((item) => <Link key={item.id} href={`/businesses/${encodeURIComponent(item.name.toLowerCase().replaceAll(" ", "-"))}`} className="group block"><p className="font-semibold group-hover:text-primary">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p></Link>)}</div></div>}
+              <div className="overflow-hidden border border-border bg-white"><h3 className="p-6 pb-3 text-lg font-semibold">Hanapin sa mapa</h3><iframe title={`Map showing ${business.name}`} className="h-52 w-full border-0" loading="lazy" src={`https://www.openstreetmap.org/export/embed.html?bbox=${business.longitude - 0.01}%2C${business.latitude - 0.01}%2C${business.longitude + 0.01}%2C${business.latitude + 0.01}&layer=mapnik&marker=${business.latitude}%2C${business.longitude}`} /><a className="block p-4 text-sm text-primary hover:underline" href={`https://www.google.com/maps/dir/?api=1&destination=${business.latitude},${business.longitude}`} target="_blank" rel="noreferrer">Buksan ang direksyon</a></div>
+              {relatedBusinesses.length > 0 && <div className="border border-border bg-white p-6"><h3 className="mb-4 text-lg font-semibold">Maaari mo ring magustuhan</h3><div className="space-y-4">{relatedBusinesses.map((item) => <Link key={item.id} href={`/businesses/${encodeURIComponent(item.name.toLowerCase().replaceAll(" ", "-"))}`} className="group block"><p className="font-semibold group-hover:text-primary">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.description}</p></Link>)}</div></div>}
             </div>
           </aside>
         </div>

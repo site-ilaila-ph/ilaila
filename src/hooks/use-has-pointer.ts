@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-const MOBILE_BREAKPOINT = 768
-
 function useHasPointer() {
   return useSyncExternalStore(
     (callback) => {

@@ -21,7 +21,8 @@ export async function DELETE(req: NextRequest) {
     const db = acquirePrismaClient();
     await db.review.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message ?? "Unknown" }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown";
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

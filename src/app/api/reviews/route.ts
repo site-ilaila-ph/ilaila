@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: false, type: "generic", message: "Unknown review action" }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, type: "generic", message: error.message ?? "Unknown" }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown";
+    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
   }
 }

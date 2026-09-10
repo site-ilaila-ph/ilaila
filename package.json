@@ -6,21 +6,10 @@
 		"node": "24.x"
 	},
 	"scripts": {
-		"typegen:app": "next typegen",
-		"typegen:db": "prisma generate",
-		"typegen": "pnpm typegen:app && pnpm typegen:db",
-		"dev:app": "next dev",
-		"dev:setup": "pnpm typegen",
-		"dev": "pnpm run dev:app",
-		"ci:typecheck": "pnpm run typegen:app && tsc --noEmit",
-		"ci:lint": "eslint --cache",
-		"ci:setup": "pnpm install --frozen-lockfile && pnpm typegen",
-		"ci:checks": "pnpm run ci:typecheck && pnpm run ci:lint",
-		"ci": "pnpm run ci:setup && pnpm run ci:checks",
-		"cd:setup": "pnpm install --frozen-lockfile && pnpm typegen",
-		"cd:app": "pnpm run cd:setup && pnpm next build",
-		"cd:bootstrap": "tsx scripts/bootstrap.mts",
-		"cd:db": "pnpm run cd:setup && pnpm exec prisma migrate deploy && pnpm run cd:bootstrap"
+		"typegen": "next typegen",
+		"dev": "next dev",
+		"ci": " tsc --noEmit && eslint --cache",
+		"cd": "pnpm next build"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.6.0",

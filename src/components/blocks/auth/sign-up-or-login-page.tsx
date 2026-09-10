@@ -1,9 +1,9 @@
 'use client'
 
-import { SignUpOrLoginForm } from '@/app/auth/components/sign-up-or-login-form'
+import { SignUpOrLoginForm } from '@/components/blocks/auth/sign-up-or-login-form'
 import { useSearchParams } from 'next/navigation'
 
-export default function SignUpOrLoginPage() {
+export function SignUpOrLoginPage() {
   const mode = useSearchParams().get('mode') === 'sign-up' ? 'sign-up' : 'login'
 
   return (

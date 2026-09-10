@@ -38,7 +38,7 @@ export default function liveStorageFactory(): StorageLayer {
       const cacheControl = options?.cacheControl ?? "3600";
       const body = typeof fileOrBody === "string" ? fileOrBody : fileOrBody;
 
-      const { data, error } = await client.storage.from(bucket).upload(key, body as never, {
+      const { error } = await client.storage.from(bucket).upload(key, body as never, {
         contentType,
         cacheControl,
         upsert: true,

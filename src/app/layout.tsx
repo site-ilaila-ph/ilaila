@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope, Montserrat } from "next/font/google";
 import "@/app/styles/globals.css";
 import { cn } from "@/lib/utils";
-import { cookies } from "next/headers";
 
 const montserratHeading = Montserrat({
   subsets: ["latin"],

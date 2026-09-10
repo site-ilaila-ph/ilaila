@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient, UserRole } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createClient } from "@supabase/supabase-js";
@@ -7,9 +8,23 @@ async function main() {
   const prisma = new PrismaClient({ adapter });
   const supabase = createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_SECRET_KEY!,
   );
 
+  console.log("Cleaning existing database records...");
+  await prisma.review.deleteMany();
+  await prisma.bookmark.deleteMany();
+  await prisma.menuItem.deleteMany();
+  await prisma.businessImage.deleteMany();
+  await prisma.businessTag.deleteMany();
+  await prisma.businessFood.deleteMany();
+  await prisma.business.deleteMany();
+  await prisma.foodImage.deleteMany();
+  await prisma.foodTag.deleteMany();
+  await prisma.food.deleteMany();
+  await prisma.user.deleteMany();
+
+  
   // create an admin, and non admin account.
   for (const role of (["admin", "viewer"] as UserRole[])) {
     // create an admin account.
@@ -24,25 +39,11 @@ async function main() {
     }
 
     await prisma.userData.update({
-      where: { id: data.user.id },
+      where: { authId: data.user.id },
       data: { role },
     });
   }
-
-  // create a non admin account.
-  console.log("Cleaning existing database records...");
-  await prisma.review.deleteMany();
-  await prisma.bookmark.deleteMany();
-  await prisma.menuItem.deleteMany();
-  await prisma.businessImage.deleteMany();
-  await prisma.businessTag.deleteMany();
-  await prisma.businessFood.deleteMany();
-  await prisma.business.deleteMany();
-  await prisma.foodImage.deleteMany();
-  await prisma.foodTag.deleteMany();
-  await prisma.food.deleteMany();
-  await prisma.user.deleteMany();
-
+  
   await console.log("Seed complete.");
   await prisma.$disconnect();
 }

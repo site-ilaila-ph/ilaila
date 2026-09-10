@@ -24,12 +24,8 @@ export function acquireCacheManager(): CacheManager {
     return globalForInfra.cacheManager;
 }
 
-export function acquireDb() {
-    return acquirePrismaClient();
-}
-
 export function acquirePrismaClient() {
-    globalForInfra.prisma ??= new PrismaClient({ adapter: new PrismaPg({}) });
+    globalForInfra.prisma ??= new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
     return globalForInfra.prisma;
 }
 

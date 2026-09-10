@@ -100,7 +100,8 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (e: any) {
-    return NextResponse.json({ success: false, type: "generic", message: e.message ?? "Unknown" }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Unknown";
+    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
   }
 }

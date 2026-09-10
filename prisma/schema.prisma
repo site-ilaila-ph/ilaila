@@ -799,7 +799,7 @@ enum BucketType {
 }
 
 // ============================================================
-// APP SCHEMA (yours) — left untouched, already camelCase.
+// APP SCHEMA
 // ============================================================
 
 enum UserRole {
@@ -825,7 +825,7 @@ model UserData {
 
   @@unique([authId])
   @@index([authId])
-  @@map("users")
+  @@map("user_data")
   @@schema("app")
 }
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AnimatePresence, motion, spring } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import { safeNextPath } from "@/lib/safe-next-path";
@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import icon from "@/app/icon.svg";
 import bg from "@/assets/login-form-bg.png";
 import bg2 from "@/assets/login-form-bg-2.png";
 
@@ -65,10 +64,6 @@ export function LoginForm({ className, onSwitch, ...props }: AuthFormProps) {
       {...props}
     >
       <CardHeader className="inline-flex flex-col items-center">
-        <div className="rounded-full bg-muted p-2">
-          <img src={icon.src} className="h-6 w-6" />
-        </div>
-
         <CardTitle className="text-2xl">Mag Sign in</CardTitle>
 
         <CardDescription className="text-center">
@@ -308,7 +303,7 @@ export function SignUpOrLoginForm({
           x: springTransition,
         }}
         className={cn(
-          "hidden h-full min-h-[500px] rounded-xl border md:block",
+          "hidden h-full min-h-125 rounded-xl border md:block",
           isLogin ? "rounded-l-none" : "rounded-r-none",
         )}
         style={{

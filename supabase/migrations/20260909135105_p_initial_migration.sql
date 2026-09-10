@@ -2,17 +2,22 @@
 CREATE SCHEMA IF NOT EXISTS "app";
 
 -- CreateTable
-CREATE TABLE "app"."users" (
+CREATE TYPE "app"."user_role" AS ENUM ('viewer', 'admin');
+CREATE TABLE "app"."user_data" (
     "id" UUID NOT NULL,
-    "userName" TEXT,
-    "email" TEXT,
-    "passwordHash" TEXT,
-    "role" TEXT NOT NULL DEFAULT 'viewer',
+    "auth_id" UUID,
+    "role" "app"."user_role" NOT NULL DEFAULT 'viewer',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_auth_id_key" ON "app"."user_data"("auth_id");
+
+-- AddForeignKey
+ALTER TABLE "app"."user_data" ADD CONSTRAINT "users_auth_id_fkey" FOREIGN KEY ("auth_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- CreateTable
 CREATE TABLE "app"."foods" (
@@ -60,7 +65,7 @@ CREATE TABLE "app"."businesses" (
     "longitude" DOUBLE PRECISION NOT NULL,
     "hours" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "businesses_pkey" PRIMARY KEY ("id")
 );
@@ -92,7 +97,6 @@ CREATE TABLE "app"."menu_items" (
     "description" TEXT,
     "price" DECIMAL(65,30) NOT NULL,
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
-    "dietaryTags" TEXT[],
 
     CONSTRAINT "menu_items_pkey" PRIMARY KEY ("id")
 );
@@ -118,7 +122,7 @@ CREATE TABLE "app"."reviews" (
     "value" INTEGER NOT NULL,
     "upvotes" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "reviews_pkey" PRIMARY KEY ("id")
 );
@@ -143,13 +147,10 @@ CREATE TABLE "app"."app_reviews" (
     "text" TEXT NOT NULL,
     "isApproved" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT now(),
 
     CONSTRAINT "app_reviews_pkey" PRIMARY KEY ("id")
 );
-
--- CreateIndex
-CREATE UNIQUE INDEX "users_email_key" ON "app"."users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "business_foods_businessId_foodId_key" ON "app"."business_foods"("businessId", "foodId");
@@ -173,7 +174,7 @@ ALTER TABLE "app"."food_tags" ADD CONSTRAINT "food_tags_foodId_fkey" FOREIGN KEY
 ALTER TABLE "app"."food_images" ADD CONSTRAINT "food_images_foodId_fkey" FOREIGN KEY ("foodId") REFERENCES "app"."foods"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "app"."businesses" ADD CONSTRAINT "businesses_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "app"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "app"."businesses" ADD CONSTRAINT "businesses_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "app"."user_data"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "app"."business_images" ADD CONSTRAINT "business_images_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "app"."businesses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -194,13 +195,13 @@ ALTER TABLE "app"."business_foods" ADD CONSTRAINT "business_foods_foodId_fkey" F
 ALTER TABLE "app"."reviews" ADD CONSTRAINT "reviews_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "app"."businesses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "app"."reviews" ADD CONSTRAINT "reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "app"."reviews" ADD CONSTRAINT "reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."user_data"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "app"."bookmarks" ADD CONSTRAINT "bookmarks_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "app"."businesses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "app"."bookmarks" ADD CONSTRAINT "bookmarks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "app"."bookmarks" ADD CONSTRAINT "bookmarks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."user_data"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "app"."app_reviews" ADD CONSTRAINT "app_reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "app"."app_reviews" ADD CONSTRAINT "app_reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "app"."user_data"("id") ON DELETE SET NULL ON UPDATE CASCADE;
