@@ -4,5 +4,5 @@
     "deploymentEnabled": false
   },
 
-  "buildCommand": "pnpm cd:app"
+  "buildCommand": "pnpm cd"
 }

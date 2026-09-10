@@ -30,5 +30,8 @@ jobs:
             - name: Install Dependencies
               run: pnpm install --frozen-lockfile
 
+            - name: Generate Prisma Client
+              run: pnpm exec prisma generate
+
             - name: CI Workflow Script
               run: pnpm run ci

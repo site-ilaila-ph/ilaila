@@ -9,7 +9,7 @@
 		"typegen": "next typegen",
 		"dev": "next dev",
 		"ci": " tsc --noEmit && eslint --cache",
-		"cd": "pnpm next build"
+		"cd": "pnpm exec prisma generate && pnpm next build"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.6.0",
