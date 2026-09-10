@@ -1,4 +1,4 @@
-﻿import { forgotPasswordAction } from '@/app/auth/actions'
+import { forgotPasswordAction } from '@/logic/auth-actions'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {

@@ -5,11 +5,11 @@ import {
   getAllAppReviews,
   getAppReviewStats,
   getPendingAppReviews,
-} from "@/app/app-reviews/services";
+} from "@/logic/app-reviews-services";
 import {
   updateAppReviewStatusAction,
   deleteAppReviewAction,
-} from "@/app/app-reviews/actions";
+} from "@/logic/app-reviews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

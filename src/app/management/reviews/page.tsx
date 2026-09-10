@@ -2,8 +2,8 @@
 
 import { startTransition, useEffect, useState } from "react";
 import { MoreHorizontal, Search, Star } from "lucide-react";
-import { getAllReviewsForManagement } from "@/app/management/services";
-import { deleteReviewAction } from "@/app/management/actions";
+import { getAllReviewsForManagement } from "@/logic/management";
+import { deleteReviewAction } from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 

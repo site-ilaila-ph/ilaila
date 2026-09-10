@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { MoreHorizontal, Search, ShieldCheck, Trash2, UserRound } from "lucide-react";
-import { getAllUsersForManagement } from "@/app/management/services";
-import { updateUserRoleAction, deleteUserAction } from "@/app/management/actions";
+import { getAllUsersForManagement } from "@/logic/management";
+import { updateUserRoleAction, deleteUserAction } from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 
 interface User {

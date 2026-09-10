@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   turbopack: { root: import.meta.dirname },
   watchOptions: {
     pollIntervalMs: 20
-  }
+  },
+  typedRoutes: true
 };
 
 export default nextConfig;

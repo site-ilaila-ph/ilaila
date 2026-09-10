@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getBusinessesAction } from "@/app/business/actions";
-import { getFoodItemsAction, getTopRatedFoodsAction } from "@/app/foods/actions";
+import { getBusinessesAction } from "@/logic/business-actions";
+import { getFoodItemsAction, getTopRatedFoodsAction } from "@/logic/foods-actions";
 import type { BusinessListItem } from "@/app/business/types";
-import type { FoodListItem } from "@/app/foods/services";
+import type { FoodListItem } from "@/logic/foods";
 
 export default function HomePage() {
   const [businesses, setBusinesses] = useState<BusinessListItem[]>([]);
@@ -19,15 +19,15 @@ export default function HomePage() {
     async function loadData() {
       const [businessesResult, foodsResult, topRatedResult] = await Promise.all([
         getBusinessesAction({}),
-        getFoodItemsAction(),
-        getTopRatedFoodsAction(),
+        getFoodItemsAction({}),
+        getTopRatedFoodsAction({}),
       ]);
 
       if (!isMounted) return;
 
-      setBusinesses(businessesResult?.data ?? businessesResult ?? []);
-      setFoods(foodsResult ?? []);
-      setTopRatedFoods(topRatedResult ?? []);
+      setBusinesses(businessesResult?.data ?? []);
+      setFoods(foodsResult?.data ?? []);
+      setTopRatedFoods(topRatedResult?.data ?? []);
 
       setIsLoading(false);
     }
@@ -149,7 +149,7 @@ export default function HomePage() {
                   {foods.map((food) => (
                     <Link
                       key={food.id}
-                      href={`/foods/${encodeURIComponent(food.name)}`}
+                      href={`/foods/${food.id}`}
                       className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
                     >
                       <h3 className="mb-2 text-lg font-semibold hover:text-primary">
@@ -188,7 +188,7 @@ export default function HomePage() {
                   {topRatedFoods.map((food) => (
                     <Link
                       key={food.id}
-                      href={`/foods/${encodeURIComponent(food.name)}`}
+                      href={`/foods/${food.id}`}
                       className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
                     >
                       <div className="mb-2 flex items-center justify-between">

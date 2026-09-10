@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { Form, ActionFormExtension } from '@/components/ui/form';
-import { signInAction, signUpAction } from '@/app/auth/actions';
+import { signInAction, signUpAction } from '@/logic/auth-actions';
 import { z } from 'zod';
 import icon from '@/app/icon.svg';
 import bg from '@/assets/login-form-bg.png';

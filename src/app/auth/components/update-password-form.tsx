@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
 import { Form, ActionFormExtension } from '@/components/ui/form'
-import { updatePasswordAction } from '@/app/auth/actions'
+import { updatePasswordAction } from '@/logic/auth-actions'
 import { z } from 'zod'
 
 const schema = z.object({ password: z.string().min(6, 'Password must be at least 6 characters') })

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import teamConfig from "@/config/team";
+import teamConfig from "@/attribution";
 
 export default function TheTeamPage() {
   return (

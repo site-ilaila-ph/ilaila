@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { getFoodItemsAction } from "@/app/foods/actions";
-import type { FoodListItem } from "@/app/foods/services";
+import { getFoodItemsAction } from "@/logic/foods-actions";
+import type { FoodListItem } from "@/logic/foods";
 import { useState, useEffect } from "react";
 
 export default function FoodsPage() {
@@ -117,7 +117,7 @@ export default function FoodsPage() {
             {filteredFoods.map((food) => (
               <Link
                 key={food.id}
-                href={`/foods/${encodeURIComponent(food.name)}`}
+                href={`/foods/${food.id}`}
                 className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
               >
                 <div>

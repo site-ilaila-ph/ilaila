@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Search, Trash2 } from "lucide-react";
-import { getAllFoodsForManagement } from "@/app/management/services";
+import { getAllFoodsForManagement } from "@/logic/management";
 import {
   createFoodAction,
   updateFoodAction,
   deleteFoodAction,
-} from "@/app/management/actions";
+} from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

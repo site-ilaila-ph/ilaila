@@ -13,7 +13,7 @@ import {
   Utensils,
   Users,
 } from "lucide-react";
-import { getManagementStats } from "@/app/management/services";
+import { getManagementStats } from "@/logic/management";
 
 export default function ManagementDashboard() {
   const [stats, setStats] = useState({

@@ -5,12 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   getAllBusinessesForManagement,
-} from "@/app/management/services";
+} from "@/logic/management";
 import {
   createBusinessAction,
   updateBusinessAction,
   deleteBusinessAction,
-} from "@/app/management/actions";
+} from "@/logic/management-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
