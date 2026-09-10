@@ -1,6 +1,6 @@
-import type { Prisma } from '@/generated/prisma/client'
-import { acquirePrismaClient } from '@/lib/infra'
-
+import type { Prisma } from "@/generated/prisma/client";
+import { acquirePrismaClient } from "@/lib/infra";
+import { fail, success } from "@/lib/csap";
 export type FoodWithRelations = Prisma.FoodGetPayload<{
   include: {
     images: true
@@ -25,117 +25,31 @@ export type FoodListItem = Prisma.FoodGetPayload<{
   }
 }>
 
-export async function getAllFood(
-): Promise<FoodListItem[]> {
+export async function getAllFood() {
   const db = acquirePrismaClient();
-
-  return db.food.findMany({
-    include: {
-      images: true,
-      tags: true,
-    },
-    orderBy: {
-      name: 'asc',
-    },
-  })
+  return success(await db.food.findMany({ include: { images: true, tags: true }, orderBy: { name: "asc" } }));
 }
 
-export async function getFoodById(
-  id: string,
-): Promise<FoodWithRelations | null> {
+export async function getFoodById(id: string) {
   const db = acquirePrismaClient();
-
-  return db.food.findUnique({
-    where: { id },
-    include: {
-      images: true,
-      tags: true,
-      businesses: {
-        include: {
-          business: {
-            include: {
-              images: true,
-              tags: true,
-            },
-          },
-        },
-      },
-    },
-  })
+  const data = await db.food.findUnique({ where: { id }, include: { images: true, tags: true, businesses: { include: { business: { include: { images: true, tags: true } } } } } });
+  return data ? success(data) : fail("NOT_FOUND", "Food not found");
 }
 
-export async function getFoodByName(
-  name: string,
-): Promise<FoodWithRelations | null> {
+export async function getFoodByName(name: string) {
   const db = acquirePrismaClient();
-
-  return db.food.findFirst({
-    where: {
-      name: {
-        contains: name,
-        mode: 'insensitive',
-      },
-    },
-    include: {
-      images: true,
-      tags: true,
-      businesses: {
-        include: {
-          business: {
-            include: {
-              images: true,
-              tags: true,
-            },
-          },
-        },
-      },
-    },
-  })
+  const data = await db.food.findFirst({ where: { name: { contains: name, mode: "insensitive" } }, include: { images: true, tags: true, businesses: { include: { business: { include: { images: true, tags: true } } } } } });
+  return data ? success(data) : fail("NOT_FOUND", "Food not found");
 }
 
-export async function getTopRatedFoods(
-  limit: number = 3,
-): Promise<(FoodListItem & { averageRating: number })[]> {
+export async function getTopRatedFoods(limit: number) {
+
   const db = acquirePrismaClient();
-
-  const foods = await db.food.findMany({
-    include: {
-      images: true,
-      tags: true,
-      businesses: {
-        include: {
-          business: {
-            include: {
-              reviews: true,
-            },
-          },
-        },
-      },
-    },
-  })
-
-  const foodsWithRatings = foods
-    .map((food) => {
-      const allReviews = food.businesses.flatMap(
-        (bf) => bf.business?.reviews ?? [],
-      )
-
-      const averageRating =
-        allReviews.length > 0
-          ? allReviews.reduce(
-              (sum, review) => sum + review.foodQuality,
-              0,
-            ) / allReviews.length
-          : 0
-
-      return {
-        ...food,
-        averageRating,
-      }
-    })
-    .filter((food) => food.averageRating > 0)
-    .sort((a, b) => b.averageRating - a.averageRating)
-    .slice(0, limit)
-
-  return foodsWithRatings
+  const foods = await db.food.findMany({ include: { images: true, tags: true, businesses: { include: { business: { include: { reviews: true } } } } } });
+  const withRatings = foods.map((f) => {
+    const reviews = f.businesses.flatMap((b) => b.business?.reviews ?? []);
+    const avg = reviews.length ? reviews.reduce((s, r) => s + r.foodQuality, 0) / reviews.length : 0;
+    return { ...f, averageRating: avg };
+  }).filter((f) => f.averageRating > 0).sort((a, b) => b.averageRating - a.averageRating).slice(0, limit);
+  return success(withRatings);
 }

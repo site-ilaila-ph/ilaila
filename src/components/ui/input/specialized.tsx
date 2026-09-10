@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Input } from "./input";
-import { useHasPointer } from "@/lib/hooks";
+import { useHasPointer } from "@/hooks/use-has-pointer";
 import { InputProps } from "@base-ui/react";
 import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from "../input-group";
 

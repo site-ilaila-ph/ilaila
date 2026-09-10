@@ -21,9 +21,6 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useServerAction } from "@/lib/action/client";
-import { AnyFunctionCoercedServerAction, InferFunctionCoercedServerActionResultData } from "@/lib/action/server";
-import { ActionFailure } from "@/lib/common-server-action-protocol";
 import { cn } from "@/lib/utils";
 import { Button } from "@base-ui/react";
 import { Card } from "./card";
@@ -482,80 +479,3 @@ export const FormError: React.FC<FormErrorProps> = ({ name, className, ...props 
 };
 
 FormError.displayName = "FormError";
-
-// ===========================================================================
-// Server Action Extension
-// ===========================================================================
-interface ActionFormSuccessCallback<
-  TAction extends AnyFunctionCoercedServerAction,
-> {
-  (data: InferFunctionCoercedServerActionResultData<TAction>): Promise<void> | void;
-}
-
-interface ActionFormFailureCallback {
-  (failureResult: ActionFailure): Promise<void> | void;
-}
-
-export interface ActionFormExtensionProps<
-  TAction extends AnyFunctionCoercedServerAction,
-> {
-  action: TAction;
-  onSuccess?: ActionFormSuccessCallback<TAction>;
-  onFailure?: ActionFormFailureCallback;
-}
-
-export const ActionFormExtension: React.FC<
-  ActionFormExtensionProps<AnyFunctionCoercedServerAction>
-> = <
-  TAction extends AnyFunctionCoercedServerAction,
->({
-  action,
-  onSuccess,
-  onFailure,
-}: ActionFormExtensionProps<TAction>) => {
-  const { registerSubmitInterceptor } = useFormExtensionApi();
-  const { execute } = useServerAction({ action });
-
-  useEffect(() => {
-    const unregister = registerSubmitInterceptor(async (data, methods) => {
-      const result = await execute(data as Parameters<TAction>[0]);
-
-      if (result.success) {
-        await onSuccess?.(result.data);
-        return;
-      }
-
-      if (result.type === "validation") {
-        for (const [field, messages] of Object.entries(result.fieldErrors)) {
-          const message = messages?.[0];
-          if (message) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            methods.setError(field as any, { type: "server", message });
-          }
-        }
-      } else {
-        // "insensitive" and "sensitive" both surface as a single root-level
-        // error — the only difference is whether the server-provided
-        // message is safe to show, or we fall back to a generic one.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        methods.setError("root" as any, {
-          type: "server",
-          message:
-            result.type === "insensitive" && result.message
-              ? result.message
-              : "Something went wrong. Please try again.",
-        });
-      }
-
-      await onFailure?.(result);
-
-      return { halt: true };
-    });
-
-    return unregister;
-  }, [execute, onFailure, onSuccess, registerSubmitInterceptor]);
-
-  return null;
-};
-
-ActionFormExtension.displayName = "ActionFormExtension";

@@ -1,6 +1,6 @@
 import { acquireCacheManager, acquirePrismaClient } from "@/lib/infra";
-
-export async function getAllBusinessesForManagement() {
+import { fail, success } from "@/lib/csap";
+export async function getAllBusinessesForManagement(params: { limit?: number } = {}) {
   const cache = acquireCacheManager();
   const db = acquirePrismaClient();
   return cache.cached({
@@ -14,14 +14,14 @@ export async function getAllBusinessesForManagement() {
   });
 }
 
-export async function getBusinessById(id: string) {
+export async function getBusinessById(params: { id: string }) {
   const cache = acquireCacheManager();
   const db = acquirePrismaClient();
   return cache.cached({
-    key: `business:${id}`,
+    key: `business:${params.id}`,
     fn: async () =>
       await db.business.findUnique({
-        where: { id },
+        where: { id: params.id },
         include: {
           tags: true,
           images: true,
@@ -33,7 +33,7 @@ export async function getBusinessById(id: string) {
   });
 }
 
-export async function getAllFoodsForManagement() {
+export async function getAllFoodsForManagement(params: { limit?: number } = {}) {
   const cache = acquireCacheManager();
   const db = acquirePrismaClient();
   return cache.cached({
@@ -81,7 +81,7 @@ export async function getAllUsersForManagement() {
   const db = acquirePrismaClient();
   return cache.cached({
     key: "allUsersForManagement",
-    fn: async () => await db.user.findMany({ orderBy: { created_at: true } }),
+    fn: async () => await db.user.findMany({ orderBy: { createdAt: true } }),
     ttlSeconds: 60,
   });
 }

@@ -1,95 +1,73 @@
 "use server";
 
 import { acquirePrismaClient } from "@/lib/infra";
+import { success } from "@/lib/csap";
 import z from "zod";
-import { AppReview } from "@/generated/prisma/client";
 
-export async function getAllAppReviews({}): Promise<AppReview[]> {
-  const db = acquirePrismaClient();
-
-  return await db.appReview.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export async function getAllAppReviews() {
+  return success(
+    await acquirePrismaClient().appReview.findMany({
+      include: { user: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  );
 }
 
-export async function getApprovedAppReviews({}): Promise<AppReview[]> {
-  const db = acquirePrismaClient();
-  return await db.appReview.findMany({
-    where: { isApproved: true },
-    include: { user: { select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+export async function getApprovedAppReviews() {
+  return success(
+    await acquirePrismaClient().appReview.findMany({
+      where: { isApproved: true },
+      include: { user: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  );
 }
 
-export async function getPendingAppReviews({}): Promise<AppReview[]> {
-  const db = acquirePrismaClient();
-  return await db.appReview.findMany({
-    where: { isApproved: false },
-    include: { user: { select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+export async function getPendingAppReviews() {
+  return success(
+    await acquirePrismaClient().appReview.findMany({
+      where: { isApproved: false },
+      include: { user: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+  );
 }
 
-export async function getAppReviewStats({}) {
-  const db = acquirePrismaClient();
+export async function getAppReviewStats() {
   const [total, approved, pending, avgRatingResult] = await Promise.all([
-    db.appReview.count(),
-    db.appReview.count({ where: { isApproved: true } }),
-    db.appReview.count({ where: { isApproved: false } }),
-    db.appReview.aggregate({ _avg: { rating: true } }),
+    acquirePrismaClient().appReview.count(),
+    acquirePrismaClient().appReview.count({ where: { isApproved: true } }),
+    acquirePrismaClient().appReview.count({ where: { isApproved: false } }),
+    acquirePrismaClient().appReview.aggregate({ _avg: { rating: true } }),
   ]);
-  return {
+  return success({
     total,
     approved,
     pending,
     averageRating: avgRatingResult._avg.rating || 0,
-  };
+  });
 }
 
-const createAppReviewSchema = z.object({
-  userId: z.string().optional(),
-  userName: z.string().optional(),
-  email: z.string().email().optional(),
-  rating: z.number().min(1).max(5),
-  text: z.string().min(10).max(1000),
-});
-
-export const createAppReviewAction = async (
-  input: z.infer<typeof createAppReviewSchema>,
-) => {
-  const db = acquirePrismaClient();
-  return await db.appReview.create({
-    data: { ...input, id: crypto.randomUUID() },
-  });
+export const createAppReviewAction = async (userId: string, email: string, rating: number, text: string) => {
+  return success(
+    await acquirePrismaClient().appReview.create({
+      data: { userId, email, rating, text },
+    }),
+  );
 };
 
-const updateAppReviewStatusSchema = z.object({
-  id: z.string(),
-  isApproved: z.boolean(),
-});
-
 export const updateAppReviewStatusAction = async (
-  input: z.infer<typeof updateAppReviewStatusSchema>,
+  id: string,
+  isApproved: boolean
 ) => {
-  const db = acquirePrismaClient();
-  await db.appReview.update({
-    where: { id: input.id },
-    data: { isApproved: input.isApproved },
+  await acquirePrismaClient().appReview.update({
+    where: { id },
+    data: { isApproved },
   });
-  return { success: true };
+  return success({ updated: true });
 };
 
 export const deleteAppReviewAction = async (id: string) => {
-  const db = acquirePrismaClient();
-  await db.appReview.delete({ where: { id } });
-  return { success: true };
+  await acquirePrismaClient().appReview.delete({ where: { id } });
+  return success({ deleted: true });
 };
