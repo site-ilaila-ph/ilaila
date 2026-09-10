@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -14,33 +13,14 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
+import { Form, ActionFormExtension } from '@/components/ui/form'
+import { updatePasswordAction } from '@/app/auth/actions'
+import { z } from 'zod'
+
+const schema = z.object({ password: z.string().min(6, 'Password must be at least 6 characters') })
 
 export function UpdatePasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const res = await fetch('/api/auth/update-user-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to update password')
-      router.push('/protected')
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : 'An error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -50,25 +30,16 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
           <CardDescription>Please enter your new password below.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleForgotPassword}>
+          <Form schema={schema}>
+            <ActionFormExtension action={updatePasswordAction} onSuccess={() => router.push('/protected')} />
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="password">New password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="New password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <Input id="password" name="password" type="password" placeholder="New password" required />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save new password'}
-              </Button>
+              <Button type="submit" className="w-full">Save new password</Button>
             </div>
-          </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

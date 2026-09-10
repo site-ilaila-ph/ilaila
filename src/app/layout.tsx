@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope, Montserrat } from "next/font/google";
 import "@/app/styles/globals.css";
 import { cn } from "@/lib/utils";
-import { createSessionReader } from "@/lib/session/server";
-import { ClientReadonlySession, SessionContext } from "@/lib/session/client";
 import { cookies } from "next/headers";
-import { acquireCacheManager, acquirePrismaClient } from "@/lib/infra";
 
-const montserratHeading = Montserrat({subsets:['latin'],variable:'--font-heading'});
+const montserratHeading = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
 
-const manrope = Manrope({subsets:['latin'],variable:'--font-sans'});
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,40 +23,29 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Ilaila",
-  description: "Isang website para sa mga restawran at cafe sa mga pamayanan ng San Pedro City, Laguna",
+  description:
+    "Isang website para sa mga restawran at cafe sa mga pamayanan ng San Pedro City, Laguna",
 };
-
-function sanitizeUser(user: any): ClientReadonlySession['user'] {
-  return {
-    id: user.id,
-    userName: user.userName,
-    email: user.email,
-    isAdmin: user.isAdmin
-  }
-}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const session = createSessionReader({ db: acquirePrismaClient(), cache: acquireCacheManager(), cookieMap: cookieStore });
-  const sessionId = await session.getSessionId();
-  const sessionUser = sessionId ? await session.getSessionUser() : null;
-  const clientSession = sessionId && sessionUser
-    ? { id: sessionId, user: sanitizeUser(sessionUser) }
-    : null;
   return (
     <html
       lang="tl"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", manrope.variable, montserratHeading.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        manrope.variable,
+        montserratHeading.variable,
+      )}
     >
-      <body className="min-h-full w-full flex flex-col">
-        <SessionContext value={clientSession}>
-          {children}
-        </SessionContext>
-      </body>
+      <body className="min-h-full w-full flex flex-col">{children}</body>
     </html>
   );
 }

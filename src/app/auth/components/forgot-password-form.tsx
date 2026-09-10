@@ -11,6 +11,10 @@ import {
 import { Input } from '@/components/ui/input/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
+import { Form, ActionFormExtension } from '@/components/ui/form'
+import { z } from 'zod'
+
+const schema = z.object({ email: z.string().email('Invalid email format').trim() })
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   return (
@@ -23,7 +27,8 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={forgotPasswordAction}>
+          <Form schema={schema}>
+            <ActionFormExtension action={forgotPasswordAction} />
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -45,7 +50,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                 Sign in
               </Link>
             </div>
-          </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

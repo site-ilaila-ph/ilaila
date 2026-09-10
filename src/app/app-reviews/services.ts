@@ -1,18 +1,39 @@
+import { AppReview } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
 
-export async function getAllAppReviews() {
+export async function getAllAppReviews(): Promise<AppReview[]> {
   const db = acquirePrismaClient();
-  return await db.appReview.findMany({ include: { user: { select: { email: true, userName: true } } }, orderBy: { createdAt: "desc" } });
+
+  return await db.appReview.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 }
 
-export async function getApprovedAppReviews() {
+export async function getApprovedAppReviews(): Promise<AppReview[]> {
   const db = acquirePrismaClient();
-  return await db.appReview.findMany({ where: { isApproved: true }, include: { user: { select: { email: true, userName: true } } }, orderBy: { createdAt: "desc" } });
+  return await db.appReview.findMany({
+    where: { isApproved: true },
+    include: { user: { select: { id: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
-export async function getPendingAppReviews() {
+export async function getPendingAppReviews(): Promise<AppReview[]> {
   const db = acquirePrismaClient();
-  return await db.appReview.findMany({ where: { isApproved: false }, include: { user: { select: { email: true, userName: true } } }, orderBy: { createdAt: "desc" } });
+  return await db.appReview.findMany({
+    where: { isApproved: false },
+    include: { user: { select: { id: true } } },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 export async function getAppReviewStats() {
@@ -23,5 +44,10 @@ export async function getAppReviewStats() {
     db.appReview.count({ where: { isApproved: false } }),
     db.appReview.aggregate({ _avg: { rating: true } }),
   ]);
-  return { total, approved, pending, averageRating: avgRatingResult._avg.rating || 0 };
+  return {
+    total,
+    approved,
+    pending,
+    averageRating: avgRatingResult._avg.rating || 0,
+  };
 }

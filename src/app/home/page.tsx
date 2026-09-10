@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getBusinessesAction } from "@/app/business/actions";
 import { getFoodItemsAction, getTopRatedFoodsAction } from "@/app/foods/actions";
-import type { BusinessListItem } from "@/app/business/services";
+import type { BusinessListItem } from "@/app/business/types";
 import type { FoodListItem } from "@/app/foods/services";
 
 export default function HomePage() {
@@ -19,21 +19,15 @@ export default function HomePage() {
     async function loadData() {
       const [businessesResult, foodsResult, topRatedResult] = await Promise.all([
         getBusinessesAction({}),
-        getFoodItemsAction({}),
-        getTopRatedFoodsAction(3),
+        getFoodItemsAction(),
+        getTopRatedFoodsAction(),
       ]);
 
       if (!isMounted) return;
 
-      if (businessesResult.success) {
-        setBusinesses((businessesResult.data ?? []).slice(0, 3));
-      }
-      if (foodsResult.success) {
-        setFoods((foodsResult.data ?? []).slice(0, 3));
-      }
-      if (topRatedResult.success) {
-        setTopRatedFoods(topRatedResult.data ?? []);
-      }
+      setBusinesses(businessesResult?.data ?? businessesResult ?? []);
+      setFoods(foodsResult ?? []);
+      setTopRatedFoods(topRatedResult ?? []);
 
       setIsLoading(false);
     }

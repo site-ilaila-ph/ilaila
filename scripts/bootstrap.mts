@@ -1,6 +1,6 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { hash } from "@/app/auth/lib/password";
+import { createClient } from "@supabase/supabase-js";
 
 async function main() {
   if (!process.env.DIRECT_URL) {
@@ -9,19 +9,26 @@ async function main() {
 
   const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL });
   const client = new PrismaClient({ adapter });
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
 
   // check if we already have admins
-  const anyExistingAdmin = await client.user.findFirst({ where: { isAdmin: true } });
+  const anyExistingAdmin = await client.userData.findFirst({ where: { role: 'admin' } });
 
   // add a temporary admin if no admin present yet.
   if (!anyExistingAdmin) {
-    await client.user.create({
-      data: {
-        userName: "Bootstrap site admin",
-        email: "site-bootstrap-ilaila-ph@gmail.com",
-        passwordHash: await hash("00000000"),
-        isAdmin: true,
-      },
+    const { data, error } = await supabase.auth.admin.createUser({
+      email: "site-bootstrap-ilaila-ph@gmail.com",
+      password: "00000000",
+      email_confirm: true,
+    });
+    if (error) throw error;
+
+    await client.userData.update({
+      where: { id: data!.user.id },
+      data: { role: 'admin' },
     });
   }
 

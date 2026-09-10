@@ -1,86 +1,55 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
+import { actionify } from '@/lib/action/server'
+import { signInService, signUpService, signOutService, forgotPasswordService, updatePasswordService } from './services'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { safeNextPath } from '@/lib/safe-next-path'
 
-export async function signInAction(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const nextParam = formData.get('next') as string
+const emailSchema = z.string().email('Invalid email format').trim()
+const passwordSchema = z.string().min(6, 'Password must be at least 6 characters')
+const nextParamSchema = z.string().optional()
 
-  if (!email || !password) {
-    return { error: 'Email and password are required' }
-  }
+export const signInAction = actionify(
+  async ({ email, password, next }: { email: string; password: string; next?: string }) => {
+    await signInService(email, password)
+    const destination = safeNextPath(next, '/protected')
+    redirect(destination)
+  },
+  z.object({ email: emailSchema, password: passwordSchema, next: nextParamSchema })
+)
 
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  })
+export const signUpAction = actionify(
+  async ({ email, password }: { email: string; password: string }) => {
+    const headersList = await headers()
+    const origin = headersList.get('origin') || ''
+    await signUpService(email, password, origin)
+    redirect('/auth/sign-up-success')
+  },
+  z.object({ email: emailSchema, password: passwordSchema })
+)
 
-  if (error) {
-    return { error: error.message }
-  }
+export const signOutAction = actionify(
+  async ({}) => {
+    await signOutService()
+  },
+  z.object({})
+)
 
-  const destination = safeNextPath(nextParam, '/protected')
-  redirect(destination)
-}
+export const forgotPasswordAction = actionify(
+  async ({ email }: { email: string }) => {
+    const headersList = await headers()
+    const origin = headersList.get('origin') || ''
+    await forgotPasswordService(email, origin)
+  },
+  z.object({ email: emailSchema })
+)
 
-export async function signUpAction(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-
-  if (!email || !password) {
-    return { error: 'Email and password are required' }
-  }
-
-  const headersList = await headers()
-  const origin = headersList.get('origin') || ''
-
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
-    email: email.trim(),
-    password,
-    options: { emailRedirectTo: `${origin}/protected` },
-  })
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  redirect('/auth/sign-up-success')
-}
-
-export async function signOutAction() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  redirect('/auth/login')
-}
-
-export async function forgotPasswordAction(formData: FormData) {
-  const email = formData.get('email') as string
-
-  const headersList = await headers()
-  const origin = headersList.get('origin') || ''
-
-  const supabase = await createClient()
-  
-  const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: `${origin}/auth/update-password`,
-  })
-
-  if (error) redirect("/auth/error?error=Something%20went%20wrong")
-}
-
-export async function updatePasswordAction(formData: FormData) {
-  const password = formData.get('password') as string
-
-  const supabase = await createClient()
-  const { error } = await supabase.auth.updateUser({ password })
-
-  if (error) redirect("/auth/error?error=Something%20went%20wrong")
-
-  redirect('/protected')
-}
+export const updatePasswordAction = actionify(
+  async ({ password }: { password: string }) => {
+    await updatePasswordService(password)
+    redirect('/protected')
+  },
+  z.object({ password: passwordSchema })
+)

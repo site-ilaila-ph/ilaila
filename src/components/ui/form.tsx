@@ -20,7 +20,7 @@ import {
   type Path,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
+import { z } from "zod";
 import { useServerAction } from "@/lib/action/client";
 import { AnyFunctionCoercedServerAction, InferFunctionCoercedServerActionResultData } from "@/lib/action/server";
 import { ActionFailure } from "@/lib/common-server-action-protocol";
@@ -133,9 +133,7 @@ const FormInner = <TFieldValues extends FieldValues = FieldValues>(
   }: FormProps<TFieldValues>,
   ref: React.ForwardedRef<HTMLFormElement>,
 ) => {
-  // Form always owns the RHF instance — no bring-your-own-instance
-  // prop. Anything that needs `methods` gets it via context.
-  const methods = useForm<TFieldValues>({
+  const methods = useForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: schema ? zodResolver(schema as any) : undefined,
     defaultValues,

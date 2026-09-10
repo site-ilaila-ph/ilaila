@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import z from "zod";
-import {
-  PrismaClientInitializationError,
-  PrismaClientKnownRequestError,
-  PrismaClientRustPanicError,
-  PrismaClientUnknownRequestError,
-  PrismaClientValidationError,
-} from "@prisma/client/runtime/client";
 import type { AnySerializable } from "../serializable";
 import type { ActionFailure, ActionResponse, ActionValidationErrors } from "../common-server-action-protocol";
 
@@ -35,68 +28,6 @@ type AnyFunctionCoercedServerAction = FunctionCoercedServerAction<
 type InferFunctionCoercedServerActionResultData<
   TFn extends AnyFunctionCoercedServerAction,
 > = Exclude<Awaited<ReturnType<TFn>>, ActionFailure>["data"];
-
-function prismaErrorToActionFailure(error: unknown): ActionFailure | null {
-  if (error instanceof PrismaClientKnownRequestError) {
-    if (error.code === "P2002") {
-      return {
-        success: false,
-        type: "insensitive",
-        hint: "unique-constraint",
-        message: "This value is already in use.",
-      };
-    }
-
-    if (error.code === "P2025") {
-      return {
-        success: false,
-        type: "insensitive",
-        hint: "record-not-found",
-        message: "The requested record could not be found.",
-      };
-    }
-
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-request",
-    };
-  }
-
-  if (error instanceof PrismaClientValidationError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-validation",
-    };
-  }
-
-  if (error instanceof PrismaClientInitializationError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-initialization",
-    };
-  }
-
-  if (error instanceof PrismaClientUnknownRequestError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-unknown-request",
-    };
-  }
-
-  if (error instanceof PrismaClientRustPanicError) {
-    return {
-      success: false,
-      type: "sensitive",
-      hint: "database-engine",
-    };
-  }
-
-  return null;
-}
 
 // --- Implementation ----------------------------------------------------------
 
@@ -133,9 +64,6 @@ function actionify<
         data: data as Awaited<ReturnType<TFn>>,
       };
     } catch (error: any) {
-      const prismaFailure = prismaErrorToActionFailure(error);
-      if (prismaFailure) return prismaFailure;
-
       if (!(error instanceof ApplicationError)) {
         return {
           success: false,

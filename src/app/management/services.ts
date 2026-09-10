@@ -5,7 +5,11 @@ export async function getAllBusinessesForManagement() {
   const db = acquirePrismaClient();
   return cache.cached({
     key: "allBusinessesForManagement",
-    fn: async () => await db.business.findMany({ include: { tags: true, createdBy: { select: { email: true } } }, orderBy: { createdAt: "desc" } }),
+    fn: async () =>
+      await db.business.findMany({
+        include: { tags: true, createdBy: true },
+        orderBy: { createdAt: "desc" },
+      }),
     ttlSeconds: 60,
   });
 }
@@ -15,7 +19,16 @@ export async function getBusinessById(id: string) {
   const db = acquirePrismaClient();
   return cache.cached({
     key: `business:${id}`,
-    fn: async () => await db.business.findUnique({ where: { id }, include: { tags: true, images: true, foods: { include: { food: true } }, reviews: { include: { user: { select: { email: true } } } } } }),
+    fn: async () =>
+      await db.business.findUnique({
+        where: { id },
+        include: {
+          tags: true,
+          images: true,
+          foods: { include: { food: true } },
+          reviews: { include: { user: true } },
+        },
+      }),
     ttlSeconds: 60,
   });
 }
@@ -25,7 +38,11 @@ export async function getAllFoodsForManagement() {
   const db = acquirePrismaClient();
   return cache.cached({
     key: "allFoodsForManagement",
-    fn: async () => await db.food.findMany({ include: { tags: true }, orderBy: { name: "asc" } }),
+    fn: async () =>
+      await db.food.findMany({
+        include: { tags: true },
+        orderBy: { name: "asc" },
+      }),
     ttlSeconds: 60,
   });
 }
@@ -35,14 +52,28 @@ export async function getFoodById(id: string) {
   const db = acquirePrismaClient();
   return cache.cached({
     key: `food:${id}`,
-    fn: async () => await db.food.findUnique({ where: { id }, include: { tags: true, images: true, businesses: { include: { business: true } } } }),
+    fn: async () =>
+      await db.food.findUnique({
+        where: { id },
+        include: {
+          tags: true,
+          images: true,
+          businesses: { include: { business: true } },
+        },
+      }),
     ttlSeconds: 60,
   });
 }
 
 export async function getAllReviewsForManagement() {
   const db = acquirePrismaClient();
-  return await db.review.findMany({ include: { user: { select: { email: true, userName: true } }, business: { select: { name: true } } }, orderBy: { createdAt: "desc" } });
+  return await db.review.findMany({
+    include: {
+      user: { include: { authUser: true } },
+      business: { select: { name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 export async function getAllUsersForManagement() {
@@ -50,7 +81,7 @@ export async function getAllUsersForManagement() {
   const db = acquirePrismaClient();
   return cache.cached({
     key: "allUsersForManagement",
-    fn: async () => await db.user.findMany({ orderBy: { createdAt: "desc" } }),
+    fn: async () => await db.user.findMany({ orderBy: { created_at: true } }),
     ttlSeconds: 60,
   });
 }
@@ -61,7 +92,14 @@ export async function getManagementStats() {
   return cache.cached({
     key: "managementStats",
     fn: async () => {
-      const [userCount, businessCount, foodCount, reviewCount, appReviewCount, pendingAppReviewCount] = await Promise.all([
+      const [
+        userCount,
+        businessCount,
+        foodCount,
+        reviewCount,
+        appReviewCount,
+        pendingAppReviewCount,
+      ] = await Promise.all([
         db.user.count(),
         db.business.count(),
         db.food.count(),
@@ -69,7 +107,14 @@ export async function getManagementStats() {
         db.appReview.count(),
         db.appReview.count({ where: { isApproved: false } }),
       ]);
-      return { users: userCount, businesses: businessCount, foods: foodCount, reviews: reviewCount, appReviews: appReviewCount, pendingAppReviews: pendingAppReviewCount };
+      return {
+        users: userCount,
+        businesses: businessCount,
+        foods: foodCount,
+        reviews: reviewCount,
+        appReviews: appReviewCount,
+        pendingAppReviews: pendingAppReviewCount,
+      };
     },
     ttlSeconds: 60,
   });

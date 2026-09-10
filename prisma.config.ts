@@ -9,7 +9,6 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
 
   migrations: {
-    path: "prisma/migrations",
     seed: "seed/db.mts",
   },
 

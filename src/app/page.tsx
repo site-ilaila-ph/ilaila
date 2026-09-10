@@ -1,28 +1,17 @@
-import { cookies } from "next/headers";
-import { acquirePrismaClient, acquireCacheManager } from "@/lib/infra";
-import { createSessionReader } from "@/lib/session/server";
+import { acquirePrismaClient } from "@/lib/infra";
+import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function RootPage() {
-      const cookieStore = await cookies();
-      const session = createSessionReader({
-        db: acquirePrismaClient(),
-        cache: acquireCacheManager(),
-        cookieMap: cookieStore,
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.getUser();
+
+      if (!data.user) redirect("/landing");
+      
+      const userData = await acquirePrismaClient().userData.findFirstOrThrow({
+            where: { id: data.user.id }
       });
 
-      const sessionId = await session.getSessionId();
-      const user = sessionId ? await session.getSessionUser() : null;
-
-      if (!user) {
-        redirect("/landing");
-      }
-
-      else if (user.isAdmin) {
-        redirect("/management");
-      }
-
-      else {
-        redirect("/home");
-      }
+      if (userData.role == "admin") redirect("/management");
+      else redirect("/home");
 }

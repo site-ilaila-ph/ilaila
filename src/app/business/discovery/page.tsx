@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { getBusinessesAction } from "@/app/business/actions";
-import type { BusinessListItem } from "@/app/business/services";
 import { Button } from "@/components/ui/button";
+import { BusinessListItem } from "../types";
 
 function ratingFor(business: BusinessListItem) {
   if (!business.reviews.length) return 0;
@@ -20,7 +20,7 @@ export default function BusinessDiscoveryPage() {
 
   useEffect(() => {
     getBusinessesAction({}).then((result) => {
-      if (result.success) setBusinesses(result.data ?? []);
+      if (result.success) setBusinesses(result.data);
       setIsLoading(false);
     });
   }, []);
@@ -48,37 +48,3 @@ function BusinessCard({ business, featured = false }: { business: BusinessListIt
   const rating = ratingFor(business);
   return <Link href={`/business/${encodeURIComponent(business.name.toLowerCase().replaceAll(" ", "-"))}`} className={`group flex flex-col overflow-hidden border border-brand-border bg-white transition hover:-translate-y-1 hover:border-primary hover:shadow-lg ${featured ? "min-h-64" : "min-h-56"}`}><div className={`relative flex items-end bg-brand-deep p-5 text-white ${featured ? "h-36" : "h-28"}`}><div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,var(--color-brand-accent),transparent_38%)]" /><span className="relative text-xs font-semibold uppercase tracking-[0.14em] text-brand-muted">{business.tags[0]?.value ?? "Local place"}</span></div><div className="flex flex-1 flex-col p-5"><div className="flex items-start justify-between gap-3"><h3 className="font-heading text-xl font-bold group-hover:text-primary">{business.name}</h3>{rating > 0 && <span className="flex shrink-0 items-center gap-1 text-sm font-semibold"><Star className="size-4 fill-brand-accent text-brand-accent" />{rating.toFixed(1)}</span>}</div><p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{business.description}</p><div className="mt-auto flex items-center justify-between gap-3 pt-5 text-xs text-muted-foreground"><span className="flex min-w-0 items-center gap-1 truncate"><MapPin className="size-3.5 shrink-0 text-primary" />{business.address}</span><ArrowRight className="size-4 shrink-0 text-primary transition group-hover:translate-x-1" /></div></div></Link>;
 }
-
-/*
- * LEGACY VERSION - intentionally disabled for reference.
- * The active implementation above replaces this original simple directory.
- *
- * "use client";
- * import { useEffect, useState } from "react";
- * import Link from "next/link";
- * import { getBusinessesAction } from "@/app/business/actions";
- * import type { BusinessListItem } from "@/app/business/services";
- *
- * type Business = BusinessListItem;
- *
- * export default function BusinessDiscoveryPage() {
- *   const [businesses, setBusinesses] = useState<Business[]>([]);
- *   const [isLoading, setIsLoading] = useState(true);
- *
- *   useEffect(() => {
- *     let isMounted = true;
- *     async function loadBusinesses() {
- *       const result = await getBusinessesAction({});
- *       if (!isMounted) return;
- *       if (result.success) setBusinesses(result.data ?? []);
- *       setIsLoading(false);
- *     }
- *     void loadBusinesses();
- *     return () => { isMounted = false; };
- *   }, []);
- *
- *   if (isLoading) return <main className="min-h-screen bg-background text-foreground"><nav className="border-b border-border bg-card/80 backdrop-blur"><div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4"><Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">Ilaila</Link></div></nav><div className="mx-auto max-w-6xl px-6 py-20 text-center"><p>Loading businesses...</p></div></main>;
- *
- *   return <main className="min-h-screen bg-background text-foreground"><nav className="border-b border-border bg-card/80 backdrop-blur"><div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4"><Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">Ilaila</Link><div className="flex gap-3"><Link href="/business/discovery" className="rounded-full border border-border px-4 py-2 text-sm font-medium">Businesses</Link></div></div></nav><div className="mx-auto max-w-6xl px-6 py-20"><div className="mb-12 text-center"><h1 className="mb-4 text-4xl font-bold tracking-tight">Discover Local Businesses</h1><p className="text-lg text-muted-foreground">Explore the vibrant food and business scene of San Pedro</p></div>{businesses.length === 0 ? <div className="rounded-lg border border-border bg-card p-8 text-center"><p className="text-muted-foreground">No businesses found</p></div> : <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{businesses.map((business) => <Link key={business.id} href={`/business/${business.id}`} className="group rounded-lg border border-border bg-card p-6 transition hover:shadow-lg"><h3 className="mb-2 text-lg font-semibold group-hover:text-primary">{business.name}</h3><p className="mb-4 line-clamp-2 text-sm text-muted-foreground">{business.description}</p><p className="text-sm font-medium text-primary">{business.address}</p></Link>)}</div>}</div></main>;
- * }
- */

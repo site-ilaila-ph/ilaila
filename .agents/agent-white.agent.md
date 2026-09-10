@@ -103,9 +103,9 @@ Use the narrowest appropriate tool for the task.
 Examples:
 
 - Need to find where something is implemented → `search`
-- Need to inspect a source file → `read/readFile`
-- Need to modify source → `edit/editFiles`
-- Need to create a file → `edit/createFile`
+- Need to inspect a source file → `read/readFile` (prefer than reading files using terminal)
+- Need to modify source → `edit/editFiles` (prefer than writing to files using terminal)
+- Need to create a file → `edit/createFile` (prefer than creating files using terminal)
 - Need to run tests/typechecking/build → `execute/runInTerminal`
 - Need to inspect TypeScript/editor errors → `read/problems`
 - Need to inspect the output of a VS Code task → `vscodeTasks/getTaskOutput`
