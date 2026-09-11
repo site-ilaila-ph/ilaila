@@ -9,6 +9,8 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function mapManagementUserFailure(request: NextRequest, error: unknown, action: string): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(request, { detail: "The request body must be valid JSON." });

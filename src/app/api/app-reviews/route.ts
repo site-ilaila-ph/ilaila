@@ -10,6 +10,8 @@ import {
   internalErrorProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 const createAppReviewSchema = z.object({
   userId: z.uuid(),
   email: z.email(),

@@ -3,6 +3,8 @@ import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
 import { internalErrorProblem, notFoundProblem } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function mapFoodReadFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Food read failed", error);
   return internalErrorProblem(request, { detail: "Unable to load foods right now. Please try again later." });

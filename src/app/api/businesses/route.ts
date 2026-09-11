@@ -6,6 +6,8 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function mapBusinessReadFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Business read failed", error);
   return internalErrorProblem(request, { detail: "Unable to load businesses right now. Please try again later." });

@@ -8,6 +8,8 @@ import {
   tooManyRequestsProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function isAuthError(error: unknown): error is AuthError {
   return (
     typeof error === "object" &&

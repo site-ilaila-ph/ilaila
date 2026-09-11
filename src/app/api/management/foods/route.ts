@@ -9,6 +9,8 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function isMissingId(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientValidationError &&

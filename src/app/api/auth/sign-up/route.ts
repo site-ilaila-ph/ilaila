@@ -9,6 +9,8 @@ import {
 } from "@/lib/responses/problem";
 import { withLogging } from "@/lib/logging";
 
+export const runtime = "nodejs";
+
 function isAuthError(error: unknown): error is AuthError {
   return (
     typeof error === "object" &&

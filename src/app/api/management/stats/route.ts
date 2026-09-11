@@ -3,6 +3,8 @@ import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
 import { internalErrorProblem, ok } from "@/lib/responses";
 
+export const runtime = "nodejs";
+
 function mapManagementStatsFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Management stats read failed", error);
   return internalErrorProblem(request, { detail: "Unable to load dashboard stats right now. Please try again later." });

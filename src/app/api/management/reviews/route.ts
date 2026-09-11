@@ -8,6 +8,8 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function mapManagementReviewFailure(request: NextRequest, error: unknown): NextResponse {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
     return notFoundProblem(request, { code: "review-not-found", detail: "The review does not exist." });

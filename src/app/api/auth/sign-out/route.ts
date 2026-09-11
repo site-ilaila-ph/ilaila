@@ -4,6 +4,8 @@ import type { AuthError } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { badRequestProblem, internalErrorProblem } from '@/lib/responses/problem'
 
+export const runtime = "nodejs";
+
 function isAuthError(error: unknown): error is AuthError {
   return (
     typeof error === "object" &&

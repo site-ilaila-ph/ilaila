@@ -9,6 +9,8 @@ import {
   unauthorizedProblem,
 } from "@/lib/responses/problem";
 
+export const runtime = "nodejs";
+
 function mapSignInFailure(request: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(request, { detail: "The request body must be valid JSON." });
