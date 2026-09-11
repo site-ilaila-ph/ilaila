@@ -14,7 +14,7 @@ CREATE TABLE "app"."user_data" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_auth_id_key" ON "app"."user_data"("auth_id");
+CREATE UNIQUE INDEX "users_auth_id_key" ON "app"."user_data"("authId");
 
 -- AddForeignKey
 ALTER TABLE "app"."user_data" ADD CONSTRAINT "users_auth_id_fkey" FOREIGN KEY ("authId") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
