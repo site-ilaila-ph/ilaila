@@ -22,9 +22,4 @@ ALTER TABLE "app"."uploads" ADD CONSTRAINT "uploads_userId_fkey" FOREIGN KEY ("u
 -- CreateIndex for UserData @@index([authId]).
 -- The initial migration only created the UNIQUE index "users_auth_id_key" (covers @@unique([authId])),
 -- but the current schema also declares @@index([authId]).
-CREATE INDEX "user_data_authId_idx" ON "app"."user_data"("auth_id");
-
--- AlterTable: make app.user_data.auth_id required to match schema (authId String @db.Uuid, no "?")
--- NOTE: this will fail if any existing rows have NULL "auth_id". Clean or backfill those rows first.
--- The existing UNIQUE index "users_auth_id_key" already satisfies @@unique([authId]), so no new index is needed.
-ALTER TABLE "app"."user_data" ALTER COLUMN "auth_id" SET NOT NULL;
+CREATE INDEX "user_data_authId_idx" ON "app"."user_data"("authId");

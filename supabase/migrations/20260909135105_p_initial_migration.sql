@@ -5,7 +5,7 @@ CREATE SCHEMA IF NOT EXISTS "app";
 CREATE TYPE "app"."user_role" AS ENUM ('viewer', 'admin');
 CREATE TABLE "app"."user_data" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
-    "auth_id" UUID,
+    "authId" UUID,
     "role" "app"."user_role" NOT NULL DEFAULT 'viewer',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT now(),
@@ -14,10 +14,10 @@ CREATE TABLE "app"."user_data" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_auth_id_key" ON "app"."user_data"("auth_id");
+CREATE UNIQUE INDEX "users_auth_id_key" ON "app"."user_data"("authId");
 
 -- AddForeignKey
-ALTER TABLE "app"."user_data" ADD CONSTRAINT "users_auth_id_fkey" FOREIGN KEY ("auth_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "app"."user_data" ADD CONSTRAINT "users_auth_id_fkey" FOREIGN KEY ("authId") REFERENCES "auth"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- CreateTable
 CREATE TABLE "app"."foods" (
