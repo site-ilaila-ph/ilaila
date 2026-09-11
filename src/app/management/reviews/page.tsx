@@ -75,8 +75,8 @@ export default function ManageReviews() {
   return (
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div><p className="mb-2 text-xs font-medium text-slate-400">Mga Pahina / Mga Review</p><h1 className="text-3xl font-bold tracking-tight text-slate-900">Mga Review</h1></div>
-        <div className="flex w-full items-center gap-2 sm:w-auto"><div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" /></div><button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm"><MoreHorizontal size={19} /></button></div>
+        <div><p className="mb-2 text-xs font-medium text-muted-foreground">Mga Pahina / Mga Review</p><h1 className="text-3xl font-bold tracking-tight text-foreground">Mga Review</h1></div>
+        <div className="flex w-full items-center gap-2 sm:w-auto"><div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm border border-border sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground" /></div><button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground border border-border shadow-sm transition hover:text-primary"><MoreHorizontal size={19} /></button></div>
       </div>
 
         <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
@@ -94,7 +94,7 @@ export default function ManageReviews() {
         ) : (
           <div className="space-y-3">
             {visibleReviews.map((review) => (
-              <Card key={review.id} className="rounded-2xl border-slate-200 bg-white shadow-[0_8px_30px_rgba(65,93,145,0.08)] transition hover:border-blue-200">
+              <Card key={review.id} className="rounded-2xl border-border bg-card shadow-sm transition hover:border-primary/50">
                 <CardContent className="py-4">
                   <div className="mb-3 flex items-start justify-between">
                     <div>
@@ -107,8 +107,8 @@ export default function ManageReviews() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="flex items-center gap-1 text-lg font-bold text-amber-500"><Star size={15} fill="currentColor" />{getAverageRating(review)}</p>
-                      <p className="text-xs text-slate-400">Karaniwang Marka</p>
+                      <p className="flex items-center gap-1 text-lg font-bold text-primary"><Star size={15} fill="currentColor" />{getAverageRating(review)}</p>
+                      <p className="text-xs text-muted-foreground">Karaniwang Marka</p>
                     </div>
                   </div>
 

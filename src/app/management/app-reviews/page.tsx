@@ -269,7 +269,7 @@ export default function ManageAppReviews() {
                               </span>
                               <span className="text-muted-foreground">/5</span>
                             </div>
-                            <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold bg-yellow-500 text-white">
+                            <div className="inline-block rounded-full border border-border bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground">
                               Nakabinbin
                             </div>
                           </div>

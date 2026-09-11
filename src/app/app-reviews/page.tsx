@@ -80,9 +80,9 @@ export default function SubmitAppReview() {
         </div>
 
         {submitted && (
-          <Card className="mb-8 border-emerald-200 bg-emerald-50">
+          <Card className="mb-8 border-primary/30 bg-primary/10">
             <CardContent className="py-4 text-center">
-              <p className="font-semibold text-emerald-700">
+              <p className="font-semibold text-primary">
                 Salamat! Naipadala ang iyong review at kasalukuyang naghihintay ng pag-apruba.
               </p>
             </CardContent>

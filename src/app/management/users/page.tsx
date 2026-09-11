@@ -86,11 +86,11 @@ export default function ManageUsers() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Mga Gumagamit</h1>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm border border-border sm:w-64 sm:flex-none">
             <Search size={16} />
-            <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" suppressHydrationWarning className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" />
+            <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" suppressHydrationWarning className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground" />
           </div>
-          <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-blue-500"><MoreHorizontal size={19} /></button>
+          <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground border border-border shadow-sm transition hover:text-primary"><MoreHorizontal size={19} /></button>
         </div>
       </div>
 
@@ -103,29 +103,29 @@ export default function ManageUsers() {
       </div>
 
         {isLoading ? (
-          <div className="rounded-2xl bg-white py-16 text-center shadow-[0_8px_30px_rgba(65,93,145,0.08)]">
-            <p className="text-sm text-slate-400">Ikinakarga ang mga gumagamit...</p>
+          <div className="rounded-2xl bg-card py-16 text-center shadow-sm border border-border">
+            <p className="text-sm text-muted-foreground">Ikinakarga ang mga gumagamit...</p>
           </div>
         ) : visibleUsers.length === 0 ? (
-          <div className="rounded-2xl bg-white py-16 text-center shadow-[0_8px_30px_rgba(65,93,145,0.08)]">
-            <UserRound className="mx-auto mb-3 text-slate-300" size={30} />
-            <p className="text-sm text-slate-400">Walang nakitang gumagamit</p>
+          <div className="rounded-2xl bg-card py-16 text-center shadow-sm border border-border">
+            <UserRound className="mx-auto mb-3 text-muted-foreground/50" size={30} />
+            <p className="text-sm text-muted-foreground">Walang nakitang gumagamit</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(65,93,145,0.08)]">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className="min-w-[760px]">
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-slate-100 px-5 py-4 text-xs font-semibold text-slate-400">
+              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-border px-5 py-4 text-xs font-semibold text-muted-foreground">
                 <span className="flex items-center gap-3"><input type="checkbox" aria-label="Piliin lahat" /> Gumagamit</span><span>Mga Review</span><span>Mga Bookmark</span><span>Tungkulin</span><span />
               </div>
               {visibleUsers.map((user) => (
-                <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-0 hover:bg-slate-50/70">
+                <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-muted/50">
                   <div className="flex items-center gap-3">
-                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">{user.email.charAt(0).toUpperCase()}</div>
-                    <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-700">{user.userName || "Walang username"}</p><p className="truncate text-xs text-slate-400">{user.email}</p></div>
+                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">{user.email.charAt(0).toUpperCase()}</div>
+                    <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{user.userName || "Walang username"}</p><p className="truncate text-xs text-muted-foreground">{user.email}</p></div>
                   </div>
-                  <span className="text-sm text-slate-600">{user._count?.reviews || 0}</span>
-                  <span className="text-sm text-slate-600">{user._count?.bookmarks || 0}</span>
-                  <span className={`flex items-center gap-1.5 text-sm ${user.isAdmin ? "font-semibold text-blue-600" : "text-slate-500"}`}><ShieldCheck size={15} />{user.isAdmin ? "Tagapangasiwa" : "Gumagamit"}</span>
+                  <span className="text-sm text-muted-foreground">{user._count?.reviews || 0}</span>
+                  <span className="text-sm text-muted-foreground">{user._count?.bookmarks || 0}</span>
+                  <span className={`flex items-center gap-1.5 text-sm ${user.isAdmin ? "font-semibold text-primary" : "text-muted-foreground"}`}><ShieldCheck size={15} />{user.isAdmin ? "Tagapangasiwa" : "Gumagamit"}</span>
                   <div className="flex justify-end gap-1">
                     <Button
                       variant={user.isAdmin ? "destructive" : "outline"}
@@ -155,5 +155,5 @@ export default function ManageUsers() {
 }
 
 function FilterButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className={`rounded-full px-3.5 py-2 text-xs transition ${active ? "bg-blue-500 font-semibold text-white shadow-sm" : "bg-white text-slate-500 hover:text-blue-500"}`}>{label}</button>;
+  return <button type="button" onClick={onClick} className={`rounded-full px-3.5 py-2 text-xs transition ${active ? "bg-primary font-semibold text-primary-foreground shadow-sm" : "bg-card text-muted-foreground border border-border hover:text-primary"}`}>{label}</button>;
 }

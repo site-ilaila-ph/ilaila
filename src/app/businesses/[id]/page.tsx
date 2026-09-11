@@ -391,7 +391,7 @@ export default function BusinessProfilePage({
                         className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs ${
                           menuFilter === item
                             ? "border-primary bg-primary text-primary-foreground"
-                            : "border-border bg-white"
+                            : "border-border bg-card"
                         }`}
                       >
                         {item}
@@ -401,7 +401,7 @@ export default function BusinessProfilePage({
                   <select
                     value={menuSort}
                     onChange={(event) => setMenuSort(event.target.value as typeof menuSort)}
-                    className="rounded-full border border-border bg-white px-3 py-1.5 text-xs"
+                    className="rounded-full border border-border bg-card px-3 py-1.5 text-xs"
                   >
                     <option value="popular">Ayusin ang menu</option>
                     <option value="price-low">Presyo: mababa hanggang mataas</option>
@@ -490,7 +490,7 @@ export default function BusinessProfilePage({
                             [key]: Number(event.target.value),
                           })
                         }
-                        className="mt-1 block w-full border border-border bg-white px-2 py-2 text-sm text-foreground"
+                        className="mt-1 block w-full border border-border bg-card px-2 py-2 text-sm text-foreground"
                       >
                         {[1, 2, 3, 4, 5].map((value) => (
                           <option key={value} value={value}>
@@ -506,7 +506,7 @@ export default function BusinessProfilePage({
                   onChange={(event) => setReviewText(event.target.value)}
                   placeholder="Ano ang dapat malaman ng mga tao bago pumunta?"
                   rows={4}
-                  className="w-full border border-border bg-white p-3 text-sm outline-none focus:border-primary"
+                  className="w-full border border-border bg-card p-3 text-sm outline-none focus:border-primary"
                 />
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-xs text-muted-foreground">
@@ -521,7 +521,7 @@ export default function BusinessProfilePage({
                     onDismiss={() => setReviewError(null)}
                   />
                 )}
-                {reviewMessage && <p className="text-sm text-emerald-700">{reviewMessage}</p>}
+                {reviewMessage && <p className="text-sm text-primary font-medium">{reviewMessage}</p>}
               </form>
             </section>
           </div>
@@ -555,7 +555,7 @@ export default function BusinessProfilePage({
               </div>
 
               {/* Map & Google Maps Location Link */}
-              <div className="overflow-hidden border border-border bg-white rounded-xl shadow-xs">
+              <div className="overflow-hidden border border-border bg-card rounded-xl shadow-xs">
                 <h3 className="p-6 pb-3 text-lg font-semibold">Hanapin sa mapa</h3>
                 <iframe
                   title={`Map showing ${business.name}`}
@@ -577,7 +577,7 @@ export default function BusinessProfilePage({
               </div>
 
               {relatedBusinesses.length > 0 && (
-                <div className="border border-border bg-white p-6 rounded-xl">
+                <div className="border border-border bg-card p-6 rounded-xl">
                   <h3 className="mb-4 text-lg font-semibold">Maaari mo ring magustuhan</h3>
                   <div className="space-y-4">
                     {relatedBusinesses.map((item) => (

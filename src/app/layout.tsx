@@ -20,6 +20,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const runtime = "nodejs";
+
 export const metadata: Metadata = {
   title: "Ilaila",
   description:
