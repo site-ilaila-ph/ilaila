@@ -31,7 +31,7 @@ export const proxy = async (request: NextRequest) => {
   assert(supabaseUrl, "A supabase url was not configured via environment variable.");
   assert(supabaseKey, "No supabase key was provided via the environment variables.");
 
-  const supabase = createServerClient(supabaseKey, supabaseUrl, {
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
