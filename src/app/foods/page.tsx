@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Utensils } from "lucide-react";
 import type { FoodListItem } from "./types";
 import { useState, useEffect } from "react";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -110,8 +111,10 @@ export default function FoodsPage() {
 
         {filteredFoods.length === 0 ? (
           <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-xs">
-            <div className="mb-3 text-4xl">🍲</div>
-            <h3 className="text-lg font-semibold">Walang nakitang tugmang pagkain</h3>
+            <h3 className="flex items-center justify-center gap-2 text-lg font-semibold">
+              <Utensils aria-hidden="true" className="size-6 shrink-0 text-primary" />
+              Walang nakitang tugmang pagkain
+            </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Subukang isaayos ang iyong paghahanap upang makahanap ng higit pang mga pagkaing pamana.
             </p>
@@ -126,7 +129,9 @@ export default function FoodsPage() {
               >
                 <div>
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="rounded-lg bg-primary/10 p-2.5 text-xl">🍲</span>
+                    <span className="rounded-lg bg-primary/10 p-2.5 text-xl">
+                      <Utensils aria-hidden="true" className="size-5 text-primary" />
+                    </span>
                     <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition">
                       Tingnan ang Resipe &rarr;
                     </span>

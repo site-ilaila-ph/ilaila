@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Search, Trash2 } from "lucide-react";
+import { MoreHorizontal, Search, Trash2, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -269,7 +269,7 @@ export default function ManageFoods() {
               <div className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] gap-4 border-b border-border px-5 py-4 text-xs font-semibold text-muted-foreground"><span>Pagkain</span><span>Negosyo</span><span>Larawan</span><span>Uri</span><span /></div>
             {visibleFoods.map((food) => (
               <div key={food.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] items-center gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-muted/50">
-                  <div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">🍲</div><div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{food.name}</p><p className="truncate text-xs text-muted-foreground">{food.description}</p></div></div>
+                  <div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground"><Utensils aria-hidden="true" className="size-4" /></div><div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{food.name}</p><p className="truncate text-xs text-muted-foreground">{food.description}</p></div></div>
                   <span className="text-sm text-foreground">{food._count?.businesses || 0}</span><span className="text-sm text-foreground">{food._count?.images || 0}</span><span className="text-sm text-muted-foreground">{food.isHeritage ? "Pamanang-kultura" : "Karaniwan"}</span>
                   <div className="flex justify-end gap-2">
                     <Button

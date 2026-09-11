@@ -37,7 +37,7 @@ export default function SubmitAppReview() {
         }),
       });
       if (!response.ok) {
-        throw new Error(await readProblemMessage(response, "Failed to submit app review"));
+        throw new Error(await readProblemMessage(response, "Hindi naisumite ang review ng app"));
       }
 
       setSubmitted(true);
@@ -52,7 +52,7 @@ export default function SubmitAppReview() {
       setTimeout(() => setSubmitted(false), 3000);
     } catch (error) {
       console.error("Failed to submit review:", error);
-      setSubmitError(error instanceof Error ? error.message : "Failed to submit review. Please try again.");
+      setSubmitError(error instanceof Error ? error.message : "Hindi naisumite ang review. Pakisubukang muli.");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,16 +66,16 @@ export default function SubmitAppReview() {
             href="/home"
             className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
           >
-            ← Back to Home
+            ← Bumalik sa Home
           </Link>
         </div>
       </nav>
 
       <div className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Share Your Feedback</h1>
+          <h1 className="text-4xl font-bold mb-2">Ibahagi ang Iyong Feedback</h1>
           <p className="text-muted-foreground">
-            Help us improve Ilaila by sharing your thoughts and experience
+            Tulungan kaming mapabuti ang Ilaila sa pamamagitan ng pagbabahagi ng iyong mga saloobin at karanasan
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function SubmitAppReview() {
           <Card className="mb-8 border-emerald-200 bg-emerald-50">
             <CardContent className="py-4 text-center">
               <p className="font-semibold text-emerald-700">
-                Thank you! Your review has been submitted and is pending approval.
+                Salamat! Naipadala ang iyong review at kasalukuyang naghihintay ng pag-apruba.
               </p>
             </CardContent>
           </Card>
@@ -93,27 +93,27 @@ export default function SubmitAppReview() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Write a Review</CardTitle>
+            <CardTitle>Sumulat ng Review</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div>
-                <Label htmlFor="userName">Name (optional)</Label>
+                <Label htmlFor="userName">Pangalan (opsyonal)</Label>
                 <Input
                   id="userName"
                   value={formData.userName}
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                  placeholder="Your name"
+                  placeholder="Iyong pangalan"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Leave empty to submit anonymously
+                  Iwanang blangko upang magsumite nang hindi nagpapakilala
                 </p>
               </div>
 
               {/* Email */}
               <div>
-                <Label htmlFor="email">Email (optional)</Label>
+                <Label htmlFor="email">Email (opsyonal)</Label>
                 <Input
                   id="email"
                   type="email"
@@ -143,18 +143,18 @@ export default function SubmitAppReview() {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  1 = Not satisfied, 5 = Very satisfied
+                  1 = Hindi nasiyahan, 5 = Lubos na nasiyahan
                 </p>
               </div>
 
               {/* Review Text */}
               <div>
-                <Label htmlFor="text">Your Review</Label>
+                <Label htmlFor="text">Iyong Review</Label>
                 <textarea
                   id="text"
                   value={formData.text}
                   onChange={(e) => setFormData({ ...formData, text: e.target.value })}
-                  placeholder="Tell us what you think about Ilaila. What do you like? What could we improve?"
+                  placeholder="Sabihin sa amin ang iyong saloobin tungkol sa Ilaila. Ano ang nagustuhan mo? Ano ang maaari naming mapabuti?"
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   rows={5}
                   minLength={10}
@@ -162,7 +162,7 @@ export default function SubmitAppReview() {
                   required
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  {formData.text.length}/1000 characters
+                  {formData.text.length}/1000 na karakter
                 </p>
               </div>
 
@@ -171,11 +171,11 @@ export default function SubmitAppReview() {
                 disabled={isSubmitting || formData.text.length < 10}
                 className="w-full"
               >
-                {isSubmitting ? "Submitting..." : "Submit Review"}
+                {isSubmitting ? "Nagpapadala..." : "Isumite ang Review"}
               </Button>
 
               <p className="text-xs text-muted-foreground text-center">
-                Your review will be reviewed by our team before being published.
+                Susuriin mula ng aming koponan ang iyong review bago ito ilathala.
               </p>
             </form>
           </CardContent>
@@ -183,9 +183,9 @@ export default function SubmitAppReview() {
 
         {/* Featured Reviews Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">What Users Say</h2>
+          <h2 className="text-2xl font-bold mb-6">Ano ang Sinasabi ng mga Gumagamit</h2>
           <p className="text-muted-foreground mb-6">
-            Approved reviews from our community will appear here
+            Dito lalabas ang mga review mula sa aming komunidad na naaprubahan na
           </p>
         </div>
       </div>

@@ -42,6 +42,7 @@ export default async function RootLayout({
         "font-sans",
         manrope.variable,
         montserratHeading.variable,
+        "notranslate"
       )}
     >
       <body className="min-h-full w-full flex flex-col">{children}</body>

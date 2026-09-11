@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { MapPin, Star, Store, Utensils } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "@/app/businesses/types";
@@ -88,8 +89,10 @@ export default function HomePage() {
             href="/businesses/discovery"
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
-            <div className="mb-4 text-3xl">🏪</div>
-            <h2 className="mb-2 text-xl font-semibold">Tuklasin ang mga negosyo</h2>
+            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
+              <Store aria-hidden="true" className="size-6 shrink-0 text-primary" />
+              Tuklasin ang mga negosyo
+            </h2>
             <p className="text-sm text-muted-foreground">
               Mag-browse ng mga lokal na negosyo at restawran sa San Pedro
             </p>
@@ -99,8 +102,10 @@ export default function HomePage() {
             href="/foods"
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
-            <div className="mb-4 text-3xl">🍲</div>
-            <h2 className="mb-2 text-xl font-semibold">Mga pagkaing pamana</h2>
+            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
+              <Utensils aria-hidden="true" className="size-6 shrink-0 text-primary" />
+              Mga pagkaing pamana
+            </h2>
             <p className="text-sm text-muted-foreground">
               Alamin ang tungkol sa mga tradisyonal na pagkain at recipe
             </p>
@@ -110,8 +115,10 @@ export default function HomePage() {
             href="/about/san-pedro"
             className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
           >
-            <div className="mb-4 text-3xl">📍</div>
-            <h2 className="mb-2 text-xl font-semibold">Tungkol sa San Pedro</h2>
+            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
+              <MapPin aria-hidden="true" className="size-6 shrink-0 text-primary" />
+              Tungkol sa San Pedro
+            </h2>
             <p className="text-sm text-muted-foreground">
               Tuklasin ang kasaysayan at kultura ng lugar
             </p>
@@ -212,7 +219,9 @@ export default function HomePage() {
                           <span className="text-sm font-bold text-primary">
                             {food.averageRating.toFixed(1)}
                           </span>
-                          <span className="text-xs text-primary">⭐</span>
+                          <span className="text-xs text-primary">
+                            <Star aria-hidden="true" className="size-3 fill-current" />
+                          </span>
                         </div>
                       </div>
                       <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">

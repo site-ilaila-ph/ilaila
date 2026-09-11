@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Flower2, Landmark, PartyPopper } from "lucide-react";
 import { useEffect } from "react";
 
 const stats = [
-  { label: "Land area", value: "24.05 km²" },
-  { label: "Founded (Jan 18)", value: "1725" },
-  { label: "Barangays", value: "28" },
-  { label: "Population (2020)", value: "~325k" },
+  { label: "Lawak ng lupa", value: "24.05 km²" },
+  { label: "Itinatag (Ene 18)", value: "1725" },
+  { label: "Mga Barangay", value: "28" },
+  { label: "Populasyon (2020)", value: "~325k" },
 ];
 
 const barangays = [
@@ -21,24 +22,24 @@ const barangays = [
 
 const milestones = [
   {
-    phase: "Colonial",
-    title: "Founded as San Pedro de Tunasan",
-    text: "Established January 18, 1725 after separating from Cabuyao, named after the medicinal tunas plants on its shores.",
+    phase: "Kolonyal",
+    title: "Itinatag bilang San Pedro de Tunasan",
+    text: "Itinatag noong Enero 18, 1725 pagkatapos humiwalay sa Cabuyao, pinangalanan sa mga gamot na tunas na halaman sa mga dalampasigan nito.",
   },
   {
-    phase: "Geography",
-    title: "Agrarian friar-land hacienda",
-    text: "An agrarian estate under Spanish religious orders, with sampaguita farming shaping early local life.",
+    phase: "Heograpiya",
+    title: "Hacienda ng mga prayle",
+    text: "Isang agraryong ari-arian sa ilalim ng mga Kastilang relihiyosong samahan, kung saan humubog ang pagtatanim ng sampaguita sa maagang buhay ng pamayanan.",
   },
   {
-    phase: "Modern",
-    title: "Laguna's northernmost gateway",
-    text: "Bordered by Muntinlupa to the north via the Tunasan River and Biñan to the south.",
+    phase: "Makabago",
+    title: "Pinakahilagang tarangkahan ng Laguna",
+    text: "Hangganan ang Muntinlupa sa hilaga sa pamamagitan ng Ilog Tunasan at ang Biñan sa timog.",
   },
   {
-    phase: "Today",
-    title: "A suburban dormitory town",
-    text: "Evolved into a bustling urbanized city — a residential hub for Metro Manila commuters.",
+    phase: "Ngayon",
+    title: "Isang suburban dormitoryong lungsod",
+    text: "Umunlad bilang mausisang urbanisadong lungsod — isang pabahay-hub para sa mga taga-Metro Manila na manlalakbay araw-araw.",
   },
 ];
 
@@ -226,13 +227,13 @@ export default function SanPedroPage() {
                 href="/about/the-team"
                 className="rounded-full border border-border px-4 py-2 text-sm font-medium text-(--text-secondary) transition hover:bg-muted"
               >
-                The Team
+                Ang Koponan
               </Link>
               <Link
                 href="/about/the-website"
                 className="rounded-full border border-border px-4 py-2 text-sm font-medium text-(--text-secondary) transition hover:bg-muted"
               >
-                The Website
+                Ang Website
               </Link>
             </div>
           </div>
@@ -242,15 +243,16 @@ export default function SanPedroPage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="reveal">
               <span className="mb-4 inline-flex rounded-full bg-(--primary-muted) px-3 py-1 text-sm font-medium text-primary">
-                Reference concept
+                Sangguniang konsepto
               </span>
               <h1 className="max-w-xl text-4xl font-black tracking-tight text-foreground sm:text-5xl">
                 San Pedro, Laguna.
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-8 text-(--text-secondary)">
-                A place known for its rooted community spirit, welcoming neighborhoods, and a
-                blend of heritage and everyday life. This is a concept page inspired by the town’s
-                identity rather than an official profile.
+                Isang lugar na kilala sa malalim na diwa ng pamayanan, mga mapagpatuluyang
+                pamayanan, at tambalan ng pamanang kultura at pang-araw-araw na buhay. Ito ay isang
+                konseptong pahina na inspirasyon ng pagkakakilanlan ng bayan at hindi isang opisyal na
+                profile.
               </p>
             </div>
 
@@ -259,7 +261,7 @@ export default function SanPedroPage() {
                 <div className="shimmer-card rounded-[1.5rem] bg-linear-to-br from-secondary via-card to-muted p-6">
                   <div className="mb-5 flex items-center justify-between text-sm">
                     <span className="rounded-full border border-border bg-card px-3 py-1 font-medium uppercase tracking-[0.2em] text-(--text-secondary)">
-                      Local
+                      Lokal
                     </span>
                     <span className="font-medium text-primary">Laguna</span>
                   </div>
@@ -274,8 +276,8 @@ export default function SanPedroPage() {
                     />
                     <h2 className="text-xl font-bold text-foreground">San Pedro</h2>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      A community rooted in hospitality, neighborhood life, and the everyday rhythm
-                      of local culture.
+                      Isang pamayanang nakaugat sa kabaitan, buhay ng pamayanan, at sa pang-araw-araw
+                      na daloy ng lokal na kultura.
                     </p>
                   </div>
                 </div>
@@ -304,10 +306,10 @@ export default function SanPedroPage() {
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 max-w-2xl reveal">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-              03Brief History
+              03Maikling Kasaysayan
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              From tunas shores to city streets
+              Mula sa mga dalampasigan ng tunas hanggang sa mga lansangan ng lungsod
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">1725</p>
           </div>
@@ -340,13 +342,16 @@ export default function SanPedroPage() {
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div className="reveal">
                 <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-                  The Sampaguita City
+                  Ang Lungsod ng Sampaguita
                 </p>
                 <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  A flower woven into identity
+                  Isang bulaklak na hinabi sa pagkakakilanlan
                 </h2>
                 <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                  Sampaguita has long been part of San Pedros cultural and economic story—from garlands sold along the streets to locally made products and the citys annual Sampaguita Festival. Known as the Sampaguita Capital of the Philippines the flower continues to shape the citys heritage and community pride.
+                  Matagal nang bahagi ng kultural at ekonomikong kuwento ng San Pedro ang sampaguita—mula sa mga
+                  lei na ibinebenta sa mga lansangan hanggang sa mga produktong gawa locally at sa taunang
+                  Sampaguita Festival ng lungsod. Kilala bilang Sampaguita Capital ng Pilipinas, ang bulaklak ay
+                  patuloy na humuhubog sa pamana at pride ng lungsod.
                 </p>
                 <div className="mt-8 space-y-4">
                   <div className="flex items-start gap-4">
@@ -354,8 +359,8 @@ export default function SanPedroPage() {
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-foreground">Garlands & Street Culture</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">Traditional sampaguita garlands remain iconic along San Pedros streets</p>
+                      <h4 className="font-semibold text-foreground">Mga Lei at Kultura ng Lansangan</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Patuloy na tanyag ang tradisyonal na sampaguita lei sa mga lansangan ng San Pedro</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -363,8 +368,8 @@ export default function SanPedroPage() {
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-foreground">Local Products</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">Sampaguita oil and soap crafted by local artisans</p>
+                      <h4 className="font-semibold text-foreground">Mga Lokal na Produkto</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Langis at sabon ng sampaguita na ginawa ng mga lokal na artesano</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -372,8 +377,8 @@ export default function SanPedroPage() {
                       ✓
                     </span>
                     <div>
-                      <h4 className="font-semibold text-foreground">Annual Festival</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">Celebration and revival of sampaguita heritage every May</p>
+                      <h4 className="font-semibold text-foreground">Taunang Pagdiriwang</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Pagdiriwang at muling pagbabangon ng pamana ng sampaguita tuwing Mayo</p>
                     </div>
                   </div>
                 </div>
@@ -398,13 +403,15 @@ export default function SanPedroPage() {
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 reveal">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-              Local Flavors
+              Mga Lokal na Lasang
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              A taste of San Pedro
+              Lasang San Pedro
             </h2>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              From old neighborhood panciterias to everyday merienda, San Pedros food culture reflects its history as a close-knit community where tradition and flavor are passed down through generations.
+              Mula sa mga lumang panciteria ng pamayanan hanggang sa pang-araw-araw na merienda, ipinapakita ng
+              kulturang pagkain ng San Pedro ang kasaysayan nito bilang isang malapit na pamayanan kung saan
+              ipinamamana ang tradisyon at lasa sa mga susunod na henerasyon.
             </p>
           </div>
 
@@ -421,10 +428,12 @@ export default function SanPedroPage() {
               <div className="p-6">
                 <h3 className="text-xl font-bold text-foreground">Pancit Maciang</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-6">
-                  A San Pedro institution dating back to the 1950s. Known for its distinctive noodles, egg, and ketchup/lechon-style toppings, Pancit Maciang represents the citys culinary heritage and neighborhood dining tradition.
+                  Isang institusyon sa San Pedro mula pa noong dekada 1950. Kilala sa natatanging noodles,
+                  itlog, at ketchup/lechon-style toppings, kinakatawan ng Pancit Maciang ang pamanang
+                  pagkain ng lungsod at tradisyon ng pagkain kasama ng kapitbahayan.
                 </p>
                 <span className="mt-4 inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
-                  Since 1950s
+                  Mula pa noong dekada 1950
                 </span>
               </div>
             </div>
@@ -439,12 +448,14 @@ export default function SanPedroPage() {
                 height={256}
               />
               <div className="p-6">
-                <h3 className="text-xl font-bold text-foreground">Neighborhood Panciterias</h3>
+                <h3 className="text-xl font-bold text-foreground">Mga Panciteria ng Pamayanan</h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-6">
-                  Small, local noodle shops where families gather for quick meals and conversation. These humble establishments are the backbone of San Pedros everyday food culture and community gathering spaces.
+                  Maliliit na lokal na noodle shop kung saan nagtitipon ang mga pamilya para sa mabilisang
+                  kainan at kwentuhan. Ang mga payak na negosyong ito ang gulugod ng pang-araw-araw na
+                  kulturang pagkain at mga titigang tipunan ng San Pedro.
                 </p>
                 <span className="mt-4 inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
-                  Community Staple
+                  Bahagi ng Bawat Araw ng Pamayanan
                 </span>
               </div>
             </div>
@@ -456,13 +467,14 @@ export default function SanPedroPage() {
           <div className="mx-auto max-w-6xl px-6 py-20">
             <div className="mb-12 reveal">
               <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-                Celebrations
+                Mga Pagdiriwang
               </p>
               <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Festivals & Traditions
+                Mga Pagdiriwang at Tradisyon
               </h2>
               <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                Throughout the year, San Pedro celebrates its heritage and community spirit through vibrant festivals that bring neighborhoods together.
+                Sa buong taon, ipinagdiriwang ng San Pedro ang pamana at diwa ng pamayanan sa pamamagitan ng
+                makukulay na pagdiriwang na nagpapagitaw sa mga pamayanan.
               </p>
             </div>
 
@@ -478,19 +490,25 @@ export default function SanPedroPage() {
                 />
                 <div className="flex flex-col justify-center">
                   <h3 className="text-2xl font-bold text-foreground">Sampaguita Festival</h3>
-                  <p className="mt-3 text-sm text-primary font-semibold">May 22–30 (Annual)</p>
+                  <p className="mt-3 text-sm text-primary font-semibold">Mayo 22–30 (Taun-taon)</p>
                   <p className="mt-4 text-base leading-7 text-muted-foreground">
-                    The citys most significant celebration, dedicated to reviving and honoring San Pedros sampaguita heritage. The festival features parades, cultural performances, local product showcases, and community gatherings that celebrate the flower that defines the citys identity.
+                    Ang pinakamahalagang pagdiriwang ng lungsod, nakatuon sa muling pagbabangon at pagpaparangal
+                    sa pamana ng sampaguita ng San Pedro. Tampok sa festival ang mga parada, kultural na
+                    pagtatanghal, pagpapakita ng mga lokal na produkto, at mga tipunan ng pamayanan na
+                    nagdiriwang sa bulaklak na nagbibigay-hulog sa pagkakakilanlan ng lungsod.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
-                      🌸 Cultural
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
+                      <Flower2 aria-hidden="true" className="size-3.5" />
+                      Kultural
                     </span>
-                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
-                      🎉 Community
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
+                      <PartyPopper aria-hidden="true" className="size-3.5" />
+                      Pamayanan
                     </span>
-                    <span className="inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
-                      🏛️ Heritage
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-primary">
+                      <Landmark aria-hidden="true" className="size-3.5" />
+                      Pamana
                     </span>
                   </div>
                 </div>
@@ -503,13 +521,14 @@ export default function SanPedroPage() {
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="mb-12 reveal">
             <p className="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-              Communities
+              Mga Pamayanan
             </p>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              28 Barangays of San Pedro
+              28 Barangay ng San Pedro
             </h2>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              San Pedro is composed of 28 barangays, each with its own character and community spirit that together form the fabric of the city.
+              Binubuo ang San Pedro ng 28 barangay, bawat isa ay may sariling katangian at diwa ng pamayanan
+              na magkasamang bumubuo sa tela ng lungsod.
             </p>
           </div>
 

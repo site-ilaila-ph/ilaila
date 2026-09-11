@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Form } from '@/components/ui/form'
 import { z } from 'zod'
 
-const schema = z.object({ password: z.string().min(6, 'Password must be at least 6 characters') })
+const schema = z.object({ password: z.string().min(6, 'Dapat may 6 na karakter ang password pataas') })
 
 export function UpdatePasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const router = useRouter()
@@ -28,8 +28,8 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>Please enter your new password below.</CardDescription>
+          <CardTitle className="text-2xl">I-reset ang Iyong Password</CardTitle>
+          <CardDescription>Ilagay ang iyong bagong password sa ibaba.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form schema={schema} onSubmit={async (data) => {
@@ -47,10 +47,10 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
           }}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
-                <Input id="password" name="password" type="password" placeholder="New password" required />
+                <Label htmlFor="password">Bagong password</Label>
+                <Input id="password" name="password" type="password" placeholder="Bagong password" required />
               </div>
-              <Button type="submit" className="w-full">Save new password</Button>
+              <Button type="submit" className="w-full">I-save ang bagong password</Button>
               {notice && (
                 <p
                   role="alert"

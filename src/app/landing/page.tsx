@@ -1,7 +1,13 @@
 ﻿"use client";
 
 import { useEffect } from "react";
-import { LandingNav, LandingHero, LandingFeatures, LandingWhy, LandingCta } from "@/components/blocks/landing";
+import {
+  LandingNav,
+  LandingHero,
+  LandingFeatures,
+  LandingWhy,
+  LandingCta,
+} from "@/components/blocks/landing";
 
 const revealSelector = ".landing-reveal";
 
@@ -54,7 +60,9 @@ export default function LandingPage() {
       `}</style>
       <LandingNav />
       <LandingHero />
-      <LandingFeatures />
+      <div className="px-4 py-2 w-screen">
+        <LandingFeatures />
+      </div>
       <LandingWhy />
       <LandingCta />
     </div>

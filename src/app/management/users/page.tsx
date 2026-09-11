@@ -82,8 +82,8 @@ export default function ManageUsers() {
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">Mga Pahina / Mga Gumagamit</p>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Mga Gumagamit</h1>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Mga Pahina / Mga Gumagamit</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Mga Gumagamit</h1>
         </div>
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none">

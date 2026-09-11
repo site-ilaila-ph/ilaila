@@ -35,7 +35,7 @@ export default function SignOutPage() {
   return (
     <main className="flex min-h-svh items-center justify-center bg-background px-6">
       <div className="text-center text-sm text-muted-foreground">
-        Signing you out...
+        Nilalabas ka sa iyong account...
       </div>
     </main>
   )

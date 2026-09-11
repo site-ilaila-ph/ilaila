@@ -114,7 +114,7 @@ export function LoginForm({ className, onSwitch, ...props }: AuthFormProps) {
             {error && <p className="text-sm text-red-500">{error}</p>}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Nag-sign in..." : "Mag Sign in"}
             </Button>
           </div>
 

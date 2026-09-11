@@ -147,7 +147,7 @@ export default function TheTeamPage() {
                 href="/about/the-website"
                 className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
               >
-                The Website
+                Ang Website
               </Link>
             </div>
           </div>
@@ -156,14 +156,14 @@ export default function TheTeamPage() {
         <section className="relative z-10 mx-auto max-w-6xl px-6 py-20">
           <div className="reveal max-w-3xl">
             <span className="mb-4 inline-flex rounded-full bg-(--primary-muted) px-3 py-1 text-sm font-medium text-primary">
-              Reference concept
+              Sangguniang konsepto
             </span>
             <h1 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl">
-              The people behind the story.
+              Ang mga taong nasa likod ng kuwento.
             </h1>
             <p className="mt-6 text-lg leading-8 text-(--text-secondary)">
-              This page is a reference layout for introducing the people shaping the brand, the
-              local stories, and the experience behind the product.
+              Ang pahinang ito ay isang sangguniang disenyo para sa pagpapakilala sa mga taong humuhubog sa
+              brand, sa mga lokal na kuwento, at sa karanasan sa likod ng produkto.
             </p>
           </div>
 
@@ -171,7 +171,7 @@ export default function TheTeamPage() {
             {/* Frontend Team */}
             <div>
               <div className="mb-8 reveal slide-left">
-                <h2 className="text-2xl font-bold text-foreground">Frontend Team</h2>
+                <h2 className="text-2xl font-bold text-foreground">Koponan ng Frontend</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {teamConfig.frontend.features.join(" • ")}
                 </p>
@@ -195,7 +195,7 @@ export default function TheTeamPage() {
             {/* Backend Team */}
             <div>
               <div className="mb-8 reveal slide-right">
-                <h2 className="text-2xl font-bold text-foreground">Backend Team</h2>
+                <h2 className="text-2xl font-bold text-foreground">Koponan ng Backend</h2>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {teamConfig.backend.features.join(" • ")}
                 </p>

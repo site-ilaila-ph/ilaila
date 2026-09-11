@@ -18,7 +18,7 @@ import Link from 'next/link'
 import { Form } from '@/components/ui/form'
 import { z } from 'zod'
 
-const schema = z.object({ email: z.string().email('Invalid email format').trim() })
+const schema = z.object({ email: z.string().email('Di-wastong anyo ng email').trim() })
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
@@ -27,9 +27,9 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+          <CardTitle className="text-2xl">I-reset ang Iyong Password</CardTitle>
           <CardDescription>
-            Type in your email and we&apos;ll send you a link to reset your password
+            Ilagay ang iyong email at ipapadala namin sa iyo ang link upang muling i-set ang iyong password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,7 +58,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                 />
               </div>
               <Button type="submit" className="w-full">
-                Send reset email
+                Ipadala ang reset email
               </Button>
               {notice && (
                 <p
@@ -70,9 +70,9 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
               )}
             </div>
             <div className="mt-4 text-center text-sm">
-              Already have an account?{' '}
+              May account ka na?{' '}
               <Link href="/auth/sign-up-or-login?mode=login" className="underline underline-offset-4">
-                Sign in
+                Mag Sign in
               </Link>
             </div>
           </Form>
