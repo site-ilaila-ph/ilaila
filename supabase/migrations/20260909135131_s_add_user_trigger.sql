@@ -3,8 +3,8 @@ returns trigger
 set search_path = ''
 as $$
 begin
-  insert into app.user_data (id, authId)
-  values (new.id, new.id);
+  insert into app.user_data ("authId")
+  values (new.id);
 
   return new;
 end;
