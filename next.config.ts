@@ -5,11 +5,12 @@ const nextConfig: NextConfig = {
   cleanDistDir: true,
   turbopack: { root: import.meta.dirname },
   typedRoutes: true,
+  reactCompiler: true,
+
   experimental: {
     cpus: 1,
-    reactCompiler: true,
     typedEnv: true,
-  } as NextConfig['experimental']
+  } as NextConfig["experimental"],
 };
 
 export default nextConfig;

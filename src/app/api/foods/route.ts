@@ -18,23 +18,53 @@ async function getFoods(req: NextRequest) {
 
   try {
     if (id) {
-      const result = await db.food.findUnique({
-        where: { id },
-        include: {
-          images: true,
-          tags: true,
-          businesses: {
-            include: {
-              business: {
-                include: {
-                  images: true,
-                  tags: true,
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      let result = null;
+
+      if (isUuid) {
+        result = await db.food.findUnique({
+          where: { id },
+          include: {
+            images: true,
+            tags: true,
+            businesses: {
+              include: {
+                business: {
+                  include: {
+                    images: true,
+                    tags: true,
+                  },
                 },
               },
             },
           },
-        },
-      });
+        });
+      }
+
+      if (!result) {
+        result = await db.food.findFirst({
+          where: {
+            OR: [
+              { name: { equals: id, mode: "insensitive" } },
+              { name: { contains: id, mode: "insensitive" } },
+            ],
+          },
+          include: {
+            images: true,
+            tags: true,
+            businesses: {
+              include: {
+                business: {
+                  include: {
+                    images: true,
+                    tags: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
 
       if (!result) {
         return notFoundProblem(req, { code: "food-not-found", detail: "The food does not exist." });

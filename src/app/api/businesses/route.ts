@@ -20,16 +20,41 @@ async function getBusinesses(req: NextRequest) {
 
   try {
     if (id) {
-      const data = await db.business.findUnique({
-        where: { id },
-        include: {
-          images: true,
-          tags: true,
-          reviews: true,
-          menuItems: true,
-          foods: { include: { food: { include: { images: true, tags: true } } } },
-        },
-      });
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      let data = null;
+
+      if (isUuid) {
+        data = await db.business.findUnique({
+          where: { id },
+          include: {
+            images: true,
+            tags: true,
+            reviews: { include: { user: { include: { authUser: true } } } },
+            menuItems: true,
+            foods: { include: { food: { include: { images: true, tags: true } } } },
+          },
+        });
+      }
+
+      if (!data) {
+        const decoded = decodeURIComponent(id).replaceAll("-", " ");
+        data = await db.business.findFirst({
+          where: {
+            OR: [
+              { name: { equals: id, mode: "insensitive" } },
+              { name: { equals: decoded, mode: "insensitive" } },
+              { name: { contains: id, mode: "insensitive" } },
+            ],
+          },
+          include: {
+            images: true,
+            tags: true,
+            reviews: { include: { user: { include: { authUser: true } } } },
+            menuItems: true,
+            foods: { include: { food: { include: { images: true, tags: true } } } },
+          },
+        });
+      }
 
       if (!data) {
         return notFoundProblem(req, { code: "business-not-found", detail: "The business does not exist." });

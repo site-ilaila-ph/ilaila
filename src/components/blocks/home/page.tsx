@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { MapPin, Star, Store, Utensils } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -136,23 +137,42 @@ export default function HomePage() {
                   </Link>
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {businesses.map((business) => (
-                    <Link
-                      key={business.id}
-                      href={`/businesses/${business.id}`}
-                      className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-                    >
-                      <h3 className="mb-2 text-lg font-semibold hover:text-primary">
-                        {business.name}
-                      </h3>
-                      <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-                        {business.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {business.address}
-                      </p>
-                    </Link>
-                  ))}
+                  {businesses.map((business) => {
+                    const primaryImageUrl = business.images?.find((img) => Boolean(img.url))?.url;
+
+                    return (
+                      <Link
+                        key={business.id}
+                        href={`/businesses/${business.id}`}
+                        className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition hover:border-primary hover:shadow-lg"
+                      >
+                        {primaryImageUrl ? (
+                          <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                            <Image
+                              src={primaryImageUrl}
+                              alt={business.name}
+                              width={400}
+                              height={225}
+                              unoptimized
+                              className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
+                        ) : null}
+
+                        <div className="p-6">
+                          <h3 className="mb-2 text-lg font-semibold group-hover:text-primary transition">
+                            {business.name}
+                          </h3>
+                          <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
+                            {business.description}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {business.address}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </section>
             )}
