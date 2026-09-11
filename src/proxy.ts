@@ -5,6 +5,7 @@ import { match } from "path-to-regexp";
 import { acquirePrismaClient } from "./lib/infra";
 import { safeNextPath } from "./lib/safe-next-path";
 import { notFoundProblem, redirectResponse } from "./lib/responses";
+import { assert } from "./lib/assert";
 
 // Routes reachable without a session.
 const isPublicRoute = match([
@@ -27,35 +28,34 @@ export const proxy = async (request: NextRequest) => {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
     "";
 
-  const supabase = createServerClient(
-    supabaseKey,
-    supabaseUrl,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
+  assert(supabaseUrl, "A supabase url was not configured via environment variable.");
+  assert(supabaseKey, "No supabase key was provided via the environment variables.");
 
-        setAll(cookiesToSet) {
-          // Copy cookies to the request so subsequent middleware/server
-          // code sees the refreshed session.
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
+  const supabase = createServerClient(supabaseKey, supabaseUrl, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
 
-          // Recreate the response with the modified request.
-          response = NextResponse.next({
-            request,
-          });
+      setAll(cookiesToSet) {
+        // Copy cookies to the request so subsequent middleware/server
+        // code sees the refreshed session.
+        cookiesToSet.forEach(({ name, value }) => {
+          request.cookies.set(name, value);
+        });
 
-          // Copy Supabase's cookies to the actual response sent to the browser.
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
+        // Recreate the response with the modified request.
+        response = NextResponse.next({
+          request,
+        });
+
+        // Copy Supabase's cookies to the actual response sent to the browser.
+        cookiesToSet.forEach(({ name, value, options }) => {
+          response.cookies.set(name, value, options);
+        });
       },
     },
-  );
+  });
 
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
