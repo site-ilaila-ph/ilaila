@@ -4,7 +4,7 @@ CREATE SCHEMA IF NOT EXISTS "app";
 -- CreateTable
 CREATE TYPE "app"."user_role" AS ENUM ('viewer', 'admin');
 CREATE TABLE "app"."user_data" (
-    "id" UUID, -- not null omitted to satisfy auth users fk constraint.
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "auth_id" UUID,
     "role" "app"."user_role" NOT NULL DEFAULT 'viewer',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
