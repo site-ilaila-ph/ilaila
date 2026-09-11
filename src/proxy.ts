@@ -14,18 +14,22 @@ const isPublicRoute = match([
   "/api/auth/*rest",
 ]);
 
-const isAdminOnlyRoute = match([
-  "/management/*rest",
-]);
+const isAdminOnlyRoute = match(["/management/*rest"]);
 
 export const proxy = async (request: NextRequest) => {
   let response = NextResponse.next({
     request,
   });
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const supabaseKey =
+    (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
+    "";
+
   const supabase = createServerClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
+    supabaseKey,
+    supabaseUrl,
     {
       cookies: {
         getAll() {
@@ -82,9 +86,7 @@ export const proxy = async (request: NextRequest) => {
   // Resolve '/'.
   if (pathname === "/") {
     const target =
-      userData.role === "admin"
-        ? safeNextPath("/management")
-        : "/home";
+      userData.role === "admin" ? safeNextPath("/management") : "/home";
 
     return redirectResponse(new URL(target, request.url));
   }
