@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { readProblemMessage } from "@/lib/api/client";
 
 interface AppReview {
   id: string;
@@ -22,16 +23,18 @@ interface AppReview {
 export function AppReviewsWidget({ limit = 3 }: { limit?: number }) {
   const [reviews, setReviews] = useState<AppReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadReviews() {
       try {
         const response = await fetch("/api/app-reviews?type=approved");
-        if (!response.ok) throw new Error("Failed to fetch approved reviews");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to fetch approved reviews"));
         const data = await response.json();
         setReviews((data as AppReview[]).slice(0, limit));
       } catch (error) {
         console.error("Failed to load reviews:", error);
+        setLoadError(error instanceof Error ? error.message : "Failed to fetch approved reviews");
       } finally {
         setIsLoading(false);
       }
@@ -53,12 +56,17 @@ export function AppReviewsWidget({ limit = 3 }: { limit?: number }) {
     return (
       <Card>
         <CardContent className="py-8 text-center">
-          <p className="text-muted-foreground mb-4">No reviews yet</p>
-          <Link href="/app-reviews">
-            <Button variant="outline" size="sm">
-              Be the first to review
-            </Button>
-          </Link>
+          <p className="text-sm text-red-700">{loadError}</p>
+          {!loadError && (
+            <>
+              <p className="text-muted-foreground mb-4">No reviews yet</p>
+              <Link href="/app-reviews">
+                <Button variant="outline" size="sm">
+                  Be the first to review
+                </Button>
+              </Link>
+            </>
+          )}
         </CardContent>
       </Card>
     );

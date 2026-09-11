@@ -4,6 +4,8 @@ import { startTransition, useEffect, useState } from "react";
 import { MoreHorizontal, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 interface Review {
   id: string;
@@ -26,15 +28,17 @@ export default function ManageReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   async function loadReviews() {
     try {
       const response = await fetch("/api/management/reviews");
-      if (!response.ok) throw new Error("Failed to load reviews");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load reviews"));
       const data = await response.json();
       setReviews(data as Review[]);
     } catch (error) {
       console.error("Failed to load reviews:", error);
+      setError(error instanceof Error ? error.message : "Failed to load reviews");
     } finally {
       setIsLoading(false);
     }
@@ -50,10 +54,11 @@ export default function ManageReviews() {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
         const response = await fetch(`/api/management/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete review");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete review"));
         await loadReviews();
       } catch (error) {
         console.error("Failed to delete review:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete review");
       }
     }
   }
@@ -73,6 +78,8 @@ export default function ManageReviews() {
         <div><p className="mb-2 text-xs font-medium text-slate-400">Mga Pahina / Mga Review</p><h1 className="text-3xl font-bold tracking-tight text-slate-900">Mga Review</h1></div>
         <div className="flex w-full items-center gap-2 sm:w-auto"><div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" /></div><button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm"><MoreHorizontal size={19} /></button></div>
       </div>
+
+        <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
 
         {isLoading ? (
           <div className="text-center py-12">

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { FoodWithRelations } from "../types";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 export default function SingleFoodPage({
   params,
@@ -12,6 +14,7 @@ export default function SingleFoodPage({
 }) {
   const [food, setFood] = useState<FoodWithRelations | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -19,12 +22,15 @@ export default function SingleFoodPage({
     async function loadFood() {
       const resolvedParams = await params;
       const response = await fetch(`/api/foods?id=${encodeURIComponent(resolvedParams.id)}`);
-      const data = await response.json();
 
-      if (!isMounted) return;
+      if (response.ok) {
+        const data = await response.json();
+        if (isMounted) setFood(data ?? null);
+      } else if (isMounted) {
+        setLoadError(await readProblemMessage(response, "Hindi na-load ang detalya ng pagkaing ito."));
+      }
 
-      setFood(data ?? null);
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     }
 
     void loadFood();
@@ -68,7 +74,7 @@ export default function SingleFoodPage({
           </div>
         </nav>
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
-          <p className="text-muted-foreground">Hindi nahanap ang pagkain</p>
+          <p className="text-muted-foreground">{loadError ?? "Hindi nahanap ang pagkain"}</p>
           <Link href="/foods" className="mt-4 inline-block text-primary hover:underline">
             Bumalik sa mga pagkain
           </Link>
@@ -94,6 +100,7 @@ export default function SingleFoodPage({
       </nav>
 
       <article className="mx-auto max-w-4xl px-6 py-12">
+        <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <header className="mb-12 border-b border-border pb-8">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">{food.name}</h1>
           {food.tags && food.tags.length > 0 && (

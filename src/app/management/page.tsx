@@ -4,6 +4,8 @@ import { StatCard } from "@/components/blocks/management/stat-card";
 import { SummaryStat } from "@/components/blocks/management/summary-stat";
 import { CircleUserRound, Users, Store, Utensils, MessageSquareText, ClipboardList, CheckCircle2, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 export default function Page() {
   const [stats, setStats] = useState({
@@ -15,18 +17,20 @@ export default function Page() {
     pendingAppReviews: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadStats() {
       try {
         const response = await fetch("/api/management/stats");
         if (!response.ok) {
-          throw new Error(`Failed to load stats: ${response.status}`);
+          throw new Error(await readProblemMessage(response, `Failed to load stats: ${response.status}`));
         }
         const data = await response.json();
         setStats(data);
       } catch (error) {
         console.error("Failed to load stats:", error);
+        setLoadError(error instanceof Error ? error.message : "Failed to load stats");
       } finally {
         setIsLoading(false);
       }
@@ -47,6 +51,8 @@ export default function Page() {
           </div>
         </div>
       </div>
+
+      <ErrorAlert message={loadError} className="mb-4" onDismiss={() => setLoadError(null)} />
 
       {isLoading ? (
         <div className="rounded-2xl bg-card py-16 text-center shadow-sm border border-border">

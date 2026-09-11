@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { readProblemMessage } from "@/lib/api/client";
+import { ErrorAlert } from "@/components/ui/error-alert";
 interface Food {
   id: string;
   name: string;
@@ -22,6 +23,7 @@ interface Food {
 export default function ManageFoods() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,11 +45,12 @@ export default function ManageFoods() {
   async function loadFoods() {
     try {
       const response = await fetch("/api/management/foods");
-      if (!response.ok) throw new Error("Failed to load foods");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load foods"));
       const data = await response.json();
       setFoods(data as Food[]);
     } catch (error) {
       console.error("Failed to load foods:", error);
+      setError(error instanceof Error ? error.message : "Failed to load foods");
     } finally {
       setIsLoading(false);
     }
@@ -55,6 +58,7 @@ export default function ManageFoods() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     try {
       const payload = { ...formData };
       const response = await fetch("/api/management/foods", {
@@ -63,13 +67,13 @@ export default function ManageFoods() {
         body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
       });
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: "Failed to save food" }));
-        throw new Error(error.message ?? "Failed to save food");
+        throw new Error(await readProblemMessage(response, "Failed to save food"));
       }
       resetForm();
       await loadFoods();
     } catch (error) {
       console.error("Failed to save food:", error);
+      setError(error instanceof Error ? error.message : "Failed to save food");
     }
   }
 
@@ -77,10 +81,11 @@ export default function ManageFoods() {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang pagkaing ito?")) {
       try {
         const response = await fetch(`/api/management/foods?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete food");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete food"));
         await loadFoods();
       } catch (error) {
         console.error("Failed to delete food:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete food");
       }
     }
   }
@@ -118,6 +123,8 @@ export default function ManageFoods() {
             <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground shadow-sm border border-border"><MoreHorizontal size={19} /></button>
           </div>
         </div>
+
+        <ErrorAlert message={error} className="mb-6" onDismiss={() => setError(null)} />
 
         {showForm && (
           <Card className="mb-8">

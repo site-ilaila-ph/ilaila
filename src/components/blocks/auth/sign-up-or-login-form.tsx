@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { readProblemMessage } from "@/lib/api/client";
 import { safeNextPath } from "@/lib/safe-next-path";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import bg from "@/assets/login-form-bg.png";
 import bg2 from "@/assets/login-form-bg-2.png";
+import { Route } from "next";
 
 interface AuthFormProps extends React.ComponentPropsWithoutRef<"div"> {
   onSwitch?: () => void;
@@ -43,14 +45,12 @@ export function LoginForm({ className, onSwitch, ...props }: AuthFormProps) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Failed to sign in");
+        throw new Error(await readProblemMessage(response, "Failed to sign in"));
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(safeNextPath(next, "/home"));
+      router.push(safeNextPath(next, "/home") as Route);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -160,10 +160,8 @@ export function SignUpForm({ className, onSwitch, ...props }: AuthFormProps) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || "Hindi nagawa ang pag-sign up");
+        throw new Error(await readProblemMessage(response, "Hindi nagawa ang pag-sign up"));
       }
 
       router.push("/auth/sign-up-success");

@@ -1,7 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
+import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import {
+  badRequestProblem,
+  internalErrorProblem,
+  tooManyRequestsProblem,
+  unauthorizedProblem,
+} from "@/lib/responses/problem";
 
-export async function POST(req: NextRequest) {
+function isAuthError(error: unknown): error is AuthError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "__isAuthError" in error &&
+    typeof (error as { status?: unknown }).status !== "undefined"
+  );
+}
+
+function mapUpdatePasswordFailure(error: unknown) {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem({ detail: "The request body must be valid JSON." });
+  }
+
+  if (isAuthError(error)) {
+    const message = error.message || "Password update failed.";
+    const status = error.status ?? 400;
+
+    if (status === 401) {
+      return unauthorizedProblem({ code: "update-password-unauthorized", detail: message });
+    }
+
+    if (status === 422) {
+      return badRequestProblem({ code: "update-password-invalid", detail: message });
+    }
+
+    if (status === 429) {
+      return tooManyRequestsProblem({ code: "update-password-rate-limited", detail: message });
+    }
+
+    if (status >= 500) {
+      console.error("Update password failed with upstream status", status, message);
+      return internalErrorProblem({ detail: "Password update is unavailable right now. Please try again later." });
+    }
+
+    return badRequestProblem({ code: "update-password-failed", detail: message });
+  }
+
+  console.error("Update password failed", error);
+  return internalErrorProblem({ detail: "Password update is unavailable right now. Please try again later." });
+}
+
+async function postUpdatePassword(req: NextRequest) {
   try {
     const body = await req.json();
     const supabase = await createClient();
@@ -9,7 +59,11 @@ export async function POST(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ success: false, type: "generic", message }, { status: 400 });
+    return mapUpdatePasswordFailure(error);
   }
 }
+
+export const POST = withLogging(postUpdatePassword, {
+  name: "postUpdatePassword",
+  redact: { headers: ["authorization", "cookie"], bodyKeys: ["password"] },
+});

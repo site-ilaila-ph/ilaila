@@ -1,16 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
+import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
+import {
+  badRequestProblem,
+  conflictProblem,
+  internalErrorProblem,
+  notFoundProblem,
+} from "@/lib/responses/problem";
 
-export async function GET() {
-  const db = acquirePrismaClient();
-  const data = await db.userData.findMany({ orderBy: { createdAt: "desc" } });
-  return NextResponse.json(
-    data.map((row) => ({ ...row, isAdmin: row.role === "admin" })),
-    { status: 200 },
-  );
+function mapManagementUserFailure(error: unknown, action: string): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem({ detail: "The request body must be valid JSON." });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2025") {
+      return notFoundProblem({ code: "user-not-found", detail: "The user does not exist." });
+    }
+
+    if (error.code === "P2002") {
+      return conflictProblem({ code: "user-conflict", detail: "The user already exists." });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem({
+        code: "user-invalid-reference",
+        detail: "The user references a record that does not exist.",
+      });
+    }
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientValidationError &&
+    /Argument `id` is missing/i.test(error.message)
+  ) {
+    return badRequestProblem({ code: "user-id-required", detail: "A user id is required." });
+  }
+
+  console.error(`Management user ${action} failed`, error);
+  return internalErrorProblem({ detail: `Unable to ${action} the user right now. Please try again later.` });
 }
 
-export async function PATCH(req: NextRequest) {
+function mapManagementUserReadFailure(error: unknown): NextResponse {
+  console.error("Management user read failed", error);
+  return internalErrorProblem({ detail: "Unable to load users right now. Please try again later." });
+}
+async function getUsers() {
+  try {
+    const db = acquirePrismaClient();
+    const data = await db.userData.findMany({ orderBy: { createdAt: "desc" } });
+    return NextResponse.json(
+      data.map((row) => ({ ...row, isAdmin: row.role === "admin" })),
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    return mapManagementUserReadFailure(error);
+  }
+}
+
+async function patchUser(req: NextRequest) {
   try {
     const body = await req.json();
     const db = acquirePrismaClient();
@@ -20,21 +69,34 @@ export async function PATCH(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ message }, { status: 500 });
+    return mapManagementUserFailure(error, "update");
   }
 }
 
-export async function DELETE(req: NextRequest) {
+async function deleteUser(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
-    if (!id) return NextResponse.json({ message: "Missing id" }, { status: 400 });
+    if (!id) return badRequestProblem({ code: "user-id-required", detail: "A user id is required." });
     const db = acquirePrismaClient();
     await db.userData.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ message }, { status: 500 });
+    return mapManagementUserFailure(error, "delete");
   }
 }
+
+export const GET = withLogging(getUsers, {
+  name: "getUsers",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const PATCH = withLogging(patchUser, {
+  name: "patchUser",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const DELETE = withLogging(deleteUser, {
+  name: "deleteUser",
+  redact: { headers: ["authorization", "cookie"] },
+});

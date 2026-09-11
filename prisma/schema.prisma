@@ -822,11 +822,29 @@ model UserData {
   bookmarks        Bookmark[]
   businessesPosted Business[]
   reviews          Review[]
+  uploads          Upload[]
 
   @@unique([authId])
   @@index([authId])
   @@map("user_data")
   @@schema("app")
+}
+
+model Upload {
+    id         String   @id @default(uuid()) @db.Uuid
+    pathname   String
+    uploadName String
+    userId     String   @db.Uuid
+    status     String   @default("pending")
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+
+    user UserData @relation(fields: [userId], references: [id])
+
+    @@index([userId])
+    @@index([status])
+    @@map("uploads")
+    @@schema("app")
 }
 
 model Food {

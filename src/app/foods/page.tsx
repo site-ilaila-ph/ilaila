@@ -4,23 +4,29 @@ import Link from "next/link";
 import Image from "next/image";
 import type { FoodListItem } from "./types";
 import { useState, useEffect } from "react";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadFoods() {
       const response = await fetch("/api/foods");
-      const data = await response.json();
 
-      if (!isMounted) return;
+      if (response.ok) {
+        const data = await response.json();
+        if (isMounted) setFoods(data ?? []);
+      } else if (isMounted) {
+        setLoadError(await readProblemMessage(response, "Hindi na-load ang mga pagkain."));
+      }
 
-      setFoods(data ?? []);
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     }
 
     void loadFoods();
@@ -74,6 +80,7 @@ export default function FoodsPage() {
       </nav>
 
       <div className="mx-auto max-w-6xl px-6 py-12">
+        <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <div className="mb-12 text-center">
           <span className="mb-3 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
             Pamana ng Kainan

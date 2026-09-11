@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, MapPin, Search, SlidersHorizontal, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
 
 function ratingFor(business: BusinessListItem) {
@@ -16,12 +18,13 @@ export default function BusinessDiscoveryPage() {
   const [query, setQuery] = useState("");
   const [tag, setTag] = useState("Lahat ng lugar");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/businesses")
       .then(async (response) => {
         if (!response.ok) {
-          throw new Error(`Failed to load businesses: ${response.status}`);
+          throw new Error(await readProblemMessage(response, `Failed to load businesses: ${response.status}`));
         }
 
         const data = await response.json();
@@ -36,6 +39,7 @@ export default function BusinessDiscoveryPage() {
       })
       .catch((error) => {
         console.error(error);
+        setLoadError(error instanceof Error ? error.message : "Failed to load businesses");
         setBusinesses([]);
       })
       .finally(() => {
@@ -55,6 +59,7 @@ export default function BusinessDiscoveryPage() {
       <nav className="border-b border-brand-border bg-brand-bg/90 backdrop-blur"><div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5"><Link href="/home" className="font-heading text-xl font-bold tracking-tight text-primary">ilaila<span className="text-brand-accent">.</span></Link><div className="flex items-center gap-5 text-sm font-medium"><Link href="/foods" className="text-muted-foreground hover:text-foreground">Pagkaing pamana</Link><Link href="/businesses/discovery" className="text-primary">Mga Negosyo</Link></div></div></nav>
       <section className="border-b border-brand-border bg-brand-bg-accent px-6 py-16 sm:py-24"><div className="mx-auto max-w-7xl"><p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-brand-accent">San Pedro, Laguna</p><div className="max-w-3xl"><h1 className="font-heading text-5xl font-bold leading-[0.98] tracking-tight sm:text-7xl">Tuklasin ang iyong susunod na paboritong lugar.</h1><p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">Mga independiyenteng restawran, kapitbahay na kapehan, at mga lugar na sulit puntahan.</p></div><div className="mt-10 flex max-w-2xl items-center gap-3 rounded-2xl border border-brand-border bg-white p-2 shadow-sm"><Search className="ml-3 size-5 text-muted-foreground" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Maghanap ng lugar, pagkain, o kapitbahayan" className="min-w-0 flex-1 bg-transparent px-1 py-3 text-sm outline-none" /><Button size="lg" className="hidden sm:inline-flex">Hanapin</Button></div></div></section>
       <div className="mx-auto max-w-7xl px-6 py-12 sm:py-16">
+        <ErrorAlert message={loadError} className="mb-4" onDismiss={() => setLoadError(null)} />
         {topRated.length > 0 && <section className="mb-16"><div className="mb-6 flex items-end justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-accent">Sulit bisitahin</p><h2 className="mt-2 font-heading text-3xl font-bold">Mga paboritong sikat sa komunidad</h2></div><span className="hidden text-sm text-muted-foreground sm:block">Batay sa mga lokal na review</span></div><div className="grid gap-5 md:grid-cols-3">{topRated.map((business) => <BusinessCard key={business.id} business={business} featured />)}</div></section>}
         <section id="all-places"><div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand-accent">Ang direktoryo</p><h2 className="mt-2 font-heading text-3xl font-bold">Tuklasin ang San Pedro</h2></div><div className="flex items-center gap-2 text-sm text-muted-foreground"><SlidersHorizontal className="size-4" />{filtered.length} {filtered.length === 1 ? "lugar" : "mga lugar"}</div></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{tags.map((item) => <button key={item} onClick={() => setTag(item)} className={`whitespace-nowrap rounded-full border px-4 py-2 text-sm transition ${tag === item ? "border-primary bg-primary text-primary-foreground" : "border-border bg-white hover:border-primary"}`}>{item}</button>)}</div>{isLoading ? <p className="py-16 text-center text-muted-foreground">Hinahanap ang mga lokal na lugar...</p> : filtered.length === 0 ? <div className="border border-dashed border-border bg-white p-12 text-center"><p className="font-semibold">Walang lugar na tumugma sa iyong paghahanap.</p><button onClick={() => { setQuery(""); setTag("Lahat ng lugar"); }} className="mt-2 text-sm text-primary underline">I-clear ang mga filter</button></div> : <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{filtered.map((business) => <BusinessCard key={business.id} business={business} />)}</div>}</section>
       </div>

@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
+import { readProblemMessage } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -20,6 +22,7 @@ const schema = z.object({ password: z.string().min(6, 'Password must be at least
 
 export function UpdatePasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const router = useRouter()
+  const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -38,6 +41,8 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
 
             if (response.ok) {
               router.push('/home');
+            } else {
+              setNotice({ kind: "error", text: await readProblemMessage(response, "Hindi na-update ang password. Subukang muli mamaya.") });
             }
           }}>
             <div className="flex flex-col gap-6">
@@ -46,6 +51,14 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
                 <Input id="password" name="password" type="password" placeholder="New password" required />
               </div>
               <Button type="submit" className="w-full">Save new password</Button>
+              {notice && (
+                <p
+                  role="alert"
+                  className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+                >
+                  {notice.text}
+                </p>
+              )}
             </div>
           </Form>
         </CardContent>

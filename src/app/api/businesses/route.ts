@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
+import {
+  internalErrorProblem,
+  notFoundProblem,
+} from "@/lib/responses/problem";
 
-export async function GET(req: NextRequest) {
+function mapBusinessReadFailure(error: unknown): NextResponse {
+  console.error("Business read failed", error);
+  return internalErrorProblem({ detail: "Unable to load businesses right now. Please try again later." });
+}
+
+async function getBusinesses(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const db = acquirePrismaClient();
@@ -20,7 +30,7 @@ export async function GET(req: NextRequest) {
       });
 
       if (!data) {
-        return NextResponse.json({ success: false, type: "generic", message: "Business not found" }, { status: 404 });
+        return notFoundProblem({ code: "business-not-found", detail: "The business does not exist." });
       }
 
       return NextResponse.json(data, { status: 200 });
@@ -40,7 +50,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
+    return mapBusinessReadFailure(error);
   }
 }
+
+export const GET = withLogging(getBusinesses, {
+  name: "getBusinesses",
+  redact: { headers: ["authorization", "cookie"] },
+});

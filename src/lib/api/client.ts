@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { assert } from "./assert";
-import type { ProblemDetails } from "./problem";
+import { assert } from "../assert";
+import type { ProblemDetails } from "../responses/problem";
 
 const origin = process.env.NEXT_PUBLIC_ORIGIN_URL;
 assert(origin, "No origin url configured.");
@@ -53,6 +53,32 @@ export async function throwProblem(res: Response): Promise<void> {
     throw new ApiProblemError(body);
 }
 
+function legacyMessage(body: unknown): string | undefined {
+    if (typeof body !== "object" || body === null) return undefined;
+    const record = body as Record<string, unknown>;
+    for (const key of ["detail", "message", "error"]) {
+        const value = record[key];
+        if (typeof value === "string" && value) return value;
+    }
+    return undefined;
+}
+
+export function problemMessageFromBody(body: unknown, fallback: string): string {
+    if (isProblemDetails(body)) {
+        return body.detail || body.title || fallback;
+    }
+    return legacyMessage(body) ?? fallback;
+}
+
+export async function readProblemMessage(response: Response, fallback: string): Promise<string> {
+    try {
+        const body: unknown = await response.json();
+        return problemMessageFromBody(body, fallback);
+    } catch {
+        return fallback;
+    }
+}
+
 
 export async function api<T>(
     path: string,
@@ -80,6 +106,15 @@ export async function apiWithUploads<T>(
     path: string,
     data: { [key: string]: any; },
 ): Promise<T> {
+    const preparation: Record<string, { contentType?: string }> = {};
+
+    for (const [key, file] of Object.entries(data)) {
+        preparation[key] =
+            file && typeof file.type === "string" && file.type
+                ? { contentType: file.type }
+                : {};
+    }
+
     const uploadResponse = await api<{
         [key: string]: {
             uploadId: string;
@@ -87,6 +122,10 @@ export async function apiWithUploads<T>(
         };
     }>(path, {
         method: "POST",
+        headers: {
+            "Content-Type": "application/uploads+json",
+        },
+        body: JSON.stringify(preparation),
     });
 
     const uploadIds: Record<string, string> = {};
@@ -100,6 +139,10 @@ export async function apiWithUploads<T>(
 
         const response = await fetch(upload.uploadUrl, {
             method: "PUT",
+            headers:
+                file && typeof file.type === "string" && file.type
+                    ? { "Content-Type": file.type }
+                    : undefined,
             body: file,
         });
 

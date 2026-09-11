@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { readProblemMessage } from "@/lib/api/client";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { Route } from "next";
 interface Business {
   id: string;
   name: string;
@@ -24,6 +26,7 @@ interface Business {
 export default function ManageBusinesses() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -44,11 +47,12 @@ export default function ManageBusinesses() {
   async function loadBusinesses() {
     try {
       const response = await fetch("/api/management/businesses");
-      if (!response.ok) throw new Error("Failed to load businesses");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load businesses"));
       const data = await response.json();
       setBusinesses(data as Business[]);
     } catch (error) {
       console.error("Failed to load businesses:", error);
+      setError(error instanceof Error ? error.message : "Failed to load businesses");
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +60,7 @@ export default function ManageBusinesses() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     try {
       const payload = { ...formData };
       const response = await fetch("/api/management/businesses", {
@@ -64,13 +69,13 @@ export default function ManageBusinesses() {
         body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
       });
       if (!response.ok) {
-        const error = await response.json().catch(() => ({ message: "Failed to save business" }));
-        throw new Error(error.message ?? "Failed to save business");
+        throw new Error(await readProblemMessage(response, "Failed to save business"));
       }
       resetForm();
       await loadBusinesses();
     } catch (error) {
       console.error("Failed to save business:", error);
+      setError(error instanceof Error ? error.message : "Failed to save business");
     }
   }
 
@@ -78,10 +83,11 @@ export default function ManageBusinesses() {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang negosyong ito?")) {
       try {
         const response = await fetch(`/api/management/businesses?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete business");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete business"));
         await loadBusinesses();
       } catch (error) {
         console.error("Failed to delete business:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete business");
       }
     }
   }
@@ -111,6 +117,8 @@ export default function ManageBusinesses() {
           </div>
           <Button onClick={() => setShowForm(true)}>Magdagdag ng Negosyo</Button>
         </div>
+
+        <ErrorAlert message={error} className="mb-6" onDismiss={() => setError(null)} />
 
         {showForm && (
           <Card className="mb-8">
@@ -254,7 +262,7 @@ export default function ManageBusinesses() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href={`/management/businesses/${business.id}`}>
+                    <Link href={`/management/businesses/${business.id}` as Route}>
                       <Button variant="outline" size="sm">
                         Tingnan
                       </Button>

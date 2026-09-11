@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { WebsiteLogoAvatar } from "./website-logo-avatar";
 import { cn } from "@/lib/utils";
+import { Route } from "next";
 
 interface NavLinkProps
   extends Omit<React.ComponentProps<typeof Link>, "href"> {
   href: string;
 }
 
-function NavLink({ className, children, ...props }: NavLinkProps) {
+function NavLink({ className, children, href, ...props }: NavLinkProps) {
   return (
     <Link
       className={cn(
         "rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition duration-200 ease-out hover:-translate-y-0.5 hover:bg-muted active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         className
       )}
+      href={href as Route}
       {...props}
     >
       {children}

@@ -6,8 +6,8 @@ import {
 import liveCacheFactory from "./cache/live";
 import { PrismaClient } from "@/generated/prisma/client";
 import { createStorageManager, type StorageManager } from "./storage/common";
-import liveStorageFactory from "./storage/live";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { supabaseStorage } from "./storage/supabase";
 
 const globalForInfra = globalThis as unknown as {
     prisma: PrismaClient | undefined;
@@ -30,9 +30,7 @@ export function acquirePrismaClient() {
 }
 
 export function acquireStorageManager(): StorageManager {
-    globalForInfra.storageManager = createStorageManager({
-        layer: liveStorageFactory(),
-    });
+    globalForInfra.storageManager = createStorageManager([supabaseStorage()]);
 
     return globalForInfra.storageManager;
 }

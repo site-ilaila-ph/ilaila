@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 interface AppReview {
   id: string;
@@ -30,6 +32,7 @@ export default function ManageAppReviews() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -43,7 +46,8 @@ export default function ManageAppReviews() {
         fetch("/api/app-reviews?type=stats"),
       ]);
       if (!allResponse.ok || !pendingResponse.ok || !statsResponse.ok) {
-        throw new Error("Failed to load app reviews");
+        const failed = [allResponse, pendingResponse, statsResponse].find((response) => !response.ok)!;
+        throw new Error(await readProblemMessage(failed, "Failed to load app reviews"));
       }
       const [allReviews, pendingReviewsData, statsData] = await Promise.all([
         allResponse.json(),
@@ -55,6 +59,7 @@ export default function ManageAppReviews() {
       setStats(statsData);
     } catch (error) {
       console.error("Failed to load app reviews:", error);
+      setError(error instanceof Error ? error.message : "Failed to load app reviews");
     } finally {
       setIsLoading(false);
     }
@@ -67,10 +72,11 @@ export default function ManageAppReviews() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, isApproved: true }),
       });
-      if (!response.ok) throw new Error("Failed to approve review");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to approve review"));
       await loadData();
     } catch (error) {
       console.error("Failed to approve review:", error);
+      setError(error instanceof Error ? error.message : "Failed to approve review");
     }
   }
 
@@ -81,10 +87,11 @@ export default function ManageAppReviews() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, isApproved: false }),
       });
-      if (!response.ok) throw new Error("Failed to reject review");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to reject review"));
       await loadData();
     } catch (error) {
       console.error("Failed to reject review:", error);
+      setError(error instanceof Error ? error.message : "Failed to reject review");
     }
   }
 
@@ -92,10 +99,11 @@ export default function ManageAppReviews() {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
         const response = await fetch(`/api/app-reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete review");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete review"));
         await loadData();
       } catch (error) {
         console.error("Failed to delete review:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete review");
       }
     }
   }
@@ -105,6 +113,8 @@ export default function ManageAppReviews() {
       <div className="mx-auto max-w-7xl px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Pamahalaan ang mga Review ng App</h1>
+
+        <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
           <p className="mt-1 text-muted-foreground">Suriin at pamahalaan ang mga review ng gumagamit para sa aplikasyon</p>
         </div>
 

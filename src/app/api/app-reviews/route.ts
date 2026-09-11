@@ -1,16 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
 import z from "zod";
+import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
-import { mapKnownApiRouteFailure } from "@/lib/api-route-errors";
+import { ok, noContent } from "@/lib/responses/success";
+import {
+  badRequestProblem,
+  conflictProblem,
+  internalErrorProblem,
+} from "@/lib/responses/problem";
 
 const createAppReviewSchema = z.object({
-  userId: z.string().uuid(),
-  email: z.string().email(),
+  userId: z.uuid(),
+  email: z.email(),
   rating: z.number().min(1).max(5),
   text: z.string().min(3),
 });
 
-export async function GET() {
+function mapAppReviewReadFailure(error: unknown): NextResponse {
+  console.error("App review read failed", error);
+  return internalErrorProblem({ detail: "Unable to load app reviews right now. Please try again later." });
+}
+
+function mapAppReviewCreateFailure(error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem({ detail: "The request body must be valid JSON." });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2003") {
+      return badRequestProblem({
+        code: "app-review-invalid-user",
+        detail: "The user for this app review does not exist.",
+      });
+    }
+
+    if (error.code === "P2002") {
+      return conflictProblem({
+        code: "app-review-conflict",
+        detail: "This app review already exists.",
+      });
+    }
+  }
+
+  console.error("App review create failed", error);
+  return internalErrorProblem({ detail: "Unable to submit the app review right now. Please try again later." });
+}
+
+async function getAppReviews() {
   try {
     const db = acquirePrismaClient();
     const reviews = await db.appReview.findMany({
@@ -26,20 +63,23 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(reviews, { status: 200 });
+    return ok(reviews);
   } catch (error: unknown) {
-    const mapped = mapKnownApiRouteFailure(error, "Unknown app review error");
-    return NextResponse.json({ message: mapped.message }, { status: mapped.status });
+    return mapAppReviewReadFailure(error);
   }
 }
 
-export async function POST(req: NextRequest) {
+async function postAppReview(req: NextRequest) {
   try {
     const body = await req.json();
     const parsed = createAppReviewSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ message: "Validation failed", errors: parsed.error.flatten().fieldErrors }, { status: 400 });
+      return badRequestProblem({
+        code: "app-review-invalid",
+        detail: "The app review could not be validated.",
+        errors: parsed.error.flatten().fieldErrors,
+      });
     }
 
     const db = acquirePrismaClient();
@@ -53,9 +93,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(null, { status: 200 });
+    return noContent();
   } catch (error: unknown) {
-    const mapped = mapKnownApiRouteFailure(error, "Unknown app review error");
-    return NextResponse.json({ message: mapped.message }, { status: mapped.status });
+    return mapAppReviewCreateFailure(error);
   }
 }
+
+export const GET = withLogging(getAppReviews, {
+  name: "getAppReviews",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const POST = withLogging(postAppReview, {
+  name: "postAppReview",
+  redact: { headers: ["authorization", "cookie"], bodyKeys: ["email"] },
+});

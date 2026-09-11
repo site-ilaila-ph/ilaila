@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, ExternalLink, MapPin, Star, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { createClient } from "@/lib/supabase/client";
+import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
 
 export default function BusinessProfilePage({
@@ -19,6 +21,8 @@ export default function BusinessProfilePage({
   const [menuSort, setMenuSort] = useState<"popular" | "price-low" | "price-high">("popular");
   const [reviewText, setReviewText] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [reviewScores, setReviewScores] = useState({ foodQuality: 5, service: 5, ambiance: 5, value: 5 });
   const [relatedBusinesses, setRelatedBusinesses] = useState<BusinessListItem[]>([]);
 
@@ -34,9 +38,13 @@ export default function BusinessProfilePage({
 
       if (!isMounted) return;
 
+      if (!businessResponse.ok) {
+        setLoadError(await readProblemMessage(businessResponse, "Hindi na-load ang detalya ng negosyong ito."));
+      }
+
       const [businessData, businessesData] = await Promise.all([
-        businessResponse.json(),
-        businessesResponse.json(),
+        businessResponse.ok ? businessResponse.json() : Promise.resolve(null),
+        businessesResponse.ok ? businessesResponse.json().catch(() => []) : Promise.resolve([]),
       ]);
 
       setBusiness(businessData ?? null);
@@ -122,6 +130,8 @@ export default function BusinessProfilePage({
 
   async function submitReview(event: React.FormEvent) {
     event.preventDefault();
+    setReviewMessage("");
+    setReviewError(null);
     const supabase = createClient();
     const session = (await supabase.auth.getSession()).data.session!;
     const response = await fetch("/api/reviews", {
@@ -136,9 +146,12 @@ export default function BusinessProfilePage({
       }),
     });
 
-    const result = await response.json();
-    setReviewMessage(result.success ? "Na-save na ang iyong review." : "Hindi pa namin na-save ang iyong review.");
-    if (result.success) setReviewText("");
+    if (response.ok) {
+      setReviewMessage("Na-save na ang iyong review.");
+      setReviewText("");
+    } else {
+      setReviewError(await readProblemMessage(response, "Hindi pa namin na-save ang iyong review. Subukang muli mamaya."));
+    }
   }
 
   return (
@@ -158,6 +171,7 @@ export default function BusinessProfilePage({
       </nav>
 
       <article className="mx-auto max-w-7xl px-6 py-12">
+        <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <header className="mb-12 border-b border-brand-border pb-10">
           <div className="mb-8 flex min-h-64 items-end bg-brand-deep p-7 text-white sm:p-10"><div><p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-muted">San Pedro, Laguna</p><h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">{business.name}</h1></div></div>
           <p className="mb-7 max-w-3xl text-lg leading-relaxed text-muted-foreground">{business.description}</p>
@@ -279,11 +293,14 @@ export default function BusinessProfilePage({
                       </div>
                       <p className="text-muted-foreground">{review.text}</p>
                       <button onClick={async () => {
-                        await fetch("/api/reviews", {
+                        const upvoteResponse = await fetch("/api/reviews", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ action: "upvote", reviewId: review.id }),
                         });
+                        if (!upvoteResponse.ok) {
+                          setReviewError(await readProblemMessage(upvoteResponse, "Hindi nagawa ang upvote. Subukang muli mamaya."));
+                        }
                       }} className="mt-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ThumbsUp className="size-3.5" /> {review.upvotes} nakatulong</button>
                     </div>
                   ))}
@@ -291,7 +308,7 @@ export default function BusinessProfilePage({
               </section>
             )}
 
-            <section className="border-t border-border pt-8"><h2 className="mb-4 font-heading text-2xl font-bold">Ibahagi ang iyong karanasan</h2><form onSubmit={submitReview} className="space-y-3"><div className="grid gap-3 sm:grid-cols-4">{Object.entries(reviewScores).map(([key, score]) => <label key={key} className="text-xs font-medium text-muted-foreground">{key.replace(/([A-Z])/g, " $1")}<select value={score} onChange={(event) => setReviewScores({ ...reviewScores, [key]: Number(event.target.value) })} className="mt-1 block w-full border border-border bg-white px-2 py-2 text-sm text-foreground">{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label>)}</div><textarea value={reviewText} onChange={(event) => setReviewText(event.target.value)} placeholder="Ano ang dapat malaman ng mga tao bago pumunta?" rows={4} className="w-full border border-border bg-white p-3 text-sm outline-none focus:border-primary" /><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">Sinasaklaw ng iyong review ang pagkain, serbisyo, ambiance, at halaga.</span><Button type="submit">I-publish ang review</Button></div>{reviewMessage && <p className="text-sm text-muted-foreground">{reviewMessage}</p>}</form></section>
+            <section className="border-t border-border pt-8"><h2 className="mb-4 font-heading text-2xl font-bold">Ibahagi ang iyong karanasan</h2><form onSubmit={submitReview} className="space-y-3"><div className="grid gap-3 sm:grid-cols-4">{Object.entries(reviewScores).map(([key, score]) => <label key={key} className="text-xs font-medium text-muted-foreground">{key.replace(/([A-Z])/g, " $1")}<select value={score} onChange={(event) => setReviewScores({ ...reviewScores, [key]: Number(event.target.value) })} className="mt-1 block w-full border border-border bg-white px-2 py-2 text-sm text-foreground">{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} / 5</option>)}</select></label>)}</div><textarea value={reviewText} onChange={(event) => setReviewText(event.target.value)} placeholder="Ano ang dapat malaman ng mga tao bago pumunta?" rows={4} className="w-full border border-border bg-white p-3 text-sm outline-none focus:border-primary" /><div className="flex flex-wrap items-center justify-between gap-3"><span className="text-xs text-muted-foreground">Sinasaklaw ng iyong review ang pagkain, serbisyo, ambiance, at halaga.</span><Button type="submit">I-publish ang review</Button></div>{reviewError && <ErrorAlert message={reviewError} className="mb-2" onDismiss={() => setReviewError(null)} />}{reviewMessage && <p className="text-sm text-emerald-700">{reviewMessage}</p>}</form></section>
           </div>
 
           <aside className="lg:col-span-1">

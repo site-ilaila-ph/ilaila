@@ -1,7 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
+import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
+import {
+  badRequestProblem,
+  conflictProblem,
+  internalErrorProblem,
+  notFoundProblem,
+} from "@/lib/responses/problem";
 
-export async function POST(req: NextRequest) {
+function mapReviewWriteFailure(error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem({ detail: "The request body must be valid JSON." });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2002") {
+      return conflictProblem({ code: "review-conflict", detail: "A review for this business already exists." });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem({
+        code: "review-invalid-reference",
+        detail: "The review references a business or user that does not exist.",
+      });
+    }
+
+    if (error.code === "P2025") {
+      return notFoundProblem({ code: "review-not-found", detail: "The review does not exist." });
+    }
+  }
+
+  console.error("Review write failed", error);
+  return internalErrorProblem({ detail: "Unable to save the review right now. Please try again later." });
+}
+
+async function postReview(req: NextRequest) {
   try {
     const body = await req.json();
     const db = acquirePrismaClient();
@@ -27,7 +61,7 @@ export async function POST(req: NextRequest) {
     if (body.action === "upvote") {
       const review = await db.review.findFirst({ where: { id: body.reviewId } });
       if (!review) {
-        return NextResponse.json({ success: false, type: "generic", message: "Review not found" }, { status: 404 });
+        return notFoundProblem({ code: "review-not-found", detail: "The review does not exist." });
       }
 
       await db.review.update({
@@ -38,9 +72,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    return NextResponse.json({ success: false, type: "generic", message: "Unknown review action" }, { status: 400 });
+    return badRequestProblem({ code: "review-unknown-action", detail: "The review action is not supported." });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
+    return mapReviewWriteFailure(error);
   }
 }
+
+export const POST = withLogging(postReview, {
+  name: "postReview",
+  redact: { headers: ["authorization", "cookie"] },
+});

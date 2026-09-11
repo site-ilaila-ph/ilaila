@@ -1,22 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
+import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
+import {
+  badRequestProblem,
+  conflictProblem,
+  internalErrorProblem,
+  notFoundProblem,
+} from "@/lib/responses/problem";
 
-export async function GET() {
-  const db = acquirePrismaClient();
-  const data = await db.business.findMany({
-    include: { tags: true, createdBy: true },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(data, { status: 200 });
+function isMissingId(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientValidationError &&
+    /Argument `id` is missing/i.test(error.message)
+  );
 }
 
-export async function POST(req: NextRequest) {
+function mapManagementBusinessFailure(error: unknown, action: string): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem({ detail: "The request body must be valid JSON." });
+  }
+
+  if (isMissingId(error)) {
+    return badRequestProblem({ code: "business-id-required", detail: "A business id is required." });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2025") {
+      return notFoundProblem({ code: "business-not-found", detail: "The business does not exist." });
+    }
+
+    if (error.code === "P2002") {
+      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(", ") : undefined;
+      return conflictProblem({
+        code: "business-conflict",
+        detail: target ? `A business with the same ${target} already exists.` : "The business already exists.",
+      });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem({
+        code: "business-invalid-reference",
+        detail: "The business references a record that does not exist.",
+      });
+    }
+  }
+
+  console.error(`Management business ${action} failed`, error);
+  return internalErrorProblem({ detail: `Unable to ${action} the business right now. Please try again later.` });
+}
+async function getBusinesses() {
+  try {
+    const db = acquirePrismaClient();
+    const data = await db.business.findMany({
+      include: { tags: true, createdBy: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(data, { status: 200 });
+  } catch (error: unknown) {
+    console.error("Management business read failed", error);
+    return internalErrorProblem({ detail: "Unable to load businesses right now. Please try again later." });
+  }
+}
+
+async function postBusiness(req: NextRequest) {
   try {
     const body = await req.json();
     const db = acquirePrismaClient();
     const defaultOwner = await db.userData.findFirst({ select: { id: true } });
     if (!defaultOwner) {
-      return NextResponse.json({ message: "No user profile exists" }, { status: 400 });
+      return badRequestProblem({ code: "business-owner-required", detail: "A user profile must exist before a business can be created." });
     }
     const data = await db.business.create({
       data: {
@@ -34,12 +87,11 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ message }, { status: 500 });
+    return mapManagementBusinessFailure(error, "create");
   }
 }
 
-export async function PATCH(req: NextRequest) {
+async function patchBusiness(req: NextRequest) {
   try {
     const body = await req.json();
     const db = acquirePrismaClient();
@@ -57,21 +109,39 @@ export async function PATCH(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ message }, { status: 500 });
+    return mapManagementBusinessFailure(error, "update");
   }
 }
 
-export async function DELETE(req: NextRequest) {
+async function deleteBusiness(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
-    if (!id) return NextResponse.json({ message: "Missing id" }, { status: 400 });
+    if (!id) return badRequestProblem({ code: "business-id-required", detail: "A business id is required." });
     const db = acquirePrismaClient();
     await db.business.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Unknown";
-    return NextResponse.json({ message }, { status: 500 });
+    return mapManagementBusinessFailure(error, "delete");
   }
 }
+
+export const GET = withLogging(getBusinesses, {
+  name: "getBusinesses",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const POST = withLogging(postBusiness, {
+  name: "postBusiness",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const PATCH = withLogging(patchBusiness, {
+  name: "patchBusiness",
+  redact: { headers: ["authorization", "cookie"] },
+});
+
+export const DELETE = withLogging(deleteBusiness, {
+  name: "deleteBusiness",
+  redact: { headers: ["authorization", "cookie"] },
+});

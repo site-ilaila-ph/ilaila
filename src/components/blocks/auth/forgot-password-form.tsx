@@ -1,6 +1,9 @@
 'use client'
 
+import { useState } from 'react'
+
 import { cn } from '@/lib/utils'
+import { readProblemMessage } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -18,6 +21,8 @@ import { z } from 'zod'
 const schema = z.object({ email: z.string().email('Invalid email format').trim() })
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+  const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -29,11 +34,17 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
         </CardHeader>
         <CardContent>
           <Form schema={schema} onSubmit={async (data) => {
-            await fetch('/api/auth/forgot-password', {
+            const response = await fetch('/api/auth/forgot-password', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: data.email }),
             });
+
+            if (response.ok) {
+              setNotice({ kind: "success", text: "Idinayala sa iyong email ang reset link." });
+            } else {
+              setNotice({ kind: "error", text: await readProblemMessage(response, "Hindi napadala ang reset email. Subukang muli mamaya.") });
+            }
           }}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
@@ -49,6 +60,14 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
               <Button type="submit" className="w-full">
                 Send reset email
               </Button>
+              {notice && (
+                <p
+                  role="status"
+                  className={`rounded-md border px-4 py-3 text-sm ${notice.kind === "error" ? "border-red-300 bg-red-50 text-red-800" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
+                >
+                  {notice.text}
+                </p>
+              )}
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{' '}

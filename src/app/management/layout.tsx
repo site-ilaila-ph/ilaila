@@ -8,6 +8,7 @@ import {
   Utensils,
   Users,
 } from "lucide-react";
+import { Route } from "next";
 
 export default function ManagementLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -38,5 +39,5 @@ export default function ManagementLayout({ children }: { children: React.ReactNo
 }
 
 function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
-  return <Link href={href} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">{icon}{label}</Link>;
+  return <Link href={href as Route} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">{icon}{label}</Link>;
 }

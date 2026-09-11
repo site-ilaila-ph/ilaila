@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "@/app/businesses/types";
 import type { FoodListItem } from "@/app/foods/types";
 
@@ -10,6 +12,7 @@ export default function HomePage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
   const [topRatedFoods, setTopRatedFoods] = useState<(FoodListItem & { averageRating: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -23,10 +26,15 @@ export default function HomePage() {
 
       if (!isMounted) return;
 
+      const failed = [businessesResponse, foodsResponse, topRatedResponse].find((response) => !response.ok);
+      if (failed) {
+        setLoadError(await readProblemMessage(failed, "Hindi na-load ang nilalaman. Subukang muli mamaya."));
+      }
+
       const [businessesData, foodsData, topRatedData] = await Promise.all([
-        businessesResponse.json(),
-        foodsResponse.json(),
-        topRatedResponse.json(),
+        businessesResponse.ok ? businessesResponse.json() : Promise.resolve([]),
+        foodsResponse.ok ? foodsResponse.json() : Promise.resolve([]),
+        topRatedResponse.ok ? topRatedResponse.json() : Promise.resolve([]),
       ]);
 
       setBusinesses(businessesData ?? []);
@@ -65,6 +73,7 @@ export default function HomePage() {
       </nav>
 
       <main className="mx-auto max-w-6xl px-6 py-20">
+        <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <div className="mb-16 text-center">
           <h1 className="mb-4 text-4xl font-bold tracking-tight">
             Maligayang pagdating sa Ilaila

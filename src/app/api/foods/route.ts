@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
+import { internalErrorProblem, notFoundProblem } from "@/lib/responses/problem";
 
-export async function GET(req: NextRequest) {
+function mapFoodReadFailure(error: unknown): NextResponse {
+  console.error("Food read failed", error);
+  return internalErrorProblem({ detail: "Unable to load foods right now. Please try again later." });
+}
+
+async function getFoods(req: NextRequest) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
   const name = url.searchParams.get("name");
@@ -27,7 +34,11 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      return NextResponse.json(result ?? null, { status: result ? 200 : 404 });
+      if (!result) {
+        return notFoundProblem({ code: "food-not-found", detail: "The food does not exist." });
+      }
+
+      return NextResponse.json(result, { status: 200 });
     }
 
     if (name) {
@@ -54,7 +65,11 @@ export async function GET(req: NextRequest) {
         },
       });
 
-      return NextResponse.json(result ?? null, { status: result ? 200 : 404 });
+      if (!result) {
+        return notFoundProblem({ code: "food-not-found", detail: "No food matches the requested name." });
+      }
+
+      return NextResponse.json(result, { status: 200 });
     }
 
     const topRated = url.searchParams.get("topRated");
@@ -100,8 +115,12 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Unknown";
-    return NextResponse.json({ success: false, type: "generic", message }, { status: 500 });
+  } catch (error: unknown) {
+    return mapFoodReadFailure(error);
   }
 }
+
+export const GET = withLogging(getFoods, {
+  name: "getFoods",
+  redact: { headers: ["authorization", "cookie"] },
+});

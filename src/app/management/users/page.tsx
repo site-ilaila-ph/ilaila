@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { MoreHorizontal, Search, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 interface User {
   id: string;
@@ -21,6 +23,7 @@ export default function ManageUsers() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "admins" | "users">("all");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -29,11 +32,12 @@ export default function ManageUsers() {
   async function loadUsers() {
     try {
       const response = await fetch("/api/management/users");
-      if (!response.ok) throw new Error("Failed to load users");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load users"));
       const data = await response.json();
       setUsers(data as User[]);
     } catch (error) {
       console.error("Failed to load users:", error);
+      setError(error instanceof Error ? error.message : "Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -46,10 +50,11 @@ export default function ManageUsers() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, isAdmin: !currentIsAdmin }),
       });
-      if (!response.ok) throw new Error("Failed to update user role");
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to update user role"));
       await loadUsers();
     } catch (error) {
       console.error("Failed to update user role:", error);
+      setError(error instanceof Error ? error.message : "Failed to update user role");
     }
   }
 
@@ -57,10 +62,11 @@ export default function ManageUsers() {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang user na ito? Hindi na ito maaaring ibalik.")) {
       try {
         const response = await fetch(`/api/management/users?id=${encodeURIComponent(userId)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error("Failed to delete user");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete user"));
         await loadUsers();
       } catch (error) {
         console.error("Failed to delete user:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete user");
       }
     }
   }
@@ -87,6 +93,8 @@ export default function ManageUsers() {
           <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-blue-500"><MoreHorizontal size={19} /></button>
         </div>
       </div>
+
+      <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
 
       <div className="mb-5 flex flex-wrap gap-2 text-sm">
         <FilterButton label={`Mga Aktibong Gumagamit ${users.length}`} active={activeFilter === "all"} onClick={() => setActiveFilter("all")} />

@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { readProblemMessage } from "@/lib/api/client";
 
 export default function SubmitAppReview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
@@ -20,6 +23,7 @@ export default function SubmitAppReview() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const response = await fetch("/api/app-reviews", {
@@ -33,7 +37,7 @@ export default function SubmitAppReview() {
         }),
       });
       if (!response.ok) {
-        throw new Error("Failed to submit app review");
+        throw new Error(await readProblemMessage(response, "Failed to submit app review"));
       }
 
       setSubmitted(true);
@@ -48,7 +52,7 @@ export default function SubmitAppReview() {
       setTimeout(() => setSubmitted(false), 3000);
     } catch (error) {
       console.error("Failed to submit review:", error);
-      alert("Failed to submit review. Please try again.");
+      setSubmitError(error instanceof Error ? error.message : "Failed to submit review. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -84,6 +88,8 @@ export default function SubmitAppReview() {
             </CardContent>
           </Card>
         )}
+
+        <ErrorAlert message={submitError} className="mb-8" onDismiss={() => setSubmitError(null)} />
 
         <Card>
           <CardHeader>
