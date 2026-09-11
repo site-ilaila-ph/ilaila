@@ -105,7 +105,7 @@ export function withUpload(
     };
 }
 
-async function resolveUploadOwnerId(request: Request): Promise<{ userId: string } | Response> {
+async function resolveUploadOwnerId(): Promise<{ userId: string } | Response> {
     let userId: string;
 
     try {
@@ -187,7 +187,7 @@ async function handleUploadPreparation(
         return badRequestProblem({ code: "upload-missing", detail: "One or more required uploads were not provided." });
     }
 
-    const owner = await resolveUploadOwnerId(request);
+    const owner = await resolveUploadOwnerId();
 
     if (owner instanceof Response) {
         return owner;
@@ -260,7 +260,7 @@ async function handleUploadExecution(
         return badRequestProblem({ code: "upload-missing", detail: "One or more required uploads were not provided." });
     }
 
-    const owner = await resolveUploadOwnerId(request);
+    const owner = await resolveUploadOwnerId();
 
     if (owner instanceof Response) {
         return owner;

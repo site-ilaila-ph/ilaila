@@ -6,10 +6,13 @@
 		"node": "24.x"
 	},
 	"scripts": {
-		"typegen": "next typegen",
-		"dev": "next dev",
-		"ci": " tsc --noEmit && eslint --cache",
-		"cd": "pnpm exec prisma generate && pnpm next build"
+		"typegen": "pnpm exec prisma generate && pnpm exec next typegen",
+		"lint": "pnpm exec eslint --cache",
+		"dev": "pnpm exec next dev",
+		"build": "pnpm exec next build",
+		"typecheck": "pnpm exec tsc --noEmit",
+		"ci": "pnpm run typecheck && pnpm run lint",
+		"cd": "pnpm run typegen && pnpm run build"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1129.0",
