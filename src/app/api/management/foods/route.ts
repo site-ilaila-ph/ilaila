@@ -16,40 +16,44 @@ function isMissingId(error: unknown): boolean {
   );
 }
 
-function mapManagementFoodFailure(error: unknown, action: string): NextResponse {
+function mapManagementFoodFailure(request: NextRequest, error: unknown, action: string): NextResponse {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (isMissingId(error)) {
-    return badRequestProblem({ code: "food-id-required", detail: "A food id is required." });
+    return badRequestProblem(request, { code: "food-id-required", detail: "A food id is required." });
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2025") {
-      return notFoundProblem({ code: "food-not-found", detail: "The food does not exist." });
+      return notFoundProblem(request, { code: "food-not-found", detail: "The food does not exist." });
     }
 
     if (error.code === "P2002") {
       const target = Array.isArray(error.meta?.target) ? error.meta.target.join(", ") : undefined;
-      return conflictProblem({
-        code: "food-conflict",
-        detail: target ? `A food with the same ${target} already exists.` : "The food already exists.",
-      });
+      return conflictProblem(
+        request,
+        {
+          code: "food-conflict",
+          detail: target ? `A food with the same ${target} already exists.` : "The food already exists.",
+        });
     }
 
     if (error.code === "P2003") {
-      return badRequestProblem({
-        code: "food-invalid-reference",
-        detail: "The food references a record that does not exist.",
-      });
+      return badRequestProblem(
+        request,
+        {
+          code: "food-invalid-reference",
+          detail: "The food references a record that does not exist.",
+        });
     }
   }
 
   console.error(`Management food ${action} failed`, error);
-  return internalErrorProblem({ detail: `Unable to ${action} the food right now. Please try again later.` });
+  return internalErrorProblem(request, { detail: `Unable to ${action} the food right now. Please try again later.` });
 }
-async function getFoods() {
+async function getFoods(req: NextRequest) {
   try {
     const db = acquirePrismaClient();
     const data = await db.food.findMany({
@@ -59,7 +63,7 @@ async function getFoods() {
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
     console.error("Management food read failed", error);
-    return internalErrorProblem({ detail: "Unable to load foods right now. Please try again later." });
+    return internalErrorProblem(req, { detail: "Unable to load foods right now. Please try again later." });
   }
 }
 
@@ -81,7 +85,7 @@ async function postFood(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(error, "create");
+    return mapManagementFoodFailure(req, error, "create");
   }
 }
 
@@ -103,7 +107,7 @@ async function patchFood(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(error, "update");
+    return mapManagementFoodFailure(req, error, "update");
   }
 }
 
@@ -111,12 +115,12 @@ async function deleteFood(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
-    if (!id) return badRequestProblem({ code: "food-id-required", detail: "A food id is required." });
+    if (!id) return badRequestProblem(req, { code: "food-id-required", detail: "A food id is required." });
     const db = acquirePrismaClient();
     await db.food.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(error, "delete");
+    return mapManagementFoodFailure(req, error, "delete");
   }
 }
 

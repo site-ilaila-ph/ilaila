@@ -17,14 +17,14 @@ function isAuthError(error: unknown): error is AuthError {
   );
 }
 
-function mapForgotPasswordFailure(error: unknown) {
+function mapForgotPasswordFailure(request: NextRequest, error: unknown) {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (error instanceof TypeError) {
     // new URL(req.url) failed or another malformed request input.
-    return badRequestProblem({ code: "forgot-password-invalid", detail: "The request URL is invalid." });
+    return badRequestProblem(request, { code: "forgot-password-invalid", detail: "The request URL is invalid." });
   }
 
   if (isAuthError(error)) {
@@ -32,19 +32,19 @@ function mapForgotPasswordFailure(error: unknown) {
     const status = error.status ?? 400;
 
     if (status === 429) {
-      return tooManyRequestsProblem({ code: "forgot-password-rate-limited", detail: message });
+      return tooManyRequestsProblem(request, { code: "forgot-password-rate-limited", detail: message });
     }
 
     if (status >= 500) {
       console.error("Forgot password failed with upstream status", status, message);
-      return internalErrorProblem({ detail: "Password reset is unavailable right now. Please try again later." });
+      return internalErrorProblem(request, { detail: "Password reset is unavailable right now. Please try again later." });
     }
 
-    return badRequestProblem({ code: "forgot-password-failed", detail: message });
+    return badRequestProblem(request, { code: "forgot-password-failed", detail: message });
   }
 
   console.error("Forgot password failed", error);
-  return internalErrorProblem({ detail: "Password reset is unavailable right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Password reset is unavailable right now. Please try again later." });
 }
 
 async function postForgotPassword(req: NextRequest) {
@@ -56,7 +56,7 @@ async function postForgotPassword(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    return mapForgotPasswordFailure(error);
+    return mapForgotPasswordFailure(req, error);
   }
 }
 

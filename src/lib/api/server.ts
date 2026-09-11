@@ -98,14 +98,16 @@ export function withUpload(
             );
         }
 
-        return unsupportedMediaTypeProblem({
-            code: "upload-unsupported-media-type",
-            detail: `Expected "${UPLOAD_MEDIA_TYPE}" or "${JSON_MEDIA_TYPE}".`,
-        });
+        return unsupportedMediaTypeProblem(
+            request,
+            {
+                code: "upload-unsupported-media-type",
+                detail: `Expected "${UPLOAD_MEDIA_TYPE}" or "${JSON_MEDIA_TYPE}".`,
+            });
     };
 }
 
-async function resolveUploadOwnerId(): Promise<{ userId: string } | Response> {
+async function resolveUploadOwnerId(request: Request): Promise<{ userId: string } | Response> {
     let userId: string;
 
     try {
@@ -115,7 +117,7 @@ async function resolveUploadOwnerId(): Promise<{ userId: string } | Response> {
         } = await supabase.auth.getUser();
 
         if (!user) {
-            return unauthorizedProblem({ code: "upload-unauthorized", detail: "Authentication required to upload files." });
+            return unauthorizedProblem(request, { code: "upload-unauthorized", detail: "Authentication required to upload files." });
         }
 
         const db = acquirePrismaClient();
@@ -125,34 +127,34 @@ async function resolveUploadOwnerId(): Promise<{ userId: string } | Response> {
         });
 
         if (!userData) {
-            return forbiddenProblem({ code: "upload-profile-required", detail: "No user profile exists for the current user." });
+            return forbiddenProblem(request, { code: "upload-profile-required", detail: "No user profile exists for the current user." });
         }
 
         userId = userData.id;
     } catch (error: unknown) {
         console.error("Upload owner lookup failed", error);
-        return internalErrorProblem({ detail: "Unable to verify the upload owner right now. Please try again later." });
+        return internalErrorProblem(request, { detail: "Unable to verify the upload owner right now. Please try again later." });
     }
 
     return { userId };
 }
 
-function mapUploadPreparationFailure(error: unknown): Response {
+function mapUploadPreparationFailure(request: Request, error: unknown): Response {
     if (isStorageError(error)) {
-        return badGatewayProblem({ code: "upload-storage-unavailable", detail: error.message });
+        return badGatewayProblem(request, { code: "upload-storage-unavailable", detail: error.message });
     }
 
     console.error("Upload preparation failed", error);
-    return internalErrorProblem({ detail: "Unable to prepare uploads right now. Please try again later." });
+    return internalErrorProblem(request, { detail: "Unable to prepare uploads right now. Please try again later." });
 }
 
-function mapUploadResolutionFailure(error: unknown): Response {
+function mapUploadResolutionFailure(request: Request, error: unknown): Response {
     if (isStorageError(error)) {
-        return badGatewayProblem({ code: "upload-storage-unavailable", detail: error.message });
+        return badGatewayProblem(request, { code: "upload-storage-unavailable", detail: error.message });
     }
 
     console.error("Upload resolution failed", error);
-    return internalErrorProblem({ detail: "Unable to verify uploads right now. Please try again later." });
+    return internalErrorProblem(request, { detail: "Unable to verify uploads right now. Please try again later." });
 }
 
 function isStorageError(error: unknown): error is Error {
@@ -172,7 +174,7 @@ async function handleUploadPreparation(
     try {
         body = await request.json();
     } catch {
-        return badRequestProblem({ code: "upload-invalid-body", detail: "The request body must contain valid JSON." });
+        return badRequestProblem(request, { code: "upload-invalid-body", detail: "The request body must contain valid JSON." });
     }
 
     if (
@@ -180,14 +182,14 @@ async function handleUploadPreparation(
         body === null ||
         Array.isArray(body)
     ) {
-        return badRequestProblem({ code: "upload-invalid-body", detail: "The request body must be a JSON object." });
+        return badRequestProblem(request, { code: "upload-invalid-body", detail: "The request body must be a JSON object." });
     }
 
     if (!hasRequiredUploadNames(body, requiredUploadNames)) {
-        return badRequestProblem({ code: "upload-missing", detail: "One or more required uploads were not provided." });
+        return badRequestProblem(request, { code: "upload-missing", detail: "One or more required uploads were not provided." });
     }
 
-    const owner = await resolveUploadOwnerId();
+    const owner = await resolveUploadOwnerId(request);
 
     if (owner instanceof Response) {
         return owner;
@@ -230,7 +232,7 @@ async function handleUploadPreparation(
 
         return ok(uploads);
     } catch (error: unknown) {
-        return mapUploadPreparationFailure(error);
+        return mapUploadPreparationFailure(request, error);
     }
 }
 
@@ -245,7 +247,7 @@ async function handleUploadExecution(
         // Clone so the inner handler can still read the request body.
         body = await request.clone().json();
     } catch {
-        return badRequestProblem({ code: "upload-invalid-body", detail: "The request body must contain valid JSON." });
+        return badRequestProblem(request, { code: "upload-invalid-body", detail: "The request body must contain valid JSON." });
     }
 
     if (
@@ -253,14 +255,14 @@ async function handleUploadExecution(
         body === null ||
         Array.isArray(body)
     ) {
-        return badRequestProblem({ code: "upload-invalid-body", detail: "The request body must be a JSON object." });
+        return badRequestProblem(request, { code: "upload-invalid-body", detail: "The request body must be a JSON object." });
     }
 
     if (!hasRequiredUploadNames(body, requiredUploadNames)) {
-        return badRequestProblem({ code: "upload-missing", detail: "One or more required uploads were not provided." });
+        return badRequestProblem(request, { code: "upload-missing", detail: "One or more required uploads were not provided." });
     }
 
-    const owner = await resolveUploadOwnerId();
+    const owner = await resolveUploadOwnerId(request);
 
     if (owner instanceof Response) {
         return owner;
@@ -274,25 +276,25 @@ async function handleUploadExecution(
             const uploadId = body[uploadName];
 
             if (typeof uploadId !== "string") {
-                return badRequestProblem({ code: "upload-invalid-id", detail: `Upload "${uploadName}" must contain an upload ID.` });
+                return badRequestProblem(request, { code: "upload-invalid-id", detail: `Upload "${uploadName}" must contain an upload ID.` });
             }
 
             const uploadRecord = await getUploadRecordById(uploadId);
 
             if (!uploadRecord) {
-                return notFoundProblem({ code: "upload-not-found", detail: `Upload "${uploadName}" does not exist.` });
+                return notFoundProblem(request, { code: "upload-not-found", detail: `Upload "${uploadName}" does not exist.` });
             }
 
             if (uploadRecord.uploadName !== uploadName) {
-                return badRequestProblem({ code: "upload-mismatch", detail: `Upload "${uploadName}" does not match the prepared upload.` });
+                return badRequestProblem(request, { code: "upload-mismatch", detail: `Upload "${uploadName}" does not match the prepared upload.` });
             }
 
             if (uploadRecord.userId !== owner.userId) {
-                return forbiddenProblem({ code: "upload-forbidden", detail: `Upload "${uploadName}" does not belong to the current user.` });
+                return forbiddenProblem(request, { code: "upload-forbidden", detail: `Upload "${uploadName}" does not belong to the current user.` });
             }
 
             if (uploadRecord.status !== UploadStatus.Pending) {
-                return badRequestProblem({ code: "upload-already-used", detail: `Upload "${uploadName}" has already been used.` });
+                return badRequestProblem(request, { code: "upload-already-used", detail: `Upload "${uploadName}" has already been used.` });
             }
 
             const metadata = await storage.get({
@@ -300,7 +302,7 @@ async function handleUploadExecution(
             });
 
             if (!metadata) {
-                return badRequestProblem({ code: "upload-incomplete", detail: `Upload "${uploadName}" has not been uploaded.` });
+                return badRequestProblem(request, { code: "upload-incomplete", detail: `Upload "${uploadName}" has not been uploaded.` });
             }
 
             await markUploadRecordCompleted(uploadId);
@@ -310,7 +312,7 @@ async function handleUploadExecution(
 
         return handler(request, uploads);
     } catch (error: unknown) {
-        return mapUploadResolutionFailure(error);
+        return mapUploadResolutionFailure(request, error);
     }
 }
 

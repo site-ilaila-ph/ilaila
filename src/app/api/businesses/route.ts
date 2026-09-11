@@ -6,9 +6,9 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
-function mapBusinessReadFailure(error: unknown): NextResponse {
+function mapBusinessReadFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Business read failed", error);
-  return internalErrorProblem({ detail: "Unable to load businesses right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to load businesses right now. Please try again later." });
 }
 
 async function getBusinesses(req: NextRequest) {
@@ -30,7 +30,7 @@ async function getBusinesses(req: NextRequest) {
       });
 
       if (!data) {
-        return notFoundProblem({ code: "business-not-found", detail: "The business does not exist." });
+        return notFoundProblem(req, { code: "business-not-found", detail: "The business does not exist." });
       }
 
       return NextResponse.json(data, { status: 200 });
@@ -50,7 +50,7 @@ async function getBusinesses(req: NextRequest) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapBusinessReadFailure(error);
+    return mapBusinessReadFailure(req, error);
   }
 }
 

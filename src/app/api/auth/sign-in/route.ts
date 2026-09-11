@@ -9,9 +9,9 @@ import {
   unauthorizedProblem,
 } from "@/lib/responses/problem";
 
-function mapSignInFailure(error: unknown): NextResponse {
+function mapSignInFailure(request: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (isAuthError(error)) {
@@ -19,31 +19,31 @@ function mapSignInFailure(error: unknown): NextResponse {
     const status = error.status ?? 400;
 
     if (status === 400) {
-      return badRequestProblem({ code: "sign-in-failed", detail: message });
+      return badRequestProblem(request, { code: "sign-in-failed", detail: message });
     }
 
     if (status === 401) {
-      return unauthorizedProblem({ code: "invalid-credentials", detail: message });
+      return unauthorizedProblem(request, { code: "invalid-credentials", detail: message });
     }
 
     if (status === 422) {
-      return badRequestProblem({ code: "invalid-credentials", detail: message });
+      return badRequestProblem(request, { code: "invalid-credentials", detail: message });
     }
 
     if (status === 429) {
-      return tooManyRequestsProblem({ code: "sign-in-rate-limited", detail: message });
+      return tooManyRequestsProblem(request, { code: "sign-in-rate-limited", detail: message });
     }
 
     if (status >= 500) {
       console.error("Sign in failed with upstream status", status, message);
-      return internalErrorProblem({ detail: "Sign in is unavailable right now. Please try again later." });
+      return internalErrorProblem(request, { detail: "Sign in is unavailable right now. Please try again later." });
     }
 
-    return badRequestProblem({ code: "sign-in-failed", detail: message });
+    return badRequestProblem(request, { code: "sign-in-failed", detail: message });
   }
 
   console.error("Sign in failed", error);
-  return internalErrorProblem({ detail: "Sign in is unavailable right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Sign in is unavailable right now. Please try again later." });
 }
 
 function isAuthError(error: unknown): error is AuthError {
@@ -63,7 +63,7 @@ async function postSignIn(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapSignInFailure(error);
+    return mapSignInFailure(req, error);
   }
 }
 

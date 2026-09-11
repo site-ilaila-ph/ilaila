@@ -3,9 +3,9 @@ import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
 import { internalErrorProblem, notFoundProblem } from "@/lib/responses/problem";
 
-function mapFoodReadFailure(error: unknown): NextResponse {
+function mapFoodReadFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Food read failed", error);
-  return internalErrorProblem({ detail: "Unable to load foods right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to load foods right now. Please try again later." });
 }
 
 async function getFoods(req: NextRequest) {
@@ -35,7 +35,7 @@ async function getFoods(req: NextRequest) {
       });
 
       if (!result) {
-        return notFoundProblem({ code: "food-not-found", detail: "The food does not exist." });
+        return notFoundProblem(req, { code: "food-not-found", detail: "The food does not exist." });
       }
 
       return NextResponse.json(result, { status: 200 });
@@ -66,7 +66,7 @@ async function getFoods(req: NextRequest) {
       });
 
       if (!result) {
-        return notFoundProblem({ code: "food-not-found", detail: "No food matches the requested name." });
+        return notFoundProblem(req, { code: "food-not-found", detail: "No food matches the requested name." });
       }
 
       return NextResponse.json(result, { status: 200 });
@@ -116,7 +116,7 @@ async function getFoods(req: NextRequest) {
 
     return NextResponse.json(result, { status: 200 });
   } catch (error: unknown) {
-    return mapFoodReadFailure(error);
+    return mapFoodReadFailure(req, error);
   }
 }
 

@@ -1,14 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { acquirePrismaClient } from "@/lib/infra";
 import { internalErrorProblem, ok } from "@/lib/responses";
 
-function mapManagementStatsFailure(error: unknown): NextResponse {
+function mapManagementStatsFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("Management stats read failed", error);
-  return internalErrorProblem({ detail: "Unable to load dashboard stats right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to load dashboard stats right now. Please try again later." });
 }
 
-async function getStats() {
+async function getStats(req: NextRequest) {
   try {
     const db = acquirePrismaClient();
 
@@ -37,7 +37,7 @@ async function getStats() {
       pendingAppReviews: pendingAppReviewCount,
     });
   } catch (error: unknown) {
-    return mapManagementStatsFailure(error);
+    return mapManagementStatsFailure(req, error);
   }
 }
 

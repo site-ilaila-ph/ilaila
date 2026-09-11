@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withLogging } from '@/lib/logging'
 import type { AuthError } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
@@ -13,24 +13,24 @@ function isAuthError(error: unknown): error is AuthError {
   );
 }
 
-function mapSignOutFailure(error: unknown) {
+function mapSignOutFailure(request: NextRequest, error: unknown) {
   if (isAuthError(error)) {
     const message = error.message || "Sign out failed.";
     const status = error.status ?? 400;
 
     if (status >= 500) {
       console.error("Sign out failed with upstream status", status, message);
-      return internalErrorProblem({ detail: "Sign out is unavailable right now. Please try again later." });
+      return internalErrorProblem(request, { detail: "Sign out is unavailable right now. Please try again later." });
     }
 
-    return badRequestProblem({ code: "sign-out-failed", detail: message });
+    return badRequestProblem(request, { code: "sign-out-failed", detail: message });
   }
 
   console.error("Sign out failed", error);
-  return internalErrorProblem({ detail: "Sign out is unavailable right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Sign out is unavailable right now. Please try again later." });
 }
 
-async function postSignOut() {
+async function postSignOut(req: NextRequest) {
   try {
     const supabase = await createClient()
     const { error } = await supabase.auth.signOut()
@@ -38,7 +38,7 @@ async function postSignOut() {
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (error: unknown) {
-    return mapSignOutFailure(error)
+    return mapSignOutFailure(req, error)
   }
 }
 

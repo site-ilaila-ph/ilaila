@@ -9,30 +9,32 @@ import {
   notFoundProblem,
 } from "@/lib/responses/problem";
 
-function mapReviewWriteFailure(error: unknown): NextResponse {
+function mapReviewWriteFailure(request: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2002") {
-      return conflictProblem({ code: "review-conflict", detail: "A review for this business already exists." });
+      return conflictProblem(request, { code: "review-conflict", detail: "A review for this business already exists." });
     }
 
     if (error.code === "P2003") {
-      return badRequestProblem({
-        code: "review-invalid-reference",
-        detail: "The review references a business or user that does not exist.",
-      });
+      return badRequestProblem(
+        request,
+        {
+          code: "review-invalid-reference",
+          detail: "The review references a business or user that does not exist.",
+        });
     }
 
     if (error.code === "P2025") {
-      return notFoundProblem({ code: "review-not-found", detail: "The review does not exist." });
+      return notFoundProblem(request, { code: "review-not-found", detail: "The review does not exist." });
     }
   }
 
   console.error("Review write failed", error);
-  return internalErrorProblem({ detail: "Unable to save the review right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to save the review right now. Please try again later." });
 }
 
 async function postReview(req: NextRequest) {
@@ -61,7 +63,7 @@ async function postReview(req: NextRequest) {
     if (body.action === "upvote") {
       const review = await db.review.findFirst({ where: { id: body.reviewId } });
       if (!review) {
-        return notFoundProblem({ code: "review-not-found", detail: "The review does not exist." });
+        return notFoundProblem(req, { code: "review-not-found", detail: "The review does not exist." });
       }
 
       await db.review.update({
@@ -72,9 +74,9 @@ async function postReview(req: NextRequest) {
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
-    return badRequestProblem({ code: "review-unknown-action", detail: "The review action is not supported." });
+    return badRequestProblem(req, { code: "review-unknown-action", detail: "The review action is not supported." });
   } catch (error: unknown) {
-    return mapReviewWriteFailure(error);
+    return mapReviewWriteFailure(req, error);
   }
 }
 

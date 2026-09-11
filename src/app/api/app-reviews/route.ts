@@ -17,26 +17,29 @@ const createAppReviewSchema = z.object({
   text: z.string().min(3),
 });
 
-function mapAppReviewReadFailure(error: unknown): NextResponse {
+function mapAppReviewReadFailure(request: NextRequest, error: unknown): NextResponse {
   console.error("App review read failed", error);
-  return internalErrorProblem({ detail: "Unable to load app reviews right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to load app reviews right now. Please try again later." });
 }
 
-function mapAppReviewCreateFailure(error: unknown): NextResponse {
+function mapAppReviewCreateFailure(request: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2003") {
-      return badRequestProblem({
+      return badRequestProblem(
+        request,
+        {
         code: "app-review-invalid-user",
         detail: "The user for this app review does not exist.",
       });
     }
 
     if (error.code === "P2002") {
-      return conflictProblem({
+      return conflictProblem(
+        request, {
         code: "app-review-conflict",
         detail: "This app review already exists.",
       });
@@ -44,10 +47,10 @@ function mapAppReviewCreateFailure(error: unknown): NextResponse {
   }
 
   console.error("App review create failed", error);
-  return internalErrorProblem({ detail: "Unable to submit the app review right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "Unable to submit the app review right now. Please try again later." });
 }
 
-async function getAppReviews() {
+async function getAppReviews(request: NextRequest) {
   try {
     const db = acquirePrismaClient();
     const reviews = await db.appReview.findMany({
@@ -65,17 +68,17 @@ async function getAppReviews() {
 
     return ok(reviews);
   } catch (error: unknown) {
-    return mapAppReviewReadFailure(error);
+    return mapAppReviewReadFailure(request, error);
   }
 }
 
-async function postAppReview(req: NextRequest) {
+async function postAppReview(request: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await request.json();
     const parsed = createAppReviewSchema.safeParse(body);
 
     if (!parsed.success) {
-      return badRequestProblem({
+      return badRequestProblem(request, {
         code: "app-review-invalid",
         detail: "The app review could not be validated.",
         errors: parsed.error.flatten().fieldErrors,
@@ -95,7 +98,7 @@ async function postAppReview(req: NextRequest) {
 
     return noContent();
   } catch (error: unknown) {
-    return mapAppReviewCreateFailure(error);
+    return mapAppReviewCreateFailure(request, error);
   }
 }
 

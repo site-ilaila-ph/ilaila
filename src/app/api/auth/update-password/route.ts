@@ -18,9 +18,9 @@ function isAuthError(error: unknown): error is AuthError {
   );
 }
 
-function mapUpdatePasswordFailure(error: unknown) {
+function mapUpdatePasswordFailure(request: NextRequest, error: unknown) {
   if (error instanceof SyntaxError) {
-    return badRequestProblem({ detail: "The request body must be valid JSON." });
+    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
   }
 
   if (isAuthError(error)) {
@@ -28,27 +28,27 @@ function mapUpdatePasswordFailure(error: unknown) {
     const status = error.status ?? 400;
 
     if (status === 401) {
-      return unauthorizedProblem({ code: "update-password-unauthorized", detail: message });
+      return unauthorizedProblem(request, { code: "update-password-unauthorized", detail: message });
     }
 
     if (status === 422) {
-      return badRequestProblem({ code: "update-password-invalid", detail: message });
+      return badRequestProblem(request, { code: "update-password-invalid", detail: message });
     }
 
     if (status === 429) {
-      return tooManyRequestsProblem({ code: "update-password-rate-limited", detail: message });
+      return tooManyRequestsProblem(request, { code: "update-password-rate-limited", detail: message });
     }
 
     if (status >= 500) {
       console.error("Update password failed with upstream status", status, message);
-      return internalErrorProblem({ detail: "Password update is unavailable right now. Please try again later." });
+      return internalErrorProblem(request, { detail: "Password update is unavailable right now. Please try again later." });
     }
 
-    return badRequestProblem({ code: "update-password-failed", detail: message });
+    return badRequestProblem(request, { code: "update-password-failed", detail: message });
   }
 
   console.error("Update password failed", error);
-  return internalErrorProblem({ detail: "Password update is unavailable right now. Please try again later." });
+  return internalErrorProblem(request, { detail: "An unexpected error occurred." });
 }
 
 async function postUpdatePassword(req: NextRequest) {
@@ -59,7 +59,7 @@ async function postUpdatePassword(req: NextRequest) {
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapUpdatePasswordFailure(error);
+    return mapUpdatePasswordFailure(req, error);
   }
 }
 
