@@ -18,7 +18,7 @@ const isAdminOnlyRoute = match([
   "/management/*rest",
 ]);
 
-export const middleware = async (request: NextRequest) => {
+export const proxy = async (request: NextRequest) => {
   let response = NextResponse.next({
     request,
   });
