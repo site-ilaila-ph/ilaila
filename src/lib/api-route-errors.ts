@@ -1,7 +1,8 @@
-export function mapKnownApiRouteFailure(error: unknown, fallback = "Unknown error") {
+import { NextResponse } from "next/server";
+import { internalErrorProblem } from "./problem";
+
+export function mapKnownApiRouteFailure(error: unknown, fallback = "Unknown error"): NextResponse {
   const message = error instanceof Error ? error.message : fallback;
-  return {
-    status: 500,
-    message,
-  };
+  return internalErrorProblem(message);
 }
+

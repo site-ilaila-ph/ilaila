@@ -29,10 +29,6 @@ export function acquirePrismaClient() {
     return globalForInfra.prisma;
 }
 
-export async function acquireNextJSCookieMap() {
-    return new Map<string, string>();
-}
-
 export function acquireStorageManager(): StorageManager {
     globalForInfra.storageManager = createStorageManager({
         layer: liveStorageFactory(),
