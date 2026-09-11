@@ -88,7 +88,7 @@ export default function ManageUsers() {
         <div className="flex w-full items-center gap-2 sm:w-auto">
           <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm text-slate-400 shadow-sm sm:w-64 sm:flex-none">
             <Search size={16} />
-            <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" />
+            <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" suppressHydrationWarning className="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400" />
           </div>
           <button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-slate-500 shadow-sm transition hover:text-blue-500"><MoreHorizontal size={19} /></button>
         </div>
@@ -120,7 +120,7 @@ export default function ManageUsers() {
               {visibleUsers.map((user) => (
                 <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-slate-100 px-5 py-4 last:border-0 hover:bg-slate-50/70">
                   <div className="flex items-center gap-3">
-                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">{(user.userName || user.email).charAt(0).toUpperCase()}</div>
+                    <div className="grid size-9 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">{user.email.charAt(0).toUpperCase()}</div>
                     <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-700">{user.userName || "Walang username"}</p><p className="truncate text-xs text-slate-400">{user.email}</p></div>
                   </div>
                   <span className="text-sm text-slate-600">{user._count?.reviews || 0}</span>
