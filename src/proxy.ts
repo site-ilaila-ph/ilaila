@@ -70,6 +70,7 @@ export const proxy = async (request: NextRequest) => {
   }
 
   if (!user) {
+    if (pathname === "/") return redirectResponse(new URL("/landing", request.url))
     return response;
   }
 
