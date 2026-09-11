@@ -3,7 +3,7 @@ returns trigger
 set search_path = ''
 as $$
 begin
-  insert into app.users (
+  insert into app.user_data (
     id
   )
   values (
@@ -15,6 +15,6 @@ end;
 $$ language plpgsql security definer;
 
 create or replace trigger on_auth_user_created
-  after insert on auth.users
+  after insert on auth.user_data
   for each row
   execute function app.handle_new_user();
