@@ -17,7 +17,6 @@ function WebsiteLogoAvatar({
   alt = "Website logo",
   ir,
   pr,
-  className,
   containerClassName,
   style,
   ...props
@@ -34,8 +33,9 @@ function WebsiteLogoAvatar({
       <Image
         src={icon.src}
         alt={alt}
-        className={className}
-        style={{ borderRadius: ir, ...style }}
+        style={{ borderRadius: "50%", ...style }}
+        width={ir}
+        height={ir}
         {...props}
       />
     </div>
