@@ -1,0 +1,90 @@
+Update available! 12.3.4 → 12.4.1.
+Changelog: https://pnpm.io/v/12.4.1
+To update, run: Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+✓ Lockfile passes supply-chain policies (verified 6h ago)
+[WARN] deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+Progress: resolved 0, reused 12, downloaded 0, added 0
+Progress: resolved 0, reused 22, downloaded 0, added 0
+Progress: resolved 0, reused 55, downloaded 1, added 0
+Progress: resolved 0, reused 104, downloaded 1, added 0
+Progress: resolved 0, reused 126, downloaded 1, added 0
+Progress: resolved 0, reused 201, downloaded 2, added 0
+Progress: resolved 0, reused 269, downloaded 3, added 0
+Progress: resolved 0, reused 320, downloaded 6, added 0
+Progress: resolved 0, reused 331, downloaded 7, added 0
+Progress: resolved 0, reused 381, downloaded 8, added 0
+[WARN] Request took 10759ms: https://registry.npmjs.org/@sentry%2Fopentelemetry
+[WARN] Request took 10803ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+Progress: resolved 0, reused 471, downloaded 10, added 0
+[WARN] Request took 10332ms: https://registry.npmjs.org/@dotenvx%2Fdotenvx
+[WARN] Request took 11221ms: https://registry.npmjs.org/@sentry%2Freact
+[WARN] Request took 11350ms: https://registry.npmjs.org/rollup
+Progress: resolved 0, reused 512, downloaded 12, added 0
+Progress: resolved 0, reused 534, downloaded 12, added 0
+Progress: resolved 0, reused 541, downloaded 12, added 0
+[WARN] Request took 11042ms: https://registry.npmjs.org/react-is
+[WARN] Request took 18199ms: https://registry.npmjs.org/@sentry%2Fnode
+Progress: resolved 0, reused 542, downloaded 12, added 0
+[WARN] Request took 14945ms: https://registry.npmjs.org/electron-to-chromium
+[WARN] Request took 10181ms: https://registry.npmjs.org/@sentry%2Fcli-linux-i686
+[WARN] Request took 10743ms: https://registry.npmjs.org/@sentry%2Fcli-win32-arm64
+[WARN] Request took 10246ms: https://registry.npmjs.org/@sentry%2Fcli-win32-x64
+Downloading @sentry/cli-win32-x64@2.58.6: 0.00 B/5.69 MB
+[WARN] Request took 12453ms: https://registry.npmjs.org/eslint-plugin-react-hooks
+Downloading @sentry/cli-win32-x64@2.58.6: 687.09 kB/5.69 MB
+Downloading @sentry/cli-win32-x64@2.58.6: 1.39 MB/5.69 MB
+Downloading @sentry/cli-win32-x64@2.58.6: 2.16 MB/5.69 MB
+Downloading @sentry/cli-win32-x64@2.58.6: 3.80 MB/5.69 MB
+[WARN] Request took 18218ms: https://registry.npmjs.org/axe-core
+Progress: resolved 0, reused 585, downloaded 12, added 0
+Progress: resolved 0, reused 594, downloaded 13, added 0
+[WARN] Request took 12208ms: https://registry.npmjs.org/react-is
+Progress: resolved 0, reused 596, downloaded 13, added 0
+Progress: resolved 0, reused 597, downloaded 13, added 0
+Progress: resolved 0, reused 598, downloaded 13, added 0
+Progress: resolved 0, reused 613, downloaded 13, added 0
+Progress: resolved 0, reused 615, downloaded 13, added 0
+Progress: resolved 0, reused 635, downloaded 13, added 0
+Progress: resolved 0, reused 640, downloaded 14, added 0
+Progress: resolved 0, reused 649, downloaded 15, added 0
+Progress: resolved 0, reused 649, downloaded 16, added 0
+[WARN] 3 deprecated subdependencies found: stream-to-promise@2.2.0, tar@7.5.7, tsconfck@3.1.6
+Progress: resolved 0, reused 650, downloaded 17, added 0
+Progress: resolved 0, reused 651, downloaded 26, added 0
+Progress: resolved 0, reused 651, downloaded 27, added 0
+Progress: resolved 0, reused 651, downloaded 30, added 0
+Progress: resolved 0, reused 651, downloaded 42, added 0
+Progress: resolved 1, reused 651, downloaded 42, added 0
+Progress: resolved 23, reused 656, downloaded 42, added 16
+Progress: resolved 31, reused 657, downloaded 42, added 24
+Progress: resolved 32, reused 658, downloaded 42, added 25
+Progress: resolved 41, reused 659, downloaded 42, added 34
+Progress: resolved 52, reused 661, downloaded 42, added 45
+Progress: resolved 54, reused 662, downloaded 43, added 46
+Progress: resolved 54, reused 662, downloaded 46, added 47
+Progress: resolved 60, reused 664, downloaded 46, added 53
+Progress: resolved 67, reused 667, downloaded 46, added 60
+Progress: resolved 77, reused 669, downloaded 46, added 71
+Progress: resolved 80, reused 671, downloaded 46, added 77
+Progress: resolved 83, reused 672, downloaded 46, added 79
+Progress: resolved 84, reused 672, downloaded 46, added 81
+Progress: resolved 104, reused 672, downloaded 46, added 89
+Progress: resolved 104, reused 672, downloaded 46, added 91
+Progress: resolved 104, reused 672, downloaded 46, added 94
+Progress: resolved 104, reused 672, downloaded 46, added 98
+Progress: resolved 104, reused 672, downloaded 46, added 99
+Packages: +104 -25
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----------------
+Progress: resolved 104, reused 672, downloaded 46, added 104, done
+
+dependencies:
++ @sentry/nextjs 10.74.0
+
+
+Error: ERR_PNPM_IGNORED_BUILDS
+
+  × adding a new package
+  ╰─▶ Ignored build scripts: @sentry/cli@2.58.6
+  help: Run "pnpm approve-builds" to pick which dependencies should be allowed
+        to run scripts.
+

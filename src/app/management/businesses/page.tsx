@@ -15,7 +15,10 @@ interface Business {
   name: string;
   description: string;
   address: string;
+  latitude: number;
+  longitude: number;
   hours: string;
+  history: string | null;
   isPublished: boolean;
   _count?: {
     reviews: number;
@@ -276,10 +279,10 @@ export default function ManageBusinesses() {
                           name: business.name,
                           description: business.description,
                           address: business.address,
-                          latitude: 0,
-                          longitude: 0,
+                          latitude: business.latitude,
+                          longitude: business.longitude,
                           hours: business.hours,
-                          history: "",
+                          history: business.history ?? "",
                           imageData: "",
                         });
                         setShowForm(true);

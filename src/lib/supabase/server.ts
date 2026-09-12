@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { assert } from "../assert";
 
 /**
  * If using Fluid compute: Don't put this client in a global variable. Always create a new client within each
@@ -11,6 +12,10 @@ export async function createClient() {
     (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ??
     "";
+
+  assert(url, "A supabase url was not configured via environment variable.");
+  assert(key, "No supabase key was provided via the environment variables.");
+
   const cookieStore = await cookies();
 
   return createServerClient(

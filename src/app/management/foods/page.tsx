@@ -13,6 +13,10 @@ interface Food {
   id: string;
   name: string;
   description: string;
+  history: string;
+  preparation: string;
+  recipe: string;
+  culturalSignificance: string;
   isHeritage: boolean;
   _count?: {
     businesses: number;
@@ -280,10 +284,10 @@ export default function ManageFoods() {
                         setFormData({
                           name: food.name,
                           description: food.description,
-                          history: "",
-                          preparation: "",
-                          recipe: "",
-                          culturalSignificance: "",
+                          history: food.history,
+                          preparation: food.preparation,
+                          recipe: food.recipe,
+                          culturalSignificance: food.culturalSignificance,
                           isHeritage: food.isHeritage,
                           imageData: "",
                         });
