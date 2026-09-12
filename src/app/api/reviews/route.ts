@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
 import {
   badRequestProblem,
   conflictProblem,
-  internalErrorProblem,
   notFoundProblem,
 } from "@/lib/responses/problem";
 
@@ -35,8 +35,7 @@ function mapReviewWriteFailure(request: NextRequest, error: unknown): NextRespon
     }
   }
 
-  console.error("Review write failed", error);
-  return internalErrorProblem(request, { detail: "Unable to save the review right now. Please try again later." });
+  throw error;
 }
 
 async function postReview(req: NextRequest) {
@@ -82,7 +81,4 @@ async function postReview(req: NextRequest) {
   }
 }
 
-export const POST = withLogging(postReview, {
-  name: "postReview",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const POST = withLogging(withUnhandledApiErrorHandling(postReview), "postReview");

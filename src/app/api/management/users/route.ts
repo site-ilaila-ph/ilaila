@@ -1,55 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { Prisma } from "@/generated/prisma/client";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import {
-  badRequestProblem,
-  conflictProblem,
-  internalErrorProblem,
-  notFoundProblem,
-} from "@/lib/responses/problem";
+import { badRequestProblem } from "@/lib/responses/problem";
+import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-function mapManagementUserFailure(request: NextRequest, error: unknown, action: string): NextResponse {
-  if (error instanceof SyntaxError) {
-    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
-  }
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
-      return notFoundProblem(request, { code: "user-not-found", detail: "The user does not exist." });
-    }
-
-    if (error.code === "P2002") {
-      return conflictProblem(request, { code: "user-conflict", detail: "The user already exists." });
-    }
-
-    if (error.code === "P2003") {
-      return badRequestProblem(
-        request,
-        {
-          code: "user-invalid-reference",
-          detail: "The user references a record that does not exist.",
-        });
-    }
-  }
-
-  if (
-    error instanceof Prisma.PrismaClientValidationError &&
-    /Argument `id` is missing/i.test(error.message)
-  ) {
-    return badRequestProblem(request, { code: "user-id-required", detail: "A user id is required." });
-  }
-
-  console.error(`Management user ${action} failed`, error);
-  return internalErrorProblem(request, { detail: `Unable to ${action} the user right now. Please try again later.` });
-}
-
-function mapManagementUserReadFailure(request: NextRequest, error: unknown): NextResponse {
-  console.error("Management user read failed", error);
-  return internalErrorProblem(request, { detail: "Unable to load users right now. Please try again later." });
-}
 async function getUsers(req: NextRequest) {
   try {
     const db = acquirePrismaClient();
@@ -59,7 +16,7 @@ async function getUsers(req: NextRequest) {
       { status: 200 },
     );
   } catch (error: unknown) {
-    return mapManagementUserReadFailure(req, error);
+    logAndRethrow("Management user read", error);
   }
 }
 
@@ -73,7 +30,12 @@ async function patchUser(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementUserFailure(req, error, "update");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "USER_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "USER_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "USER_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "USER_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
@@ -86,21 +48,17 @@ async function deleteUser(req: NextRequest) {
     await db.userData.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementUserFailure(req, error, "delete");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "USER_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "USER_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "USER_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "USER_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
-export const GET = withLogging(getUsers, {
-  name: "getUsers",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getUsers), "getUsers");
 
-export const PATCH = withLogging(patchUser, {
-  name: "patchUser",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const PATCH = withLogging(withUnhandledApiErrorHandling(patchUser), "patchUser");
 
-export const DELETE = withLogging(deleteUser, {
-  name: "deleteUser",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteUser), "deleteUser");

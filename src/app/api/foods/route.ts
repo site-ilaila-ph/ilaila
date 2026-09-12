@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { internalErrorProblem, notFoundProblem } from "@/lib/responses/problem";
+import { notFoundProblem } from "@/lib/responses/problem";
+import { logAndRethrow } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-function mapFoodReadFailure(request: NextRequest, error: unknown): NextResponse {
-  console.error("Food read failed", error);
-  return internalErrorProblem(request, { detail: "Unable to load foods right now. Please try again later." });
-}
-
 async function getFoods(req: NextRequest) {
-  const url = new URL(req.url);
-  const id = url.searchParams.get("id");
-  const name = url.searchParams.get("name");
-  const db = acquirePrismaClient();
-
   try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    const name = url.searchParams.get("name");
+    const db = acquirePrismaClient();
+
     if (id) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
       let result = null;
@@ -148,11 +145,8 @@ async function getFoods(req: NextRequest) {
 
     return NextResponse.json(result, { status: 200 });
   } catch (error: unknown) {
-    return mapFoodReadFailure(req, error);
+    logAndRethrow("Food read", error);
   }
 }
 
-export const GET = withLogging(getFoods, {
-  name: "getFoods",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getFoods), "getFoods");

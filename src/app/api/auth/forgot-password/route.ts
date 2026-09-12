@@ -1,53 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import type { AuthError } from "@supabase/supabase-js";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { createClient } from "@/lib/supabase/server";
-import {
-  badRequestProblem,
-  internalErrorProblem,
-  tooManyRequestsProblem,
-} from "@/lib/responses/problem";
+import { mapAuthError } from "@/lib/errors";
 
 export const runtime = "nodejs";
-
-function isAuthError(error: unknown): error is AuthError {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "__isAuthError" in error &&
-    typeof (error as { status?: unknown }).status !== "undefined"
-  );
-}
-
-function mapForgotPasswordFailure(request: NextRequest, error: unknown) {
-  if (error instanceof SyntaxError) {
-    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
-  }
-
-  if (error instanceof TypeError) {
-    // new URL(req.url) failed or another malformed request input.
-    return badRequestProblem(request, { code: "forgot-password-invalid", detail: "The request URL is invalid." });
-  }
-
-  if (isAuthError(error)) {
-    const message = error.message || "Password reset request failed.";
-    const status = error.status ?? 400;
-
-    if (status === 429) {
-      return tooManyRequestsProblem(request, { code: "forgot-password-rate-limited", detail: message });
-    }
-
-    if (status >= 500) {
-      console.error("Forgot password failed with upstream status", status, message);
-      return internalErrorProblem(request, { detail: "Password reset is unavailable right now. Please try again later." });
-    }
-
-    return badRequestProblem(request, { code: "forgot-password-failed", detail: message });
-  }
-
-  console.error("Forgot password failed", error);
-  return internalErrorProblem(request, { detail: "Password reset is unavailable right now. Please try again later." });
-}
 
 async function postForgotPassword(req: NextRequest) {
   try {
@@ -57,12 +14,15 @@ async function postForgotPassword(req: NextRequest) {
     const { error } = await supabase.auth.resetPasswordForEmail(body.email, { redirectTo: `${origin}/auth/update-password` });
     if (error) throw error;
     return NextResponse.json({ success: true }, { status: 200 });
-  } catch (error) {
-    return mapForgotPasswordFailure(req, error);
+  } catch (error: unknown) {
+    return mapAuthError(req, error, {
+      genericCode: "FORGOT_PASSWORD_FAILED",
+      rateLimitedCode: "FORGOT_PASSWORD_RATE_LIMITED",
+      unavailableCode: "FORGOT_PASSWORD_UNAVAILABLE",
+      unavailableDetail: "Password reset is unavailable right now. Please try again later.",
+      operationName: "Forgot password",
+    });
   }
 }
 
-export const POST = withLogging(postForgotPassword, {
-  name: "postForgotPassword",
-  redact: { headers: ["authorization", "cookie"], bodyKeys: ["email"] },
-});
+export const POST = withLogging(withUnhandledApiErrorHandling(postForgotPassword), "postForgotPassword");

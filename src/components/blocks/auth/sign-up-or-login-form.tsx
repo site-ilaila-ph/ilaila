@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import { readProblemMessage } from "@/lib/api/client";
-import { safeNextPath } from "@/lib/safe-next-path";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -50,7 +49,7 @@ export function LoginForm({ className, onSwitch, ...props }: AuthFormProps) {
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(safeNextPath(next, "/home") as Route);
+      router.push((next ?? "/home") as Route);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

@@ -1,61 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { Prisma } from "@/generated/prisma/client";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import {
-  badRequestProblem,
-  conflictProblem,
-  internalErrorProblem,
-  notFoundProblem,
-} from "@/lib/responses/problem";
+import { badRequestProblem } from "@/lib/responses/problem";
+import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-function isMissingId(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientValidationError &&
-    /Argument `id` is missing/i.test(error.message)
-  );
-}
-
-function mapManagementFoodFailure(request: NextRequest, error: unknown, action: string): NextResponse {
-  if (error instanceof SyntaxError) {
-    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
-  }
-
-  if (isMissingId(error)) {
-    return badRequestProblem(request, { code: "food-id-required", detail: "A food id is required." });
-  }
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
-      return notFoundProblem(request, { code: "food-not-found", detail: "The food does not exist." });
-    }
-
-    if (error.code === "P2002") {
-      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(", ") : undefined;
-      return conflictProblem(
-        request,
-        {
-          code: "food-conflict",
-          detail: target ? `A food with the same ${target} already exists.` : "The food already exists.",
-        });
-    }
-
-    if (error.code === "P2003") {
-      return badRequestProblem(
-        request,
-        {
-          code: "food-invalid-reference",
-          detail: "The food references a record that does not exist.",
-        });
-    }
-  }
-
-  console.error(`Management food ${action} failed`, error);
-  return internalErrorProblem(request, { detail: `Unable to ${action} the food right now. Please try again later.` });
-}
-async function getFoods(req: NextRequest) {
+async function getFoods(_req: NextRequest) {
   try {
     const db = acquirePrismaClient();
     const data = await db.food.findMany({
@@ -64,8 +16,7 @@ async function getFoods(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    console.error("Management food read failed", error);
-    return internalErrorProblem(req, { detail: "Unable to load foods right now. Please try again later." });
+    logAndRethrow("Management food read", error);
   }
 }
 
@@ -87,7 +38,12 @@ async function postFood(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(req, error, "create");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
@@ -109,7 +65,12 @@ async function patchFood(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(req, error, "update");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
@@ -122,26 +83,19 @@ async function deleteFood(req: NextRequest) {
     await db.food.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementFoodFailure(req, error, "delete");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
-export const GET = withLogging(getFoods, {
-  name: "getFoods",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getFoods), "getFoods");
 
-export const POST = withLogging(postFood, {
-  name: "postFood",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const POST = withLogging(withUnhandledApiErrorHandling(postFood), "postFood");
 
-export const PATCH = withLogging(patchFood, {
-  name: "patchFood",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const PATCH = withLogging(withUnhandledApiErrorHandling(patchFood), "patchFood");
 
-export const DELETE = withLogging(deleteFood, {
-  name: "deleteFood",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteFood), "deleteFood");

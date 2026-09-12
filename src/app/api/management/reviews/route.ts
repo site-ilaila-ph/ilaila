@@ -1,31 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { Prisma } from "@/generated/prisma/client";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import {
-  badRequestProblem,
-  internalErrorProblem,
-  notFoundProblem,
-} from "@/lib/responses/problem";
+import { badRequestProblem } from "@/lib/responses/problem";
+import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-function mapManagementReviewFailure(request: NextRequest, error: unknown): NextResponse {
-  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
-    return notFoundProblem(request, { code: "review-not-found", detail: "The review does not exist." });
-  }
-
-  if (
-    error instanceof Prisma.PrismaClientValidationError &&
-    /Argument `id` is missing/i.test(error.message)
-  ) {
-    return badRequestProblem(request, { code: "review-id-required", detail: "A review id is required." });
-  }
-
-  console.error("Management review delete failed", error);
-  return internalErrorProblem(request, { detail: "Unable to delete the review right now. Please try again later." });
-}
-async function getReviews(req: NextRequest) {
+async function getReviews(_req: NextRequest) {
   try {
     const db = acquirePrismaClient();
     const data = await db.review.findMany({
@@ -37,8 +19,7 @@ async function getReviews(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    console.error("Management review read failed", error);
-    return internalErrorProblem(req, { detail: "Unable to load reviews right now. Please try again later." });
+    logAndRethrow("Management review read", error);
   }
 }
 
@@ -51,16 +32,14 @@ async function deleteReview(req: NextRequest) {
     await db.review.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementReviewFailure(req, error);
+    return mapPrismaError(req, error, {
+      idRequiredCode: "REVIEW_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "REVIEW_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "REVIEW_ID_REQUIRED" as ApiErrorCode,
+    });
   }
 }
 
-export const GET = withLogging(getReviews, {
-  name: "getReviews",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getReviews), "getReviews");
 
-export const DELETE = withLogging(deleteReview, {
-  name: "deleteReview",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteReview), "deleteReview");

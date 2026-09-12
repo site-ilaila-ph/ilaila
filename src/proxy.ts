@@ -3,7 +3,6 @@ import { createServerClient } from "@supabase/ssr";
 import { match } from "path-to-regexp";
 
 import { acquirePrismaClient } from "./lib/infra";
-import { safeNextPath } from "./lib/safe-next-path";
 import { notFoundProblem, redirectResponse } from "./lib/responses";
 import { assert } from "./lib/assert";
 
@@ -86,8 +85,7 @@ export const proxy = async (request: NextRequest) => {
 
   // Resolve '/'.
   if (pathname === "/") {
-    const target =
-      userData.role === "admin" ? safeNextPath("/management") : "/home";
+    const target = new URL(userData.role === "admin" ? "/management" : "/home", request.nextUrl).href;
 
     return redirectResponse(new URL(target, request.url));
   }

@@ -1,61 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { Prisma } from "@/generated/prisma/client";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import {
-  badRequestProblem,
-  conflictProblem,
-  internalErrorProblem,
-  notFoundProblem,
-} from "@/lib/responses/problem";
+import { badRequestProblem } from "@/lib/responses/problem";
+import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-function isMissingId(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientValidationError &&
-    /Argument `id` is missing/i.test(error.message)
-  );
-}
-
-function mapManagementBusinessFailure(request: NextRequest, error: unknown, action: string): NextResponse {
-  if (error instanceof SyntaxError) {
-    return badRequestProblem(request, { detail: "The request body must be valid JSON." });
-  }
-
-  if (isMissingId(error)) {
-    return badRequestProblem(request, { code: "business-id-required", detail: "A business id is required." });
-  }
-
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
-      return notFoundProblem(request, { code: "business-not-found", detail: "The business does not exist." });
-    }
-
-    if (error.code === "P2002") {
-      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(", ") : undefined;
-      return conflictProblem(
-        request,
-        {
-          code: "business-conflict",
-          detail: target ? `A business with the same ${target} already exists.` : "The business already exists.",
-        });
-    }
-
-    if (error.code === "P2003") {
-      return badRequestProblem(
-        request,
-        {
-          code: "business-invalid-reference",
-          detail: "The business references a record that does not exist.",
-        });
-    }
-  }
-
-  console.error(`Management business ${action} failed`, error);
-  return internalErrorProblem(request, { detail: `Unable to ${action} the business right now. Please try again later.` });
-}
-async function getBusinesses(req: NextRequest) {
+async function getBusinesses(_req: NextRequest) {
   try {
     const db = acquirePrismaClient();
     const data = await db.business.findMany({
@@ -64,8 +16,7 @@ async function getBusinesses(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    console.error("Management business read failed", error);
-    return internalErrorProblem(req, { detail: "Unable to load businesses right now. Please try again later." });
+    logAndRethrow("Management business read", error);
   }
 }
 
@@ -93,7 +44,12 @@ async function postBusiness(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    return mapManagementBusinessFailure(req, error, "create");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
@@ -115,7 +71,12 @@ async function patchBusiness(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementBusinessFailure(req, error, "update");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
@@ -128,26 +89,19 @@ async function deleteBusiness(req: NextRequest) {
     await db.business.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapManagementBusinessFailure(req, error, "delete");
+    return mapPrismaError(req, error, {
+      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
+      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
+      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
+      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
+    });
   }
 }
 
-export const GET = withLogging(getBusinesses, {
-  name: "getBusinesses",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getBusinesses), "getBusinesses");
 
-export const POST = withLogging(postBusiness, {
-  name: "postBusiness",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const POST = withLogging(withUnhandledApiErrorHandling(postBusiness), "postBusiness");
 
-export const PATCH = withLogging(patchBusiness, {
-  name: "patchBusiness",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const PATCH = withLogging(withUnhandledApiErrorHandling(patchBusiness), "patchBusiness");
 
-export const DELETE = withLogging(deleteBusiness, {
-  name: "deleteBusiness",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteBusiness), "deleteBusiness");

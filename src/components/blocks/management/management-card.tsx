@@ -1,5 +1,6 @@
-import { Link, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Route } from "next";
+import Link from "next/link";
 
 function ManagementCard({
   title,

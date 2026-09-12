@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { internalErrorProblem, ok } from "@/lib/responses";
+import { ok } from "@/lib/responses";
 
 export const runtime = "nodejs";
 
-function mapManagementStatsFailure(request: NextRequest, error: unknown): NextResponse {
-  console.error("Management stats read failed", error);
-  return internalErrorProblem(request, { detail: "Unable to load dashboard stats right now. Please try again later." });
-}
-
 async function getStats(req: NextRequest) {
-  try {
+    try {
     const db = acquirePrismaClient();
 
     const [
@@ -39,11 +35,9 @@ async function getStats(req: NextRequest) {
       pendingAppReviews: pendingAppReviewCount,
     });
   } catch (error: unknown) {
-    return mapManagementStatsFailure(req, error);
+    console.error("Management stats read failed", error);
+    throw error;
   }
 }
 
-export const GET = withLogging(getStats, {
-  name: "getStats",
-  redact: { headers: ["authorization", "cookie"] },
-});
+export const GET = withLogging(withUnhandledApiErrorHandling(getStats), "getStats");

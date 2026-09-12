@@ -1,3 +1,4 @@
+import { Route } from "next";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -8,7 +9,7 @@ export default function NotFound() {
         Ang pahinang hinahanap mo ay wala o inilipat na.
       </p>
       <Link
-        href="/"
+        href={"/" as Route}
         className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
       >
         Bumalik sa home

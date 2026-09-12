@@ -1,7 +1,9 @@
 "use client";
 
-import './styles/globals.css'
+import "./styles/globals.css";
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
+import Error from "next/error";
 
 export default function GlobalError({
   error,
@@ -11,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Application error:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
@@ -19,7 +21,9 @@ export default function GlobalError({
       <body>
         <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
           <h1 className="text-2xl font-semibold">May nangyaring mali</h1>
-          <p className="text-muted-foreground">Hindi namin ma-load ang pahinang ito. Pakisubukang muli.</p>
+          <p className="text-muted-foreground">
+            Hindi namin ma-load ang pahinang ito. Pakisubukang muli.
+          </p>
           <button
             type="button"
             onClick={() => reset()}
