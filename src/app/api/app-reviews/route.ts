@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import z from "zod";
@@ -16,7 +16,7 @@ const createAppReviewSchema = z.object({
   text: z.string().min(3),
 });
 
-async function getAppReviews(request: NextRequest) {
+async function getAppReviews() {
   const db = acquirePrismaClient();
   const reviews = await db.appReview.findMany({
     include: {

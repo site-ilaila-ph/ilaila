@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
@@ -6,7 +5,7 @@ import { ok } from "@/lib/responses";
 
 export const runtime = "nodejs";
 
-async function getStats(req: NextRequest) {
+async function getStats() {
     try {
     const db = acquirePrismaClient();
 

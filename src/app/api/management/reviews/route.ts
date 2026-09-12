@@ -7,7 +7,7 @@ import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-async function getReviews(_req: NextRequest) {
+async function getReviews() {
   try {
     const db = acquirePrismaClient();
     const data = await db.review.findMany({

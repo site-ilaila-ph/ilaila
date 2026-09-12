@@ -7,7 +7,7 @@ import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
-async function getUsers(req: NextRequest) {
+async function getUsers() {
   try {
     const db = acquirePrismaClient();
     const data = await db.userData.findMany({ orderBy: { createdAt: "desc" } });
