@@ -38,7 +38,6 @@
   "explorer.confirmDragAndDrop": false,
   "terminal.integrated.initialHint": false,
   "js/ts.updateImportsOnFileMove.enabled": "always",
-  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
   "terminal.integrated.profiles.windows": {
     "Developer Powershell": {
       "path": "powershell",

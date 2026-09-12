@@ -265,7 +265,7 @@ export default function ManageBusinesses() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link href={`/management/businesses/${business.id}` as Route}>
+                    <Link href={`/businesses/${business.id}` as Route}>
                       <Button variant="outline" size="sm">
                         Tingnan
                       </Button>

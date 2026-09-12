@@ -119,6 +119,7 @@ export default function ManageUsers() {
               </div>
               {visibleUsers.map((user) => (
                 <div key={user.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_72px] items-center gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-muted/50">
+                  <span className="text-sm text-muted-foreground">{user.email || 0}</span>
                   <span className="text-sm text-muted-foreground">{user._count?.reviews || 0}</span>
                   <span className="text-sm text-muted-foreground">{user._count?.bookmarks || 0}</span>
                   <span className={`flex items-center gap-1.5 text-sm ${user.isAdmin ? "font-semibold text-primary" : "text-muted-foreground"}`}><ShieldCheck size={15} />{user.isAdmin ? "Tagapangasiwa" : "Gumagamit"}</span>
