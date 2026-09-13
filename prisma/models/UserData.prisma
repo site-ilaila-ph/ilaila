@@ -1,0 +1,19 @@
+model UserData {
+  id               String      @id @db.Uuid
+  authId           String      @db.Uuid
+  authUser         AuthUser        @relation(fields: [authId], references: [id])
+  role             UserRole    @default(viewer)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt @default(now())
+
+  appReviews       AppReview[]
+  bookmarks        BusinessBookmark[]
+  businessesPosted Business[]
+  reviews          BusinessReview[]
+
+  @@unique([authId])
+  @@index([authId])
+  @@map("user_data")
+  @@schema("app")
+  resources Resource[]
+}

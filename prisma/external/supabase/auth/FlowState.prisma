@@ -1,0 +1,26 @@
+model FlowState {
+  id                    String                 @id @db.Uuid
+  userId                String?                @map("user_id") @db.Uuid
+  authCode              String?                @map("auth_code")
+  codeChallengeMethod   CodeChallengeMethod?   @map("code_challenge_method")
+  codeChallenge         String?                @map("code_challenge")
+  providerType          String                 @map("provider_type")
+  providerAccessToken   String?                @map("provider_access_token")
+  providerRefreshToken  String?                @map("provider_refresh_token")
+  createdAt             DateTime?              @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime?              @map("updated_at") @db.Timestamptz(6)
+  authenticationMethod  String                 @map("authentication_method")
+  authCodeIssuedAt      DateTime?              @map("auth_code_issued_at") @db.Timestamptz(6)
+  inviteToken           String?                @map("invite_token")
+  referrer              String?
+  oauthClientStateId    String?                @map("oauth_client_state_id") @db.Uuid
+  linkingTargetId       String?                @map("linking_target_id") @db.Uuid
+  emailOptional         Boolean                @default(false) @map("email_optional")
+  samlRelayStates       SamlRelayState[]
+
+  @@index([createdAt(sort: Desc)])
+  @@index([authCode], map: "idx_auth_code")
+  @@index([userId, authenticationMethod], map: "idx_user_id_auth_method")
+  @@map("flow_state")
+  @@schema("auth")
+}

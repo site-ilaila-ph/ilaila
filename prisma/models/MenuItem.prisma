@@ -1,0 +1,13 @@
+model MenuItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  businessId  String   @db.Uuid
+  name        String
+  description String?
+  price       Decimal
+  isAvailable Boolean  @default(true)
+
+  business    Business @relation(fields: [businessId], references: [id])
+
+  @@map("menu_items")
+  @@schema("app")
+}

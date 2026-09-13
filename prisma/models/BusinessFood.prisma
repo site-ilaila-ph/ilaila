@@ -1,0 +1,12 @@
+model BusinessFood {
+  id         String   @id @default(uuid()) @db.Uuid
+  businessId String   @db.Uuid
+  foodId     String   @db.Uuid
+
+  business   Business @relation(fields: [businessId], references: [id])
+  food       Food     @relation(fields: [foodId], references: [id])
+
+  @@unique([businessId, foodId])
+  @@map("business_foods")
+  @@schema("app")
+}

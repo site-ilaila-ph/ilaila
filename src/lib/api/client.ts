@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { assert } from "../assert";
-import type { ProblemDetails } from "../responses/problem";
+import type { ProblemDetails } from "./responses";
 
 const origin = process.env.NEXT_PUBLIC_ORIGIN_URL;
 assert(origin, "No origin url configured.");

@@ -1,0 +1,9 @@
+enum OauthAuthorizationStatus {
+  pending
+  approved
+  denied
+  expired
+
+  @@map("oauth_authorization_status")
+  @@schema("auth")
+}

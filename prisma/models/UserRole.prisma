@@ -1,0 +1,7 @@
+enum UserRole {
+  viewer
+  admin
+
+  @@map("user_role")
+  @@schema("app")
+}

@@ -49,7 +49,7 @@ export function LoginForm({ className, onSwitch, ...props }: AuthFormProps) {
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push((next ?? "/home") as Route);
+      router.push((next ?? "/") as Route);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

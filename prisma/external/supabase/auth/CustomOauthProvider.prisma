@@ -1,0 +1,34 @@
+model CustomOauthProvider {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  providerType          String    @map("provider_type")
+  identifier            String    @unique
+  name                  String
+  clientId              String    @map("client_id")
+  clientSecret          String    @map("client_secret")
+  acceptableClientIds   String[]  @default([]) @map("acceptable_client_ids")
+  scopes                String[]  @default([])
+  pkceEnabled           Boolean   @default(true) @map("pkce_enabled")
+  attributeMapping      Json      @default("{}") @map("attribute_mapping")
+  authorizationParams   Json      @default("{}") @map("authorization_params")
+  enabled               Boolean   @default(true)
+  emailOptional         Boolean   @default(false) @map("email_optional")
+  issuer                String?
+  discoveryUrl          String?   @map("discovery_url")
+  skipNonceCheck        Boolean   @default(false) @map("skip_nonce_check")
+  cachedDiscovery        Json?    @map("cached_discovery")
+  discoveryCachedAt     DateTime? @map("discovery_cached_at") @db.Timestamptz(6)
+  authorizationUrl      String?   @map("authorization_url")
+  tokenUrl              String?   @map("token_url")
+  userinfoUrl           String?   @map("userinfo_url")
+  jwksUri               String?   @map("jwks_uri")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  customClaimsAllowlist String[]  @default([]) @map("custom_claims_allowlist")
+
+  @@index([createdAt])
+  @@index([enabled])
+  @@index([identifier])
+  @@index([providerType])
+  @@map("custom_oauth_providers")
+  @@schema("auth")
+}

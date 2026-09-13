@@ -1,0 +1,12 @@
+model MfaAmrClaim {
+  sessionId             String   @map("session_id") @db.Uuid
+  createdAt             DateTime @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @map("updated_at") @db.Timestamptz(6)
+  authenticationMethod  String   @map("authentication_method")
+  id                    String   @id(map: "amr_id_pk") @db.Uuid
+  session               Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([sessionId, authenticationMethod], map: "mfa_amr_claims_session_id_authentication_method_pkey")
+  @@map("mfa_amr_claims")
+  @@schema("auth")
+}

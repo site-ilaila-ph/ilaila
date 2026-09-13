@@ -1,0 +1,7 @@
+enum FactorStatus {
+  unverified
+  verified
+
+  @@map("factor_status")
+  @@schema("auth")
+}

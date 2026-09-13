@@ -1,0 +1,7 @@
+enum CodeChallengeMethod {
+  s256
+  plain
+
+  @@map("code_challenge_method")
+  @@schema("auth")
+}

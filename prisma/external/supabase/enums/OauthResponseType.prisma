@@ -1,0 +1,6 @@
+enum OauthResponseType {
+  code
+
+  @@map("oauth_response_type")
+  @@schema("auth")
+}

@@ -1,0 +1,20 @@
+model BusinessReview {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  businessId  String   @db.Uuid
+  text        String
+  foodQuality Int
+  service     Int
+  ambiance    Int
+  value       Int
+  upvotes     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt @default(now())
+
+  business    Business @relation(fields: [businessId], references: [id])
+  user        UserData @relation(fields: [userId], references: [id])
+
+  @@unique([userId, businessId])
+  @@map("reviews")
+  @@schema("app")
+}

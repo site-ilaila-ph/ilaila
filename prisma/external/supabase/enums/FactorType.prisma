@@ -1,0 +1,8 @@
+enum FactorType {
+  totp
+  webauthn
+  phone
+
+  @@map("factor_type")
+  @@schema("auth")
+}

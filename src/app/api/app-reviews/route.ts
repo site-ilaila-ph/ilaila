@@ -3,8 +3,8 @@ import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import z from "zod";
 import { acquirePrismaClient } from "@/lib/infra";
-import { ok, noContent } from "@/lib/responses/success";
-import { badRequestProblem } from "@/lib/responses/problem";
+import { ok, noContent } from "@/lib/api/responses/success";
+import { badRequestProblem } from "@/lib/api/responses/problem";
 import { mapPrismaError, ApiErrorCode } from "@/lib/errors";
 
 export const runtime = "nodejs";

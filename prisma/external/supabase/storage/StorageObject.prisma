@@ -1,0 +1,24 @@
+model StorageObject {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bucketId       String?   @map("bucket_id")
+  name           String?
+  owner          String?   @db.Uuid
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime? @default(now()) @map("updated_at") @db.Timestamptz(6)
+  lastAccessedAt DateTime? @default(now()) @map("last_accessed_at") @db.Timestamptz(6)
+  metadata       Json?
+  pathTokens     String[]  @default(dbgenerated("string_to_array(name, '/'::text)")) @map("path_tokens")
+  version        String?
+  ownerId        String?   @map("owner_id")
+  userMetadata   Json?     @map("user_metadata")
+  archivedAt     DateTime? @map("archived_at") @db.Timestamptz(6)
+  isDeleteMarker Boolean   @default(false) @map("is_delete_marker")
+  isVersioned    Boolean   @default(false) @map("is_versioned")
+  bucket         Bucket?   @relation(fields: [bucketId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "objects_bucketId_fkey")
+
+  @@unique([bucketId, name], map: "bucketid_objname")
+  @@index([bucketId, name], map: "idx_objects_bucket_id_name")
+  @@index([name], map: "name_prefix_search")
+  @@map("objects")
+  @@schema("storage")
+}

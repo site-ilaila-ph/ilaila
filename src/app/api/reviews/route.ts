@@ -7,7 +7,7 @@ import {
   badRequestProblem,
   conflictProblem,
   notFoundProblem,
-} from "@/lib/responses/problem";
+} from "@/lib/api/responses/problem";
 
 export const runtime = "nodejs";
 

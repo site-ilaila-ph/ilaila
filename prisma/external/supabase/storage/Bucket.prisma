@@ -1,0 +1,20 @@
+model Bucket {
+  id                     String                       @id
+  name                   String                       @unique(map: "bname")
+  owner                  String?                      @db.Uuid
+  createdAt              DateTime?                    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime?                    @default(now()) @map("updated_at") @db.Timestamptz(6)
+  public                 Boolean?                     @default(false)
+  avifAutodetection      Boolean?                     @default(false) @map("avif_autodetection")
+  fileSizeLimit          BigInt?                      @map("file_size_limit")
+  allowedMimeTypes       String[]                     @map("allowed_mime_types")
+  ownerId                String?                      @map("owner_id")
+  type                   BucketType                   @default(STANDARD)
+  versioningStatus       String                       @default("DISABLED") @map("versioning_status")
+  objects                StorageObject[]
+  s3MultipartUploads     S3MultipartUpload[]
+  s3MultipartUploadParts S3MultipartUploadPart[]
+
+  @@map("buckets")
+  @@schema("storage")
+}

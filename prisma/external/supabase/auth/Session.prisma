@@ -1,0 +1,28 @@
+model Session {
+  id                    String           @id @db.Uuid
+  userId                String           @map("user_id") @db.Uuid
+  createdAt             DateTime?        @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime?        @map("updated_at") @db.Timestamptz(6)
+  factorId              String?          @map("factor_id") @db.Uuid
+  aal                   AalLevel?
+  notAfter              DateTime?        @map("not_after") @db.Timestamptz(6)
+  refreshedAt           DateTime?        @map("refreshed_at") @db.Timestamp(6)
+  userAgent             String?          @map("user_agent")
+  ip                    String?          @db.Inet
+  tag                   String?
+  oauthClientId         String?          @map("oauth_client_id") @db.Uuid
+  refreshTokenHmacKey   String?          @map("refresh_token_hmac_key")
+  refreshTokenCounter   BigInt?          @map("refresh_token_counter")
+  scopes                String?
+  mfaAmrClaims          MfaAmrClaim[]
+  refreshTokens         RefreshToken[]
+  oauthClient           OauthClient?     @relation(fields: [oauthClientId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user                  AuthUser             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([notAfter(sort: Desc)])
+  @@index([oauthClientId])
+  @@index([userId])
+  @@index([userId, createdAt], map: "user_id_created_at_idx")
+  @@map("sessions")
+  @@schema("auth")
+}

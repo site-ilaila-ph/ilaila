@@ -9,7 +9,7 @@ import {
   notFoundProblem,
   tooManyRequestsProblem,
   unauthorizedProblem,
-} from "./responses/problem";
+} from "./api/responses/problem";
 
 export interface ApiErrorDefinition {
   status: number;

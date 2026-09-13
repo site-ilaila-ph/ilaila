@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { AnyRequestHandler } from "./next-types";
-import { internalErrorProblem } from "./responses";
+import { internalErrorProblem } from "./api/responses";
 import { NextRequest } from "next/server";
 
 export function withUnhandledApiErrorHandling(

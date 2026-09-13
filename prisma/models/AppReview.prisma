@@ -1,0 +1,18 @@
+model AppReview {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String?   @db.Uuid
+  userName   String?
+  email      String?
+  rating     Int       @default(5)
+  text       String
+  isApproved Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt @default(now())
+
+  user       UserData? @relation(fields: [userId], references: [id])
+
+  @@index([isApproved])
+  @@index([createdAt])
+  @@map("app_reviews")
+  @@schema("app")
+}

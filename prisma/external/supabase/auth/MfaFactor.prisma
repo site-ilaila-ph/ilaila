@@ -1,0 +1,24 @@
+model MfaFactor {
+  id                        String           @id @db.Uuid
+  userId                    String           @map("user_id") @db.Uuid
+  friendlyName              String?          @map("friendly_name")
+  factorType                FactorType       @map("factor_type")
+  status                    FactorStatus
+  createdAt                 DateTime         @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime         @map("updated_at") @db.Timestamptz(6)
+  secret                    String?
+  phone                     String?
+  lastChallengedAt          DateTime?        @unique @map("last_challenged_at") @db.Timestamptz(6)
+  webAuthnCredential        Json?            @map("web_authn_credential")
+  webAuthnAaguid            String?          @map("web_authn_aaguid") @db.Uuid
+  lastWebauthnChallengeData Json?            @map("last_webauthn_challenge_data")
+  mfaChallenges             MfaChallenge[]
+  user                      AuthUser             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([friendlyName, userId], map: "mfa_factors_user_friendly_name_unique", where: raw("(TRIM(BOTH FROM friendly_name) <> ''::text)"))
+  @@unique([userId, phone], map: "unique_phone_factor_per_user")
+  @@index([userId, createdAt], map: "factor_id_created_at_idx")
+  @@index([userId])
+  @@map("mfa_factors")
+  @@schema("auth")
+}

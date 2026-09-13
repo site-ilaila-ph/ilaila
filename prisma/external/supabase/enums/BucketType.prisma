@@ -1,0 +1,8 @@
+enum BucketType {
+  STANDARD
+  ANALYTICS
+  VECTOR
+
+  @@map("buckettype")
+  @@schema("storage")
+}

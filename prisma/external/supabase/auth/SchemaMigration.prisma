@@ -1,0 +1,6 @@
+model SchemaMigration {
+  version String @id @db.VarChar(255)
+
+  @@map("schema_migrations")
+  @@schema("auth")
+}

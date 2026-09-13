@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { notFoundProblem } from "@/lib/responses/problem";
+import { notFoundProblem } from "@/lib/api/responses/problem";
 import { logAndRethrow } from "@/lib/errors";
 
 export const runtime = "nodejs";

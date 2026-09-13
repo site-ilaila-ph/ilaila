@@ -1,0 +1,11 @@
+model FoodImage {
+  id          String  @id @default(uuid()) @db.Uuid
+  foodId      String  @db.Uuid
+  description String
+  url         String?
+
+  food        Food @relation(fields: [foodId], references: [id])
+
+  @@map("food_images")
+  @@schema("app")
+}

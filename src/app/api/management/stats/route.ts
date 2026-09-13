@@ -1,7 +1,7 @@
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { ok } from "@/lib/responses";
+import { ok } from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 

@@ -6,11 +6,9 @@ export default defineConfig({
     url: env("DIRECT_URL"),
   },
 
-  schema: "prisma/schema.prisma",
+  schema: "prisma/",
 
-  migrations: {
-    seed: "seed/db.mts",
-  },
+  migrations: {},
 
   tables: {
     external: [

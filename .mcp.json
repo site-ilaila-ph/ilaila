@@ -9,6 +9,10 @@
     },
     "supabase": {
       "url": "http://127.0.0.1:54321/mcp"
+    },
+    "playwright": {
+      "command": "./bin/dbash.sh",
+      "args": ["-c", "npx -y @playwright/mcp@latest"]
     }
   }
 }

@@ -1,0 +1,18 @@
+model SamlRelayState {
+  id            String        @id @db.Uuid
+  ssoProviderId String        @map("sso_provider_id") @db.Uuid
+  requestId     String        @map("request_id")
+  forEmail      String?       @map("for_email")
+  redirectTo    String?       @map("redirect_to")
+  createdAt     DateTime?     @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime?     @map("updated_at") @db.Timestamptz(6)
+  flowStateId   String?       @map("flow_state_id") @db.Uuid
+  flowState     FlowState?    @relation(fields: [flowStateId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ssoProvider   SsoProvider   @relation(fields: [ssoProviderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([forEmail])
+  @@index([ssoProviderId])
+  @@map("saml_relay_states")
+  @@schema("auth")
+}

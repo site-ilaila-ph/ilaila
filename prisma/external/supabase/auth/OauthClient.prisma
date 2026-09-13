@@ -1,0 +1,22 @@
+model OauthClient {
+  id                     String                  @id @db.Uuid
+  clientSecretHash       String?                 @map("client_secret_hash")
+  registrationType       OauthRegistrationType    @map("registration_type")
+  redirectUris           String                  @map("redirect_uris")
+  grantTypes             String                  @map("grant_types")
+  clientName             String?                 @map("client_name")
+  clientUri              String?                 @map("client_uri")
+  logoUri                String?                 @map("logo_uri")
+  createdAt              DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime                @default(now()) @map("updated_at") @db.Timestamptz(6)
+  deletedAt              DateTime?               @map("deleted_at") @db.Timestamptz(6)
+  clientType             OauthClientType         @default(confidential) @map("client_type")
+  tokenEndpointAuthMethod String                 @map("token_endpoint_auth_method")
+  oauthAuthorizations    OauthAuthorization[]
+  oauthConsents          OauthConsent[]
+  sessions               Session[]
+
+  @@index([deletedAt])
+  @@map("oauth_clients")
+  @@schema("auth")
+}

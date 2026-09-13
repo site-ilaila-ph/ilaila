@@ -178,8 +178,6 @@ export default function BusinessProfilePage({
 
       <article className="mx-auto max-w-7xl px-6 py-12">
         <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
-
-        {/* Business Hero Banner Section */}
         <header className="mb-12 border-b border-brand-border pb-10">
           {primaryImage && primaryImage.url ? (
             <div className="relative mb-8 overflow-hidden rounded-2xl border border-brand-border bg-black shadow-xl">

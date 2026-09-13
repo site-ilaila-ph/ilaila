@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Camera, Image as ImageIcon, X, ZoomIn } from "lucide-react";
@@ -92,22 +92,27 @@ export default function SingleFoodPage({
     );
   }
 
-  // Collect all images (direct food images and business images)
-  const foodImages: DisplayImage[] = (food.images ?? []).map((img) => ({
-    id: img.id,
-    url: img.url,
-    description: img.description,
-    source: "Food Gallery",
-  }));
-
-  const businessImages: DisplayImage[] = (food.businesses ?? []).flatMap((bf) =>
-    (bf.business?.images ?? []).map((bImg) => ({
-      id: bImg.id,
-      url: bImg.url,
-      description: `${bImg.description || food.name} (mula sa ${bf.business.name})`,
-      source: bf.business.name,
+  // Filter out broken/missing image URLs so only valid images display
+  const foodImages: DisplayImage[] = (food.images ?? [])
+    .map((img) => ({
+      id: img.id,
+      url: img.url ? (img.url.startsWith("http") ? img.url : img.url) : null,
+      description: img.description,
+      source: "Food Gallery",
     }))
-  );
+    .filter((img) => Boolean(img.url));
+
+  const businessImages: DisplayImage[] = (food.businesses ?? [])
+    .flatMap((bf) =>
+      (bf.business?.images ?? [])
+        .map((bImg) => ({
+          id: bImg.id,
+          url: bImg.url ? (bImg.url.startsWith("http") ? bImg.url : bImg.url) : null,
+          description: `${bImg.description || food.name} (mula sa ${bf.business.name})`,
+          source: bf.business.name,
+        }))
+        .filter((img) => Boolean(img.url))
+    );
 
   const allImages = [...foodImages, ...businessImages];
   const primaryImage = allImages.find((img) => Boolean(img.url)) ?? allImages[0];

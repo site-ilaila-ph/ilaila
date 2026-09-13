@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { match } from "path-to-regexp";
 
 import { acquirePrismaClient } from "./lib/infra";
-import { notFoundProblem, redirectResponse } from "./lib/responses";
+import { notFoundProblem, redirectResponse } from "./lib/api/responses";
 import { assert } from "./lib/assert";
 
 // Routes reachable without a session.
