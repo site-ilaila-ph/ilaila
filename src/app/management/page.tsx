@@ -1,7 +1,7 @@
 "use client";
-import { ManagementCard } from "@/components/blocks/management/management-card";
-import { StatCard } from "@/components/blocks/management/stat-card";
-import { SummaryStat } from "@/components/blocks/management/summary-stat";
+import { ManagementCard } from "@/components/management-card";
+import { StatCard } from "@/components/stat-card";
+import { SummaryStat } from "@/components/summary-stat";
 import { CircleUserRound, Users, Store, Utensils, MessageSquareText, ClipboardList, CheckCircle2, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ErrorAlert } from "@/components/ui/error-alert";

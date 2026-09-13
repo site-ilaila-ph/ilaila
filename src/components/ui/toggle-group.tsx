@@ -7,10 +7,12 @@ import { type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { toggleVariants } from "./toggle";
 
+type ToggleMode = "horizontal" | "vertical";
+
 const ToggleGroupContext = React.createContext<
   VariantProps<typeof toggleVariants> & {
     spacing?: number;
-    orientation?: "horizontal" | "vertical";
+    orientation?: ToggleMode;
   }
 >({
   size: "default",
@@ -19,39 +21,41 @@ const ToggleGroupContext = React.createContext<
   orientation: "horizontal",
 });
 
-const ToggleGroup: React.FC<ToggleGroupPrimitive.Props &
-  VariantProps<typeof toggleVariants> & {
-    spacing?: number;
-    orientation?: "horizontal" | "vertical";
-  }> = ({
+const ToggleGroup = function<TValue extends string = string>({
   className,
   variant,
   size,
   spacing = 2,
-  orientation = "horizontal",
+  orientation,
   children,
   ...props
-}) => (
-  <ToggleGroupPrimitive
-    data-slot="toggle-group"
-    data-variant={variant}
-    data-size={size}
-    data-spacing={spacing}
-    data-orientation={orientation}
-    style={{ "--gap": spacing } as React.CSSProperties}
-    className={cn(
-      "group/toggle-group flex w-fit flex-row items-center gap-[--spacing(var(--gap))] data-[spacing=0]:data-[variant=outline]:rounded-3xl data-vertical:flex-col data-vertical:items-stretch",
-      className,
-    )}
-    {...props}
-  >
-    <ToggleGroupContext.Provider
-      value={{ variant, size, spacing, orientation }}
+}: ToggleGroupPrimitive.Props<TValue> &
+  VariantProps<typeof toggleVariants> & {
+    spacing?: number;
+    orientation?: "horizontal" | "vertical";
+  }) {
+  return (
+    <ToggleGroupPrimitive
+      data-slot="toggle-group"
+      data-variant={variant}
+      data-size={size}
+      data-spacing={spacing}
+      data-orientation={orientation ?? "horizontal"}
+      style={{ "--gap": spacing } as React.CSSProperties}
+      className={cn(
+        "group/toggle-group flex w-fit flex-row items-center gap-[--spacing(var(--gap))] data-[spacing=0]:data-[variant=outline]:rounded-3xl data-vertical:flex-col data-vertical:items-stretch",
+        className,
+      )}
+      {...props}
     >
-      {children}
-    </ToggleGroupContext.Provider>
-  </ToggleGroupPrimitive>
-);
+      <ToggleGroupContext.Provider
+        value={{ variant, size, spacing, orientation: orientation ?? "horizontal" }}
+      >
+        {children}
+      </ToggleGroupContext.Provider>
+    </ToggleGroupPrimitive>
+  );
+};
 
 ToggleGroup.displayName = "ToggleGroup";
 

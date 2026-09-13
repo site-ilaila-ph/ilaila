@@ -1,4 +1,4 @@
-import { Navbar, NavLink } from "../navbar";
+import { Navbar, NavLink } from "./navbar";
 
 export default function LandingNav() {
   return (

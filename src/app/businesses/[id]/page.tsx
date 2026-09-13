@@ -209,9 +209,9 @@ export default function BusinessProfilePage({
               </div>
             </div>
           ) : (
-            <div className="mb-8 flex min-h-64 items-end rounded-2xl bg-brand-deep p-7 text-white sm:p-10">
+            <div className="mb-8 flex min-h-64 items-end rounded-2xl bg-primary p-7 text-white sm:p-10">
               <div>
-                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-brand-muted">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   San Pedro, Laguna
                 </p>
                 <h1 className="font-heading text-5xl font-bold leading-none sm:text-7xl">

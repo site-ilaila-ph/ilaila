@@ -93,7 +93,7 @@ function BusinessCard({ business, featured = false }: { business: BusinessListIt
         ) : (
           <div className={`relative flex items-end bg-brand-deep p-5 text-white ${featured ? "h-36" : "h-28"}`}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,var(--color-brand-accent),transparent_38%)]" />
-            <span className="relative text-xs font-semibold uppercase tracking-[0.14em] text-brand-muted">
+            <span className="relative text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {business.tags[0]?.value ?? "Lokal na lugar"}
             </span>
           </div>

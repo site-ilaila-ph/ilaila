@@ -265,8 +265,8 @@ function SidebarTrigger({
       variant="ghost"
       size="icon-sm"
       className={cn(className)}
-      as="button"
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+      render={<button />}
+      onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
       }}

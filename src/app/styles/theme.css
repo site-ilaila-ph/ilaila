@@ -1,6 +1,6 @@
 /* Unified theme. */
 /* oklch notation: oklch(lightness chroma hue) */
- 
+
 :root {
   --surface: #fbfdf9;
   --border: oklch(0.86 0.035 145);
@@ -9,7 +9,7 @@
   --secondary: oklch(0.95 0.035 145);
   --accent: oklch(0.93 0.045 145);
   --muted: oklch(0.95 0.018 145);
-  --text-secondary: #405247;
+  --text-secondary: oklch(0.42 0.0285 157.86);
   --card: oklch(0.99 0.008 145);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
@@ -27,14 +27,16 @@
   --chart-4: oklch(0.52 0.105 223.128);
   --chart-5: oklch(0.45 0.085 224.283);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.609 0.126 221.723);
-  --sidebar-primary-foreground: oklch(0.984 0.019 200.873);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.705 0.015 286.067);
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
+
+  /* Sidebar */
+  --sidebar: oklch(0.98 0.01 145);
+  --sidebar-foreground: oklch(0.3 0.03 150);
+  --sidebar-primary: oklch(0.42 0.12 145);
+  --sidebar-primary-foreground: oklch(0.99 0.005 145);
+  --sidebar-accent: oklch(0.95 0.035 145);
+  --sidebar-accent-foreground: oklch(0.3 0.06 150);
+  --sidebar-border: oklch(0.88 0.03 145);
+  --sidebar-ring: oklch(0.42 0.12 145);
 }

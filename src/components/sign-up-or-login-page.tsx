@@ -1,6 +1,6 @@
 'use client'
 
-import { SignUpOrLoginForm } from '@/components/blocks/auth/sign-up-or-login-form'
+import { SignUpOrLoginForm } from '@/components/sign-up-or-login-form'
 import { useSearchParams } from 'next/navigation'
 
 export function SignUpOrLoginPage() {

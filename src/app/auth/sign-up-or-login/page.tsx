@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
-import { SignUpOrLoginPage } from '@/components/blocks/auth/sign-up-or-login-page';
+import { SignUpOrLoginPage } from '@/components/sign-up-or-login-page';
 
 export default function Page() {
   return (

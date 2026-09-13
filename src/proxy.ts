@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, ProxyConfig } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { match } from "path-to-regexp";
 
@@ -7,6 +7,10 @@ import { notFoundProblem, redirectResponse } from "./lib/responses";
 import { assert } from "./lib/assert";
 
 // Routes reachable without a session.
+const isIgnoreRoute = match([
+  "/dashboard"
+]);
+
 const isPublicRoute = match([
   "/",
   "/landing",
@@ -14,7 +18,7 @@ const isPublicRoute = match([
   "/api/auth/*rest",
 ]);
 
-const isAdminOnlyRoute = match(["/management/*rest"]);
+const isAdminOnlyRoute = match(["/management", "/management/*rest"]);
 
 export const proxy = async (request: NextRequest) => {
   let response = NextResponse.next({
@@ -29,6 +33,8 @@ export const proxy = async (request: NextRequest) => {
 
   assert(supabaseUrl, "A supabase url was not configured via environment variable.");
   assert(supabaseKey, "No supabase key was provided via the environment variables.");
+
+  if (isIgnoreRoute(request.nextUrl.pathname)) return response;
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -68,6 +74,7 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.redirect(url);
   }
 
+  // #region Index Virtual Route
   if (!user) {
     if (pathname === "/") return redirectResponse(new URL("/landing", request.url))
     return response;
@@ -90,7 +97,9 @@ export const proxy = async (request: NextRequest) => {
     return redirectResponse(new URL(target, request.url));
   }
 
-  // Protect specific routes.
+  // #endregion
+
+  // pretend these pages does not exists for the client.
   if (isAdminOnlyRoute(pathname)) {
     if (userData.role !== "admin") {
       return notFoundProblem(request);
@@ -100,7 +109,7 @@ export const proxy = async (request: NextRequest) => {
   return response;
 };
 
-export const config = {
+export const config: ProxyConfig = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],

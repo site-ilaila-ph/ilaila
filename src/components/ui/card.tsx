@@ -1,23 +1,14 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import {
-  AnyComponentProps,
-  throwIfUsingRenderProp,
-  type PolymorphicComponentProps,
-} from "@/components/ui/component-polymorphism"
 
-function Card<TAs extends React.ElementType = "div">({
+function Card({
   className,
   size = "default",
-  as,
-  render,
   ...props
-}: PolymorphicComponentProps<{ size?: "default" | "sm" }, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
   return (
-    <Component
+    <div
       data-slot="card"
       data-size={size}
       className={cn(
@@ -29,11 +20,9 @@ function Card<TAs extends React.ElementType = "div">({
   )
 }
 
-function CardHeader<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-header"
       className={cn(
         "group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 rounded-t-4xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)",
@@ -44,11 +33,9 @@ function CardHeader<TAs extends React.ElementType = "div">({ className, as, rend
   )
 }
 
-function CardTitle<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-title"
       className={cn("font-heading text-base font-medium", className)}
       {...props}
@@ -56,11 +43,9 @@ function CardTitle<TAs extends React.ElementType = "div">({ className, as, rende
   )
 }
 
-function CardDescription<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-description"
       className={cn("text-sm text-muted-foreground", className)}
       {...props}
@@ -68,11 +53,9 @@ function CardDescription<TAs extends React.ElementType = "div">({ className, as,
   )
 }
 
-function CardAction<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-action"
       className={cn(
         "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
@@ -83,11 +66,9 @@ function CardAction<TAs extends React.ElementType = "div">({ className, as, rend
   )
 }
 
-function CardContent<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-content"
       className={cn("px-(--card-spacing)", className)}
       {...props}
@@ -95,11 +76,9 @@ function CardContent<TAs extends React.ElementType = "div">({ className, as, ren
   )
 }
 
-function CardFooter<TAs extends React.ElementType = "div">({ className, as, render, ...props }: PolymorphicComponentProps<AnyComponentProps, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Component
+    <div
       data-slot="card-footer"
       className={cn(
         "flex items-center rounded-b-4xl px-(--card-spacing) [.border-t]:pt-(--card-spacing)",

@@ -1,7 +1,6 @@
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
-import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/components/ui/component-polymorphism"
 import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
@@ -38,15 +37,11 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   )
 }
 
-function BreadcrumbLink<TAs extends React.ElementType = "a">({
+function BreadcrumbLink({
   className,
-  as,
-  render,
   ...props
-}: PolymorphicComponentProps<Record<string, never>, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "a"
-  return <Component data-slot="breadcrumb-link" className={cn("transition-colors hover:text-foreground", className)} {...props} />
+}: React.ComponentProps<"a">) {
+  return <a data-slot="breadcrumb-link" className={cn("transition-colors hover:text-foreground", className)} {...props} />
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {

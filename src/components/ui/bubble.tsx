@@ -2,7 +2,6 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/components/ui/component-polymorphism"
 
 function BubbleGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -61,15 +60,11 @@ function Bubble({
   )
 }
 
-function BubbleContent<TAs extends React.ElementType = "div">({
+function BubbleContent({
   className,
-  as,
-  render,
   ...props
-}: PolymorphicComponentProps<Record<string, never>, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
-  return <Component data-slot="bubble-content" className={cn("w-fit max-w-full min-w-0 overflow-hidden rounded-3xl border border-transparent px-3.5 py-2.5 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/30", className)} {...props} />
+}: React.ComponentProps<"div">) {
+  return <div data-slot="bubble-content" className={cn("w-fit max-w-full min-w-0 overflow-hidden rounded-3xl border border-transparent px-3.5 py-2.5 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-3 [button,a]:focus-visible:ring-ring/30", className)} {...props} />
 }
 
 const bubbleReactionsVariants = cva(

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "next-devtools": {
+      "command": "./bin/dbash.sh",
+      "args": ["-c", "npx -y next-devtools-mcp@latest"]
+    },
+    "sentry": {
+      "url": "https://mcp.sentry.dev/mcp/ilaila/javascript-nextjs"
+    },
+    "supabase": {
+      "url": "http://127.0.0.1:54321/mcp"
+    }
+  }
+}

@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/components/ui/component-polymorphism";
 
 const attachmentVariants = cva(
   "group/attachment relative flex w-fit max-w-full min-w-0 shrink-0 flex-wrap rounded-3xl border bg-card text-card-foreground transition-colors focus-within:ring-1 focus-within:ring-ring/30 has-[>a,>button]:hover:bg-muted/50 data-[state=error]:border-destructive/30 data-[state=idle]:border-dashed",
@@ -158,16 +157,12 @@ function AttachmentAction({
   )
 }
 
-function AttachmentTrigger<TAs extends React.ElementType = "button">({
+function AttachmentAction({
   className,
-  as,
-  render,
-  type,
+  type = "button",
   ...props
-}: PolymorphicComponentProps<{ type?: "button" | "submit" | "reset" }, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "button"
-  return <Component data-slot="attachment-trigger" type={type ?? "button"} className={cn("absolute inset-0 z-10 outline-none", className)} {...props} />
+}: React.ComponentProps<"button">) {
+  return <button data-slot="attachment-trigger" type={type} className={cn("absolute inset-0 z-10 outline-none", className)} {...props} />
 }
 
 function AttachmentGroup({ className, ...props }: React.ComponentProps<"div">) {

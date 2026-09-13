@@ -27,7 +27,7 @@ export default function Page() {
             </CardContent>
             <CardFooter>
               <CardAction>
-                <Button as={Link} href="/auth/sign-up-or-login?mode=login">
+                <Button render={<Link href="/auth/sign-up-or-login?mode=login" />} nativeButton={false}>
                   Magpatuloy sa Login
                 </Button>
               </CardAction>

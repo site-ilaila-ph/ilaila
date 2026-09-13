@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
-import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/components/ui/component-polymorphism"
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -55,17 +54,13 @@ const itemVariants = cva(
   }
 )
 
-function Item<TAs extends React.ElementType = "div">({
+function Item({
   className,
   variant = "default",
   size = "default",
-  as,
-  render,
   ...props
-}: PolymorphicComponentProps<VariantProps<typeof itemVariants>, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
-  return <Component data-slot="item" data-variant={variant} data-size={size} className={cn(itemVariants({ variant, size, className }))} {...props} />
+}: React.ComponentProps<"div"> & VariantProps<typeof itemVariants>) {
+  return <div data-slot="item" data-variant={variant} data-size={size} className={cn(itemVariants({ variant, size, className }))} {...props} />
 }
 
 const itemMediaVariants = cva(

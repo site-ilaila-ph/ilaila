@@ -55,7 +55,6 @@ export default function FoodsPage() {
               className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
             >
               <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
-              <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
               Ilaila
             </Link>
           </div>

@@ -2,7 +2,6 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { throwIfUsingRenderProp, type PolymorphicComponentProps } from "@/components/ui/component-polymorphism"
 
 const markerVariants = cva(
   "group/marker relative flex min-h-4 w-full items-center gap-2 text-left text-sm text-muted-foreground [&_svg:not([class*='size-'])]:size-4 [a]:underline [a]:underline-offset-3 [a]:hover:text-foreground",
@@ -18,16 +17,12 @@ const markerVariants = cva(
   }
 )
 
-function Marker<TAs extends React.ElementType = "div">({
+function Marker({
   className,
   variant = "default",
-  as,
-  render,
   ...props
-}: PolymorphicComponentProps<VariantProps<typeof markerVariants>, TAs>) {
-  throwIfUsingRenderProp({ render })
-  const Component = as ?? "div"
-  return <Component data-slot="marker" data-variant={variant} className={cn(markerVariants({ variant, className }))} {...props} />
+}: React.ComponentProps<"div"> & VariantProps<typeof markerVariants>) {
+  return <div data-slot="marker" data-variant={variant} className={cn(markerVariants({ variant, className }))} {...props} />
 }
 
 function MarkerIcon({ className, ...props }: React.ComponentProps<"span">) {
