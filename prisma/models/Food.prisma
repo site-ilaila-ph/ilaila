@@ -10,7 +10,7 @@ model Food {
 
   businesses           BusinessFood[]
   images               FoodImage[]
-  tags                 FoodTag[]
+  tags                 String[]
 
   @@map("foods")
   @@schema("app")

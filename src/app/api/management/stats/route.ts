@@ -1,5 +1,5 @@
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { acquirePrismaClient } from "@/lib/infra";
 import { ok } from "@/lib/api/responses";
 

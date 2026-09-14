@@ -1,10 +1,9 @@
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { mapPrismaError, ApiErrorCode } from "@/lib/errors";
 import { acquirePrismaClient } from "@/lib/infra";
 import { withLogging } from "@/lib/logging";
 import { NextRequest, NextResponse } from "next/server";
 
-// add a food with no relation.
 async function postFood(req: NextRequest) {
   try {
     const body = await req.json();

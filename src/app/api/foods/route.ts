@@ -1,152 +1,98 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { ApiErrorCode } from "@/lib/errors";
+import type { FoodCreateInput, FoodImageCreateInput } from "@/generated/prisma/models";
+import { badRequestProblem, ok } from "@/lib/api/responses";
+import { commonErrorHandler } from "@/lib/api/errors";
+import { logAndRethrow, mapPrismaError } from "@/lib/errors";
+import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
+import { withApiErrorHandling } from "@/lib/api-wrappers";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient } from "@/lib/infra";
-import { notFoundProblem } from "@/lib/api/responses/problem";
-import { logAndRethrow } from "@/lib/errors";
+import { randomUUID } from "node:crypto";
+import { join } from "node:path/posix";
+import { NextResponse, NextRequest } from "next/server";
 
-export const runtime = "nodejs";
+const PRISMA_ERROR_CODES = {
+  idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
+  notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
+  conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
+  invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
+};
 
-async function getFoods(req: NextRequest) {
+async function getFoods() {
   try {
-    const url = new URL(req.url);
-    const id = url.searchParams.get("id");
-    const name = url.searchParams.get("name");
     const db = acquirePrismaClient();
-
-    if (id) {
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      let result = null;
-
-      if (isUuid) {
-        result = await db.food.findUnique({
-          where: { id },
-          include: {
-            images: true,
-            tags: true,
-            businesses: {
-              include: {
-                business: {
-                  include: {
-                    images: true,
-                    tags: true,
-                  },
-                },
-              },
-            },
-          },
-        });
-      }
-
-      if (!result) {
-        result = await db.food.findFirst({
-          where: {
-            OR: [
-              { name: { equals: id, mode: "insensitive" } },
-              { name: { contains: id, mode: "insensitive" } },
-            ],
-          },
-          include: {
-            images: true,
-            tags: true,
-            businesses: {
-              include: {
-                business: {
-                  include: {
-                    images: true,
-                    tags: true,
-                  },
-                },
-              },
-            },
-          },
-        });
-      }
-
-      if (!result) {
-        return notFoundProblem(req, { code: "food-not-found", detail: "The food does not exist." });
-      }
-
-      return NextResponse.json(result, { status: 200 });
-    }
-
-    if (name) {
-      const result = await db.food.findFirst({
-        where: {
-          name: {
-            contains: name,
-            mode: "insensitive",
-          },
-        },
-        include: {
-          images: true,
-          tags: true,
-          businesses: {
-            include: {
-              business: {
-                include: {
-                  images: true,
-                  tags: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (!result) {
-        return notFoundProblem(req, { code: "food-not-found", detail: "No food matches the requested name." });
-      }
-
-      return NextResponse.json(result, { status: 200 });
-    }
-
-    const topRated = url.searchParams.get("topRated");
-    if (topRated) {
-      const foods = await db.food.findMany({
-        include: {
-          images: true,
-          tags: true,
-          businesses: {
-            include: {
-              business: {
-                include: {
-                  reviews: true,
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const result = foods
-        .map((food) => {
-          const allReviews = food.businesses.flatMap((bf) => bf.business?.reviews ?? []);
-          const averageRating = allReviews.length > 0
-            ? allReviews.reduce((sum, review) => sum + review.foodQuality, 0) / allReviews.length
-            : 0;
-
-          return { ...food, averageRating };
-        })
-        .filter((food) => food.averageRating > 0)
-        .sort((a, b) => b.averageRating - a.averageRating)
-        .slice(0, 6);
-
-      return NextResponse.json(result, { status: 200 });
-    }
-
-    const result = await db.food.findMany({
-      include: {
-        images: true,
-        tags: true,
-      },
+    const data = await db.food.findMany({
+      include: { tags: true, images: true },
       orderBy: { name: "asc" },
     });
-
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    logAndRethrow("Food read", error);
+    logAndRethrow("Management food read", error);
   }
 }
 
-export const GET = withLogging(withUnhandledApiErrorHandling(getFoods), "getFoods");
+async function createFood(req: NextRequest) {
+  const fd = await req.formData();
+  const metadataRaw = fd.get("metadata");
+
+  if (typeof metadataRaw !== "string") {
+    return badRequestProblem(req, { code: "metadata-required", detail: "A metadata JSON part is required." });
+  }
+
+  let parsed: { food: FoodCreateInput; images?: FoodImageCreateInput[] };
+  try {
+    parsed = JSON.parse(metadataRaw);
+  } catch {
+    return badRequestProblem(req, { code: "metadata-invalid-json", detail: "metadata part must be valid JSON." });
+  }
+
+  if (!parsed?.food) {
+    return badRequestProblem(req, { code: "food-required", detail: "metadata.food is required." });
+  }
+
+  const imageFiles = fd.getAll("images").filter((f): f is Blob => f instanceof Blob);
+  const imagesMeta = parsed.images ?? [];
+
+  if (imagesMeta.length > 0 && imagesMeta.length !== imageFiles.length) {
+    return badRequestProblem(req, {
+      code: "images-files-mismatch",
+      detail: `metadata.images has ${imagesMeta.length} entries but ${imageFiles.length} image files were uploaded.`,
+    });
+  }
+
+  try {
+    const db = acquirePrismaClient();
+    const foodId = randomUUID();
+
+    const uploaded = await Promise.all(
+      imageFiles.map(async (blob, i) => {
+        const foodImageId = randomUUID();
+        const { url } = await acquireStorageManager().upload({
+          key: join("foods", foodId, "images", foodImageId),
+          fileOrBody: blob,
+          options: { contentType: blob.type },
+        });
+        return {
+          id: foodImageId,
+          url,
+          ...(imagesMeta[i] ?? {}),
+        };
+      })
+    );
+
+    const food = await db.food.create({
+      data: {
+        id: foodId,
+        ...parsed.food,
+        images: uploaded.length > 0 ? { create: uploaded } : undefined,
+      },
+      include: { images: true, tags: true },
+    });
+
+    return ok(food);
+  } catch (error: unknown) {
+    return mapPrismaError(req, error, PRISMA_ERROR_CODES);
+  }
+}
+
+export const GET = withLogging(withApiErrorHandling(getFoods, commonErrorHandler), "getFoods");
+export const POST = withLogging(withApiErrorHandling(createFood, commonErrorHandler), "createFood");

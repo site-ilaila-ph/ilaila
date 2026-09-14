@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { acquirePrismaClient } from "@/lib/infra";
 import { badRequestProblem } from "@/lib/api/responses/problem";
 import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";

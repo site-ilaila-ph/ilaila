@@ -132,61 +132,61 @@ function defineProblem(status: number, defaults: ProblemDefaults) {
 
 export const badRequestProblem = defineProblem(400, {
     code: "bad-request",
-    title: "Bad Request",
+    title: "Hindi Ko Naintindihan",
     detail:
-        "The request could not be understood or was missing required parameters.",
+        "Hindi ko maintindihan ang request mo o may kulang na impormasyon.",
 });
 
 export const unauthorizedProblem = defineProblem(401, {
     code: "unauthorized",
-    title: "Unauthorized",
-    detail: "Authentication required.",
+    title: "Kailangan Kitang Makilala Muna",
+    detail: "Kailangan mo munang mag-sign in bago ko ito maproseso.",
 });
 
 export const forbiddenProblem = defineProblem(403, {
     code: "forbidden",
-    title: "Forbidden",
-    detail: "Access forbidden.",
+    title: "Hindi Kita Mabibigyan ng Access",
+    detail: "Hindi kita mabibigyan ng access sa hinihiling mong resource.",
 });
 
 export const notFoundProblem = defineProblem(404, {
     code: "not-found",
-    title: "Not Found",
-    detail: "Resource not found.",
+    title: "Hindi Ko Mahanap",
+    detail: "Hindi ko mahanap ang hinihiling mong resource.",
 });
 
 export const unprocessableProblem = defineProblem(422, {
     code: "unprocessable-entity",
-    title: "Unprocessable Entity",
-    detail: "Unprocessable entity.",
+    title: "Hindi Ko Maproseso",
+    detail: "Naintindihan ko ang request mo, pero hindi ko ito maproseso.",
 });
 
 export const unsupportedMediaTypeProblem = defineProblem(415, {
     code: "unsupported-media-type",
-    title: "Unsupported Media Type",
-    detail: "The request media type is not supported.",
+    title: "Hindi Ko Suportado ang Media na Ito",
+    detail: "Hindi ko suportado ang uri ng media na ipinadala mo.",
 });
 
 export const conflictProblem = defineProblem(409, {
     code: "conflict",
-    title: "Conflict",
-    detail: "The request conflicts with the current state of the resource.",
+    title: "May Salungatan Ako sa Request Mo",
+    detail: "Salungat ang request mo sa kasalukuyan kong estado.",
 });
 
 export const tooManyRequestsProblem = defineProblem(429, {
     code: "too-many-requests",
-    title: "Too Many Requests",
-    detail: "Too many requests. Please try again later.",
+    title: "Sobra Na Akong Request",
+    detail: "Sobra na akong nakakatanggap ng request. Subukan mo ulit mamaya.",
 });
 
 export const badGatewayProblem = defineProblem(502, {
     code: "bad-gateway",
-    title: "Bad Gateway",
-    detail: "An upstream service failed to respond.",
+    title: "Hindi Ako Nakatanggap ng Tugon",
+    detail: "Hindi ako nakatanggap ng tugon mula sa upstream service ko.",
 });
 
 export const internalErrorProblem = defineProblem(500, {
     code: "internal-server-error",
-    title: "Internal Server Error",
-    detail: "Internal server error.",
+    title: "May Error Sa Akin",
+    detail: "May naganap na error sa akin. Paumanhin.",
 });

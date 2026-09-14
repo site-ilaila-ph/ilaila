@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { createClient } from "@/lib/supabase/server";
 import { mapAuthError } from "@/lib/errors";
+import { noContent } from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,7 @@ async function postSignIn(req: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({ email: body.email, password: body.password });
     if (error) throw error;
-    return NextResponse.json({ success: true }, { status: 200 });
+    return noContent();
   } catch (error: unknown) {
     return mapAuthError(req, error, {
       genericCode: "SIGN_IN_FAILED",
