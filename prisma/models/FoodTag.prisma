@@ -1,9 +1,0 @@
-model FoodTag {
-  id     String @id @default(uuid()) @db.Uuid
-  value  String
-  foodId String @db.Uuid
-  food   Food   @relation(fields: [foodId], references: [id])
-
-  @@map("food_tags")
-  @@schema("app")
-}

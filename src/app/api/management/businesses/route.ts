@@ -1,23 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { badRequestProblem } from "@/lib/api/responses/problem";
-import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
+import {
+  badRequestProblem,
+  conflictProblem,
+  notFoundProblem,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
-async function getBusinesses() {
-  try {
-    const db = acquirePrismaClient();
-    const data = await db.business.findMany({
-      include: { tags: true, createdBy: true },
-      orderBy: { createdAt: "desc" },
+function mapBusinessPrismaError(req: NextRequest, error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem(req, {
+      code: "invalid-json",
+      title: "Maling Request",
+      detail: "Ang request body ay dapat na valid JSON.",
     });
-    return NextResponse.json(data, { status: 200 });
-  } catch (error: unknown) {
-    logAndRethrow("Management business read", error);
   }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2025") {
+      return notFoundProblem(req, {
+        code: "business-not-found",
+        title: "Hindi Nakita",
+        detail: "Ang negosyo ay hindi umiiral.",
+      });
+    }
+
+    if (error.code === "P2002") {
+      return conflictProblem(req, {
+        code: "business-conflict",
+        title: "Salungatan",
+        detail: "Mayroon nang negosyo na may parehong mga field.",
+      });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem(req, {
+        code: "business-invalid-reference",
+        title: "Maling Request",
+        detail: "Ang negosyo ay nagre-record ng record na hindi umiiral.",
+      });
+    }
+  }
+
+  throw error;
+}
+
+async function getBusinesses() {
+  const db = acquirePrismaClient();
+  const data = await db.business.findMany({
+    include: { tags: true, createdBy: true },
+    orderBy: { createdAt: "desc" },
+  });
+  return NextResponse.json(data, { status: 200 });
 }
 
 async function postBusiness(req: NextRequest) {
@@ -44,12 +82,7 @@ async function postBusiness(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    return mapBusinessPrismaError(req, error);
   }
 }
 
@@ -71,12 +104,7 @@ async function patchBusiness(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    return mapBusinessPrismaError(req, error);
   }
 }
 
@@ -89,12 +117,7 @@ async function deleteBusiness(req: NextRequest) {
     await db.business.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "BUSINESS_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "BUSINESS_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "BUSINESS_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "BUSINESS_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    return mapBusinessPrismaError(req, error);
   }
 }
 

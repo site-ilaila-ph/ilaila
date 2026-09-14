@@ -1,8 +1,13 @@
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
-import { mapPrismaError, ApiErrorCode } from "@/lib/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
 import { withLogging } from "@/lib/logging";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  badRequestProblem,
+  conflictProblem,
+  notFoundProblem,
+} from "@/lib/api/responses";
 
 async function postFood(req: NextRequest) {
   try {
@@ -22,12 +27,48 @@ async function postFood(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 201 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    if (error instanceof SyntaxError) {
+      return badRequestProblem(req, {
+        code: "invalid-json",
+        title: "Maling Request",
+        detail: "Ang request body ay dapat na valid JSON.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return notFoundProblem(req, {
+        code: "food-not-found",
+        title: "Hindi Nakita",
+        detail: "Ang pagkain ay hindi umiiral.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return conflictProblem(req, {
+        code: "food-conflict",
+        title: "Salungatan",
+        detail: "Mayroon nang pagkain na may parehong mga field.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      return badRequestProblem(req, {
+        code: "food-invalid-reference",
+        title: "Maling Request",
+        detail: "Ang pagkain ay nagre-record ng record na hindi umiiral.",
+      });
+    }
+
+    throw error;
   }
 }
 

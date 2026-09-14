@@ -1,11 +1,16 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import z from "zod";
 import { acquirePrismaClient } from "@/lib/infra";
-import { ok, noContent } from "@/lib/api/responses/success";
-import { badRequestProblem } from "@/lib/api/responses/problem";
-import { mapPrismaError, ApiErrorCode } from "@/lib/errors";
+import {
+  badRequestProblem,
+  conflictProblem,
+  notFoundProblem,
+  ok,
+  noContent,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -60,12 +65,37 @@ async function postAppReview(request: NextRequest) {
 
     return noContent();
   } catch (error: unknown) {
-    return mapPrismaError(request, error, {
-      idRequiredCode: "APP_REVIEW_INVALID_USER" as ApiErrorCode,
-      notFoundCode: "APP_REVIEW_INVALID_USER" as ApiErrorCode,
-      conflictCode: "APP_REVIEW_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "APP_REVIEW_INVALID_USER" as ApiErrorCode,
-    });
+    if (error instanceof SyntaxError) {
+      return badRequestProblem(request, {
+        code: "invalid-json",
+        title: "Maling Request",
+        detail: "Ang request body ay dapat na valid JSON.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return conflictProblem(request, {
+        code: "app-review-conflict",
+        title: "Salungatan",
+        detail: "Ang app review na ito ay mayroon na.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === "P2003" || error.code === "P2025")
+    ) {
+      return notFoundProblem(request, {
+        code: "app-review-invalid-user",
+        title: "Maling Request",
+        detail: "Ang user para sa app review na ito ay hindi umiiral.",
+      });
+    }
+
+    throw error;
   }
 }
 

@@ -1,34 +1,9 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
+import { AnyRequestHandler } from "./next-types";
+import { badRequestProblem, conflictProblem, internalErrorProblem, notFoundProblem, tooManyRequestsProblem, unauthorizedProblem, unprocessableProblem } from "./api/responses";
 import { Prisma } from "@/generated/prisma/client";
 import { isAuthError } from "@supabase/supabase-js";
-import {
-    badRequestProblem,
-    conflictProblem,
-    internalErrorProblem,
-    notFoundProblem,
-    tooManyRequestsProblem,
-    unauthorizedProblem,
-    unprocessableProblem,
-} from "./responses";
-
-export {
-    badGatewayProblem,
-    badRequestProblem,
-    conflictProblem,
-    forbiddenProblem,
-    internalErrorProblem,
-    notFoundProblem,
-    problemResponse,
-    tooManyRequestsProblem,
-    unauthorizedProblem,
-    unprocessableProblem,
-    unsupportedMediaTypeProblem,
-} from "./responses";
-export type {
-    ProblemDefaults,
-    ProblemDetails,
-    ProblemOverrides,
-} from "./responses";
 
 export type ErrorHandlingCallback = (
   request: NextRequest,
@@ -36,6 +11,38 @@ export type ErrorHandlingCallback = (
   error: unknown,
 ) => Promise<NextResponse>;
 
+function withApiErrorHandling(
+  handler: AnyRequestHandler,
+  onError: ErrorHandlingCallback,
+  captureWithSentry = true,
+) {
+  return async function (request: NextRequest, ctx: unknown): Promise<NextResponse> {
+    try {
+      return await handler(request, ctx);
+    } catch (error) {
+      if (captureWithSentry) {
+        Sentry.captureException(error);
+      }
+
+      const res = await onError(request, ctx, error);
+      return res;
+    }
+  }
+}
+
+
+export function withUnhandledApiErrorHandling(
+  handler: AnyRequestHandler,
+): AnyRequestHandler {
+  return async (request: NextRequest, ctx: unknown): Promise<NextResponse> => {
+    try {
+      return await handler(request, ctx);
+    } catch (error) {
+      Sentry.captureException(error);
+      return internalErrorProblem(request);
+    }
+  };
+}
 
 export function isMissingIdError(err: unknown): boolean {
   return (
@@ -319,3 +326,5 @@ export function makeAuthErrorHandler(
 ): ErrorHandlingCallback {
   return async (request, _ctx, err) => mapAuthError(request, err, config);
 }
+
+export { withApiErrorHandling }

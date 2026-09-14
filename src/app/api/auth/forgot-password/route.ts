@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { isAuthError } from "@supabase/supabase-js";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { createClient } from "@/lib/supabase/server";
-import { mapAuthError } from "@/lib/errors";
-import { noContent } from "@/lib/api/responses";
+import {
+  badRequestProblem,
+  internalErrorProblem,
+  noContent,
+  tooManyRequestsProblem,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -16,13 +21,35 @@ async function postForgotPassword(req: NextRequest) {
     if (error) throw error;
     return noContent();
   } catch (error: unknown) {
-    return mapAuthError(req, error, {
-      genericCode: "FORGOT_PASSWORD_FAILED",
-      rateLimitedCode: "FORGOT_PASSWORD_RATE_LIMITED",
-      unavailableCode: "FORGOT_PASSWORD_UNAVAILABLE",
-      unavailableDetail: "Password reset is unavailable right now. Please try again later.",
-      operationName: "Forgot password",
-    });
+    if (isAuthError(error)) {
+      const message = error.message || "Nabigo ang kahilingan sa pag-reset ng password.";
+      const status = error.status ?? 400;
+
+      if (status === 429) {
+        return tooManyRequestsProblem(req, {
+          code: "forgot-password-rate-limited",
+          title: "Maraming Request",
+          detail: message,
+        });
+      }
+
+      if (status >= 500) {
+        console.error("Forgot password failed with upstream status", status, message);
+        return internalErrorProblem(req, {
+          code: "forgot-password-unavailable",
+          title: "Error sa Server",
+          detail: "Ang pag-reset ng password ay hindi available sa ngayon. Pakisubukan muli sa ibang pagkakataon.",
+        });
+      }
+
+      return badRequestProblem(req, {
+        code: "forgot-password-failed",
+        title: "Maling Request",
+        detail: message,
+      });
+    }
+
+    throw error;
   }
 }
 

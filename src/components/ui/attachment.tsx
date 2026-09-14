@@ -157,7 +157,7 @@ function AttachmentAction({
   )
 }
 
-function AttachmentAction({
+function AttachmentTrigger({
   className,
   type = "button",
   ...props

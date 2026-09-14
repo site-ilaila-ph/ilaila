@@ -1,5 +1,5 @@
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
 import { ok } from "@/lib/api/responses";
 
@@ -20,7 +20,7 @@ async function getStats() {
       db.userData.count(),
       db.business.count(),
       db.food.count(),
-      db.review.count(),
+      db.businessReview.count(),
       db.appReview.count(),
       db.appReview.count({ where: { isApproved: false } }),
     ]);

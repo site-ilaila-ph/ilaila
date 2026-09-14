@@ -1,9 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { isAuthError } from "@supabase/supabase-js";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { createClient } from "@/lib/supabase/server";
-import { mapAuthError } from "@/lib/errors";
-import { noContent } from "@/lib/api/responses";
+import {
+  badRequestProblem,
+  internalErrorProblem,
+  noContent,
+  tooManyRequestsProblem,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -15,13 +20,35 @@ async function postSignOut(req: NextRequest) {
 
     return noContent();
   } catch (error: unknown) {
-    return mapAuthError(req, error, {
-      genericCode: "SIGN_OUT_FAILED",
-      rateLimitedCode: "SIGN_OUT_UNAVAILABLE",
-      unavailableCode: "SIGN_OUT_UNAVAILABLE",
-      unavailableDetail: "Sign out is unavailable right now. Please try again later.",
-      operationName: "Sign out",
-    });
+    if (isAuthError(error)) {
+      const message = error.message || "Nabigo ang pag-sign out.";
+      const status = error.status ?? 400;
+
+      if (status === 429) {
+        return tooManyRequestsProblem(req, {
+          code: "sign-out-unavailable",
+          title: "Error sa Server",
+          detail: message,
+        });
+      }
+
+      if (status >= 500) {
+        console.error("Sign out failed with upstream status", status, message);
+        return internalErrorProblem(req, {
+          code: "sign-out-unavailable",
+          title: "Error sa Server",
+          detail: "Ang sign out ay hindi available sa ngayon. Pakisubukan muli sa ibang pagkakataon.",
+        });
+      }
+
+      return badRequestProblem(req, {
+        code: "sign-out-failed",
+        title: "Maling Request",
+        detail: message,
+      });
+    }
+
+    throw error;
   }
 }
 

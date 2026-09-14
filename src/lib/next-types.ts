@@ -1,7 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type RequestHandler<TParams extends [request: NextRequest, ctx: unknown]> = (
   ...params: TParams
-) => Promise<Response>;
+) => Promise<NextResponse>;
 type AnyRequestHandler = RequestHandler<[NextRequest, unknown]>
 export type { RequestHandler, AnyRequestHandler }

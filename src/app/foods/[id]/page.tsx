@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Camera, Image as ImageIcon, X, ZoomIn } from "lucide-react";
@@ -160,10 +160,10 @@ export default function SingleFoodPage({
                     )}
                     {food.tags?.map((tag) => (
                       <span
-                        key={tag.id}
+                        key={tag}
                         className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium backdrop-blur-xs text-white"
                       >
-                        {tag.value}
+                        {tag}
                       </span>
                     ))}
                   </div>
@@ -188,10 +188,10 @@ export default function SingleFoodPage({
                 )}
                 {food.tags?.map((tag) => (
                   <span
-                    key={tag.id}
+                    key={tag}
                     className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
                   >
-                    {tag.value}
+                    {tag}
                   </span>
                 ))}
               </div>

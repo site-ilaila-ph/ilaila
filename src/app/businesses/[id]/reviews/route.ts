@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { Prisma } from "@/generated/prisma/client";
 import { acquirePrismaClient } from "@/lib/infra";
 import {
   badRequestProblem,
   conflictProblem,
   notFoundProblem,
-} from "@/lib/api/responses/problem";
+} from "@/lib/api/responses";
+import { created } from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -44,7 +45,7 @@ async function postReview(req: NextRequest) {
     const db = acquirePrismaClient();
 
     if (body.action === "create") {
-      const review = await db.review.create({
+      const review = await db.businessReview.create({
         data: {
           id: crypto.randomUUID(),
           userId: body.userId,
@@ -58,16 +59,16 @@ async function postReview(req: NextRequest) {
         },
       });
 
-      return NextResponse.json({ success: true, data: review }, { status: 201 });
+      return created(review);
     }
 
     if (body.action === "upvote") {
-      const review = await db.review.findFirst({ where: { id: body.reviewId } });
+      const review = await db.businessReview.findFirst({ where: { id: body.reviewId } });
       if (!review) {
         return notFoundProblem(req, { code: "review-not-found", detail: "The review does not exist." });
       }
 
-      await db.review.update({
+      await db.businessReview.update({
         where: { id: body.reviewId },
         data: { upvotes: review.upvotes + 1 },
       });

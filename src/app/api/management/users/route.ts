@@ -1,23 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { badRequestProblem } from "@/lib/api/responses/problem";
-import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
+import {
+  badRequestProblem,
+  conflictProblem,
+  notFoundProblem,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
-async function getUsers() {
-  try {
-    const db = acquirePrismaClient();
-    const data = await db.userData.findMany({ orderBy: { createdAt: "desc" } });
-    return NextResponse.json(
-      data.map((row) => ({ ...row, isAdmin: row.role === "admin" })),
-      { status: 200 },
-    );
-  } catch (error: unknown) {
-    logAndRethrow("Management user read", error);
+function mapUserPrismaError(req: NextRequest, error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem(req, {
+      code: "invalid-json",
+      title: "Maling Request",
+      detail: "Ang request body ay dapat na valid JSON.",
+    });
   }
+
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2025"
+  ) {
+    return notFoundProblem(req, {
+      code: "user-not-found",
+      title: "Hindi Nakita",
+      detail: "Ang user ay hindi umiiral.",
+    });
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  ) {
+    return conflictProblem(req, {
+      code: "user-conflict",
+      title: "Salungatan",
+      detail: "Ang user ay mayroon na.",
+    });
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2003"
+  ) {
+    return badRequestProblem(req, {
+      code: "user-invalid-reference",
+      title: "Maling Request",
+      detail: "Ang user ay nagre-record ng record na hindi umiiral.",
+    });
+  }
+
+  throw error;
+}
+
+async function getUsers() {
+  const db = acquirePrismaClient();
+  const data = await db.userData.findMany({ orderBy: { createdAt: "desc" } });
+  return NextResponse.json(
+    data.map((row) => ({ ...row, isAdmin: row.role === "admin" })),
+    { status: 200 },
+  );
 }
 
 async function patchUser(req: NextRequest) {
@@ -30,12 +75,7 @@ async function patchUser(req: NextRequest) {
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "USER_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "USER_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "USER_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "USER_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    return mapUserPrismaError(req, error);
   }
 }
 
@@ -48,12 +88,7 @@ async function deleteUser(req: NextRequest) {
     await db.userData.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "USER_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "USER_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "USER_CONFLICT" as ApiErrorCode,
-      invalidRefCode: "USER_INVALID_REFERENCE" as ApiErrorCode,
-    });
+    return mapUserPrismaError(req, error);
   }
 }
 

@@ -1,26 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@/generated/prisma/client";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient } from "@/lib/infra";
-import { badRequestProblem } from "@/lib/api/responses/problem";
-import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
+import { badRequestProblem, notFoundProblem } from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
 async function getReviews() {
-  try {
-    const db = acquirePrismaClient();
-    const data = await db.review.findMany({
-      include: {
-        user: { include: { authUser: true } },
-        business: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(data, { status: 200 });
-  } catch (error: unknown) {
-    logAndRethrow("Management review read", error);
-  }
+  const db = acquirePrismaClient();
+  const data = await db.businessReview.findMany({
+    include: {
+      user: { include: { authUser: true } },
+      business: { select: { name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json(data, { status: 200 });
 }
 
 async function deleteReview(req: NextRequest) {
@@ -29,14 +26,29 @@ async function deleteReview(req: NextRequest) {
     const id = url.searchParams.get("id");
     if (!id) return badRequestProblem(req, { code: "review-id-required", detail: "A review id is required." });
     const db = acquirePrismaClient();
-    await db.review.delete({ where: { id } });
+    await db.businessReview.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, {
-      idRequiredCode: "REVIEW_ID_REQUIRED" as ApiErrorCode,
-      notFoundCode: "REVIEW_NOT_FOUND" as ApiErrorCode,
-      conflictCode: "REVIEW_ID_REQUIRED" as ApiErrorCode,
-    });
+    if (error instanceof SyntaxError) {
+      return badRequestProblem(req, {
+        code: "invalid-json",
+        title: "Maling Request",
+        detail: "Ang request body ay dapat na valid JSON.",
+      });
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return notFoundProblem(req, {
+        code: "review-not-found",
+        title: "Hindi Nakita",
+        detail: "Ang review ay hindi umiiral.",
+      });
+    }
+
+    throw error;
   }
 }
 

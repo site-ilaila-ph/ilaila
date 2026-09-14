@@ -48,7 +48,6 @@ export function permanentRedirect(
     return redirectResponse(url, 308);
 }
 
-
 export interface ProblemDetails {
     type: string;
     title: string;

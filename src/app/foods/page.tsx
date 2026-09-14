@@ -41,7 +41,7 @@ export default function FoodsPage() {
     const matchesSearch =
       food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (food.description && food.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (food.tags && food.tags.some((t) => t.value.toLowerCase().includes(searchQuery.toLowerCase())));
+      (food.tags && food.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())));
     return matchesSearch;
   });
 
@@ -162,10 +162,10 @@ export default function FoodsPage() {
                       <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border/50">
                         {food.tags.map((tag) => (
                           <span
-                            key={tag.id}
+                            key={tag}
                             className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
                           >
-                            {tag.value}
+                            {tag}
                           </span>
                         ))}
                       </div>

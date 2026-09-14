@@ -202,10 +202,10 @@ export default function HomePage() {
                         <div className="flex gap-1">
                           {food.tags.slice(0, 2).map((tag) => (
                             <span
-                              key={tag.id}
+                              key={tag}
                               className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs text-primary"
                             >
-                              {tag.value}
+                              {tag}
                             </span>
                           ))}
                         </div>
@@ -251,10 +251,10 @@ export default function HomePage() {
                         <div className="flex gap-1">
                           {food.tags.slice(0, 2).map((tag) => (
                             <span
-                              key={tag.id}
+                              key={tag}
                               className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs text-primary"
                             >
-                              {tag.value}
+                              {tag}
                             </span>
                           ))}
                         </div>

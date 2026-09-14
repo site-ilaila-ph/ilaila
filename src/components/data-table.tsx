@@ -37,7 +37,6 @@ import {
 } from "@tanstack/react-table"
 import {
   CheckCircle2Icon,
-  CheckCircleIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -366,6 +365,9 @@ export function DataTable({
     [data]
   )
 
+  // TanStack Table's `useReactTable()` returns non-memoizable functions; the
+  // React Compiler skips memoization here by design.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -449,14 +451,16 @@ export function DataTable({
         </TabsList>
         <div className="flex items-center gap-2">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <ColumnsIcon />
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
-                <ChevronDownIcon />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="outline" size="sm">
+                  <ColumnsIcon />
+                  <span className="hidden lg:inline">Customize Columns</span>
+                  <span className="lg:hidden">Columns</span>
+                  <ChevronDownIcon />
+                </Button>
+              }
+            />
             <DropdownMenuContent align="end" className="w-56">
               {table
                 .getAllColumns()
@@ -664,11 +668,13 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="link" className="w-fit px-0 text-left text-foreground">
-          {item.header}
-        </Button>
-      </SheetTrigger>
+      <SheetTrigger
+        render={
+          <Button variant="link" className="w-fit px-0 text-left text-foreground">
+            {item.header}
+          </Button>
+        }
+      />
       <SheetContent side="right" className="flex flex-col">
         <SheetHeader className="gap-1">
           <SheetTitle>{item.header}</SheetTitle>
@@ -809,11 +815,13 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </div>
         <SheetFooter className="mt-auto flex gap-2 sm:flex-col sm:space-x-0">
           <Button className="w-full">Submit</Button>
-          <SheetClose asChild>
-            <Button variant="outline" className="w-full">
-              Done
-            </Button>
-          </SheetClose>
+          <SheetClose
+            render={
+              <Button variant="outline" className="w-full">
+                Done
+              </Button>
+            }
+          />
         </SheetFooter>
       </SheetContent>
     </Sheet>

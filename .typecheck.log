@@ -1,0 +1,45 @@
+prisma/seed.mts(23,16): error TS2339: Property 'foodTag' does not exist on type 'PrismaClient<never, GlobalOmitConfig | undefined, DefaultArgs>'.
+src/app/api/app-reviews/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/auth/forgot-password/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/auth/sign-in/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/auth/sign-out/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/auth/sign-up/route.ts(5,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/auth/update-password/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/businesses/route.ts(3,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/businesses/route.ts(26,64): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FoodInclude<DefaultArgs>'.
+src/app/api/businesses/route.ts(46,64): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FoodInclude<DefaultArgs>'.
+src/app/api/businesses/route.ts(65,60): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FoodInclude<DefaultArgs>'.
+src/app/api/foods/[id]/route.ts(6,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/foods/[id]/route.ts(142,34): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FoodInclude<DefaultArgs>'.
+src/app/api/management/businesses/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/management/foods/route.ts(1,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/api/management/users/route.ts(4,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/businesses/[id]/reviews/route.ts(3,10): error TS2305: Module '"@/lib/api/errors"' has no exported member 'withUnhandledApiErrorHandling'.
+src/app/foods/[id]/page.tsx(163,34): error TS2339: Property 'id' does not exist on type 'string'.
+src/app/foods/[id]/page.tsx(166,30): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/app/foods/[id]/page.tsx(191,30): error TS2339: Property 'id' does not exist on type 'string'.
+src/app/foods/[id]/page.tsx(194,26): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/app/foods/page.tsx(44,45): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/app/foods/page.tsx(165,38): error TS2339: Property 'id' does not exist on type 'string'.
+src/app/foods/page.tsx(168,34): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/app/home/page.tsx(205,40): error TS2339: Property 'id' does not exist on type 'string'.
+src/app/home/page.tsx(208,36): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/app/home/page.tsx(254,40): error TS2339: Property 'id' does not exist on type 'string'.
+src/app/home/page.tsx(257,36): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/components/data-table.tsx(452,34): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+src/components/data-table.tsx(667,21): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & Props<unknown>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & Props<unknown>'.
+src/components/data-table.tsx(812,23): error TS2322: Type '{ children: Element; asChild: true; }' is not assignable to type 'IntrinsicAttributes & DialogCloseProps'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & DialogCloseProps'.
+src/components/ui/attachment.tsx(143,10): error TS2393: Duplicate function implementation.
+src/components/ui/attachment.tsx(160,10): error TS2393: Duplicate function implementation.
+src/components/ui/attachment.tsx(190,3): error TS2552: Cannot find name 'AttachmentTrigger'. Did you mean 'AttachmentTitle'?
+src/components/ui/chart.tsx(5,15): error TS2305: Module '"recharts"' has no exported member 'TooltipValueType'.
+src/components/ui/form.tsx(203,11): error TS2322: Type 'ForwardedRef<HTMLFormElement>' is not assignable to type 'Ref<HTMLDivElement> | undefined'.
+  Type 'RefObject<HTMLFormElement | null>' is not assignable to type 'Ref<HTMLDivElement> | undefined'.
+    Type 'RefObject<HTMLFormElement | null>' is not assignable to type 'RefObject<HTMLDivElement | null>'.
+      Type 'HTMLFormElement | null' is not assignable to type 'HTMLDivElement | null'.
+        Property 'align' is missing in type 'HTMLFormElement' but required in type 'HTMLDivElement'.
+src/components/ui/pagination.tsx(56,7): error TS2322: Type '{ ref?: Ref<HTMLAnchorElement> | undefined; key?: Key | null | undefined; download?: any; href?: string | undefined; hrefLang?: string | undefined; media?: string | undefined; ... 287 more ...; "data-active": boolean | undefined; }' is not assignable to type 'IntrinsicAttributes & Omit<ButtonProps, "ref"> & RefAttributes<HTMLElement> & VariantProps<(props?: (ConfigVariants<{ variant: { ...; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'as' does not exist on type 'IntrinsicAttributes & Omit<ButtonProps, "ref"> & RefAttributes<HTMLElement> & VariantProps<(props?: (ConfigVariants<{ variant: { ...; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.

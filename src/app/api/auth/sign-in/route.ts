@@ -1,9 +1,15 @@
 import { NextRequest } from "next/server";
+import { isAuthError } from "@supabase/supabase-js";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { createClient } from "@/lib/supabase/server";
-import { mapAuthError } from "@/lib/errors";
-import { noContent } from "@/lib/api/responses";
+import {
+  badRequestProblem,
+  internalErrorProblem,
+  noContent,
+  tooManyRequestsProblem,
+  unauthorizedProblem,
+} from "@/lib/api/responses";
 
 export const runtime = "nodejs";
 
@@ -15,15 +21,43 @@ async function postSignIn(req: NextRequest) {
     if (error) throw error;
     return noContent();
   } catch (error: unknown) {
-    return mapAuthError(req, error, {
-      genericCode: "SIGN_IN_FAILED",
-      invalidCredentialsCode: "INVALID_CREDENTIALS",
-      invalidCode: "SIGN_IN_FAILED",
-      rateLimitedCode: "SIGN_IN_RATE_LIMITED",
-      unavailableCode: "SIGN_IN_UNAVAILABLE",
-      unavailableDetail: "Sign in is unavailable right now. Please try again later.",
-      operationName: "Sign in",
-    });
+    if (isAuthError(error)) {
+      const message = error.message || "Nabigo ang pag-sign in.";
+      const status = error.status ?? 400;
+
+      if (status === 401) {
+        return unauthorizedProblem(req, {
+          code: "invalid-credentials",
+          title: "Hindi Autentificado",
+          detail: message,
+        });
+      }
+
+      if (status === 429) {
+        return tooManyRequestsProblem(req, {
+          code: "sign-in-rate-limited",
+          title: "Maraming Request",
+          detail: message,
+        });
+      }
+
+      if (status >= 500) {
+        console.error("Sign in failed with upstream status", status, message);
+        return internalErrorProblem(req, {
+          code: "sign-in-unavailable",
+          title: "Error sa Server",
+          detail: "Ang sign in ay hindi available sa ngayon. Pakisubukan muli sa ibang pagkakataon.",
+        });
+      }
+
+      return badRequestProblem(req, {
+        code: "sign-in-failed",
+        title: "Maling Request",
+        detail: message,
+      });
+    }
+
+    throw error;
   }
 }
 

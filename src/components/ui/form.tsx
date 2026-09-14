@@ -23,7 +23,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@base-ui/react";
-import { Card } from "./card";
 import { FieldSet } from "./field";
 
 type FormType = "single" | "multi";
@@ -197,19 +196,19 @@ const FormInner = <TFieldValues extends FieldValues = FieldValues>(
           "internal RHF API access" both field components and
           extensions rely on. */}
       <FormProvider {...methods}>
-        <Card
-          as="form"
+        <form
           {...props}
           ref={ref}
           onSubmit={handleSubmit}
           className={cn(
+            "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-4xl bg-card py-(--card-spacing) text-sm text-card-foreground shadow-md ring-1 ring-foreground/5 [--card-spacing:--spacing(6)] dark:ring-foreground/10",
             "px-4 py-2",
             type === "multi" && "flex flex-col",
             className,
           )}
         >
           {children}
-        </Card>
+        </form>
       </FormProvider>
     </MagicFormContext.Provider>
   );

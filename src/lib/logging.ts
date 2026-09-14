@@ -1,7 +1,7 @@
-import type { NextRequest } from "next/server";
-import type { AnyRequestHandler } from "./next-types";
+import { NextRequest } from "next/server";
+import { AnyRequestHandler } from "./next-types";
 
-export function withLogging(
+function withLogging(
   handler: AnyRequestHandler,
   name: string = handler.name || "anonymous",
 ): AnyRequestHandler {
@@ -32,3 +32,5 @@ export function withLogging(
     }
   };
 }
+
+export { withLogging };

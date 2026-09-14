@@ -12,17 +12,16 @@ async function main() {
   );
 
   console.log("Cleaning existing database records...");
-  await prisma.review.deleteMany();
-  await prisma.bookmark.deleteMany();
+  await prisma.businessReview.deleteMany();
+  await prisma.businessBookmark.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.businessImage.deleteMany();
   await prisma.businessTag.deleteMany();
   await prisma.businessFood.deleteMany();
   await prisma.business.deleteMany();
   await prisma.foodImage.deleteMany();
-  await prisma.foodTag.deleteMany();
   await prisma.food.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.userData.deleteMany();
 
   
   // create an admin, and non admin account.

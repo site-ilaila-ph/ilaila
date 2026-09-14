@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
+import { Prisma } from "@/generated/prisma/client";
 import { join } from "node:path/posix";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
+import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
-import { badRequestProblem, ok } from "@/lib/api/responses";
-import { mapPrismaError, logAndRethrow, ApiErrorCode } from "@/lib/errors";
+import {
+  badRequestProblem,
+  conflictProblem,
+  notFoundProblem,
+  ok,
+} from "@/lib/api/responses";
 import type { Food, FoodImage } from "@/generated/prisma/client";
 
 export const runtime = "nodejs";
 
-type FoodCreateInput = Omit<Food, "id">;
 type FoodImageCreateInput = Omit<FoodImage, "id" | "foodId" | "url">;
 
 type PatchImageInput = Partial<FoodImageCreateInput> & { id: string };
@@ -20,12 +23,43 @@ type PatchBody = Partial<Omit<Food, "id">> & {
   images?: PatchImageInput[];
 };
 
-const PRISMA_ERROR_CODES = {
-  idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
-  notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
-  conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
-  invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
-};
+function mapFoodDetailPrismaError(req: NextRequest, error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem(req, {
+      code: "invalid-json",
+      title: "Maling Request",
+      detail: "Ang request body ay dapat na valid JSON.",
+    });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2025") {
+      return notFoundProblem(req, {
+        code: "food-not-found",
+        title: "Hindi Nakita",
+        detail: "Ang pagkain ay hindi umiiral.",
+      });
+    }
+
+    if (error.code === "P2002") {
+      return conflictProblem(req, {
+        code: "food-conflict",
+        title: "Salungatan",
+        detail: "Mayroon nang pagkain na may parehong mga field.",
+      });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem(req, {
+        code: "food-invalid-reference",
+        title: "Maling Request",
+        detail: "Ang pagkain ay nagre-record ng record na hindi umiiral.",
+      });
+    }
+  }
+
+  throw error;
+}
 
 async function patchFood(req: NextRequest) {
   const contentType = req.headers.get("content-type") ?? "";
@@ -103,14 +137,14 @@ async function patchFood(req: NextRequest) {
               }
             : undefined,
         },
-        include: { images: true, tags: true },
+        include: { images: true },
       });
       return updatedFood;
     });
 
     return ok(data);
   } catch (error: unknown) {
-    return mapPrismaError(req, error, PRISMA_ERROR_CODES);
+    return mapFoodDetailPrismaError(req, error);
   }
 }
 
@@ -123,7 +157,7 @@ async function deleteFood(req: NextRequest) {
     await db.food.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapPrismaError(req, error, PRISMA_ERROR_CODES);
+    return mapFoodDetailPrismaError(req, error);
   }
 }
 

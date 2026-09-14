@@ -1,33 +1,66 @@
-import type { ApiErrorCode } from "@/lib/errors";
 import type { FoodCreateInput, FoodImageCreateInput } from "@/generated/prisma/models";
-import { badRequestProblem, ok } from "@/lib/api/responses";
-import { commonErrorHandler } from "@/lib/api/errors";
-import { logAndRethrow, mapPrismaError } from "@/lib/errors";
+import { Prisma } from "@/generated/prisma/client";
+import { badRequestProblem, conflictProblem, notFoundProblem, ok } from "@/lib/api/responses";
+import { isMissingIdError, withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
-import { withApiErrorHandling } from "@/lib/api-wrappers";
 import { withLogging } from "@/lib/logging";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
 import { NextResponse, NextRequest } from "next/server";
 
-const PRISMA_ERROR_CODES = {
-  idRequiredCode: "FOOD_ID_REQUIRED" as ApiErrorCode,
-  notFoundCode: "FOOD_NOT_FOUND" as ApiErrorCode,
-  conflictCode: "FOOD_CONFLICT" as ApiErrorCode,
-  invalidRefCode: "FOOD_INVALID_REFERENCE" as ApiErrorCode,
-};
+function mapFoodPrismaError(req: NextRequest, error: unknown): NextResponse {
+  if (error instanceof SyntaxError) {
+    return badRequestProblem(req, {
+      code: "invalid-json",
+      title: "Maling Request",
+      detail: "Ang request body ay dapat na valid JSON.",
+    });
+  }
+
+  if (isMissingIdError(error)) {
+    return badRequestProblem(req, {
+      code: "food-id-required",
+      title: "Maling Request",
+      detail: "Kinakailangan ng food id.",
+    });
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === "P2025") {
+      return notFoundProblem(req, {
+        code: "food-not-found",
+        title: "Hindi Nakita",
+        detail: "Ang pagkain ay hindi umiiral.",
+      });
+    }
+
+    if (error.code === "P2002") {
+      return conflictProblem(req, {
+        code: "food-conflict",
+        title: "Salungatan",
+        detail: "Mayroon nang pagkain na may parehong mga field.",
+      });
+    }
+
+    if (error.code === "P2003") {
+      return badRequestProblem(req, {
+        code: "food-invalid-reference",
+        title: "Maling Request",
+        detail: "Ang pagkain ay nagre-record ng record na hindi umiiral.",
+      });
+    }
+  }
+
+  throw error;
+}
 
 async function getFoods() {
-  try {
-    const db = acquirePrismaClient();
-    const data = await db.food.findMany({
-      include: { tags: true, images: true },
-      orderBy: { name: "asc" },
-    });
-    return NextResponse.json(data, { status: 200 });
-  } catch (error: unknown) {
-    logAndRethrow("Management food read", error);
-  }
+  const db = acquirePrismaClient();
+  const data = await db.food.findMany({
+    include: { images: true },
+    orderBy: { name: "asc" },
+  });
+  return NextResponse.json(data, { status: 200 });
 }
 
 async function createFood(req: NextRequest) {
@@ -49,7 +82,7 @@ async function createFood(req: NextRequest) {
     return badRequestProblem(req, { code: "food-required", detail: "metadata.food is required." });
   }
 
-  const imageFiles = fd.getAll("images").filter((f): f is Blob => f instanceof Blob);
+  const imageFiles = fd.getAll("images").filter((f): f is File => f instanceof File);
   const imagesMeta = parsed.images ?? [];
 
   if (imagesMeta.length > 0 && imagesMeta.length !== imageFiles.length) {
@@ -72,9 +105,9 @@ async function createFood(req: NextRequest) {
           options: { contentType: blob.type },
         });
         return {
+          ...(imagesMeta[i] ?? {}),
           id: foodImageId,
           url,
-          ...(imagesMeta[i] ?? {}),
         };
       })
     );
@@ -85,14 +118,14 @@ async function createFood(req: NextRequest) {
         ...parsed.food,
         images: uploaded.length > 0 ? { create: uploaded } : undefined,
       },
-      include: { images: true, tags: true },
+      include: { images: true },
     });
 
     return ok(food);
   } catch (error: unknown) {
-    return mapPrismaError(req, error, PRISMA_ERROR_CODES);
+    return mapFoodPrismaError(req, error);
   }
 }
 
-export const GET = withLogging(withApiErrorHandling(getFoods, commonErrorHandler), "getFoods");
-export const POST = withLogging(withApiErrorHandling(createFood, commonErrorHandler), "createFood");
+export const GET = withLogging(withUnhandledApiErrorHandling(getFoods), "getFoods");
+export const POST = withLogging(withUnhandledApiErrorHandling(createFood), "createFood");
