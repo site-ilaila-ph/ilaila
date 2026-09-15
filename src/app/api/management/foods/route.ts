@@ -8,6 +8,35 @@ import {
   conflictProblem,
   notFoundProblem,
 } from "@/lib/api/responses";
+import { ListOptionsError, parseListOptions } from "@/lib/api/list-options";
+import {
+  listFoods,
+  sortableFields,
+  filterableFields,
+  includeableRelations,
+} from "@/lib/repos/food";
+
+async function getFoods(req: NextRequest) {
+  try {
+    const options = parseListOptions(
+      req.nextUrl.searchParams,
+      sortableFields,
+      filterableFields,
+      includeableRelations,
+    );
+    const data = await listFoods(options);
+    return NextResponse.json(data, { status: 200 });
+  } catch (err) {
+    if (err instanceof ListOptionsError) {
+      return badRequestProblem(req, {
+        code: "bad-list-options",
+        title: "Maling Request",
+        detail: err.message,
+      });
+    }
+    throw err;
+  }
+}
 
 async function postFood(req: NextRequest) {
   try {
@@ -68,8 +97,9 @@ async function postFood(req: NextRequest) {
       });
     }
 
-    throw error;
+        throw error;
   }
 }
 
+export const GET = withLogging(withUnhandledApiErrorHandling(getFoods), "getFoods");
 export const POST = withLogging(withUnhandledApiErrorHandling(postFood), "postFood");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronDown,
@@ -52,6 +52,7 @@ export default function ManageFoods() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -64,12 +65,25 @@ export default function ManageFoods() {
   const [formImages, setFormImages] = useState<FoodImage[]>([]);
 
   useEffect(() => {
-    loadFoods();
-  }, []);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setIsLoading(true);
+    debounceRef.current = setTimeout(() => {
+      void loadFoods(searchQuery);
+    }, searchQuery ? 300 : 0);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, loadFoods]);
 
-  async function loadFoods() {
+  async function loadFoods(query: string) {
     try {
-      const response = await fetch("/api/foods");
+      const params = new URLSearchParams();
+      if (query.trim()) {
+        params.set("filter", "name:contains:" + encodeURIComponent(query.trim()));
+      }
+      const qs = params.toString();
+      const url = qs ? "/api/management/foods?" + qs : "/api/management/foods";
+      const response = await fetch(url);
       if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load foods"));
       const data = (await response.json()) as Food[];
       setFoods(data);
@@ -179,7 +193,7 @@ export default function ManageFoods() {
         for (const img of activeImages) {
           if (img.isNew && img.file) form.append(`image:${img.id}`, img.file);
         }
-        const response = await fetch(`/api/foods/${editingId}`, {
+        const response = await fetch(`/api/management/foods/${editingId}`, {
           method: "PATCH",
           body: form,
         });
@@ -199,7 +213,7 @@ export default function ManageFoods() {
         for (const img of newImages) {
           if (img.file) form.append("images", img.file);
         }
-        const response = await fetch("/api/foods", {
+        const response = await fetch("/api/management/foods", {
           method: "POST",
           body: form,
         });
@@ -209,7 +223,7 @@ export default function ManageFoods() {
       }
 
       resetForm();
-      await loadFoods();
+      await loadFoods(searchQuery);
     } catch (error) {
       console.error("Failed to save food:", error);
       setError(error instanceof Error ? error.message : "Failed to save food");
@@ -230,7 +244,7 @@ export default function ManageFoods() {
         if (!response.ok) {
           throw new Error(await readProblemMessage(response, "Failed to delete food"));
         }
-        await loadFoods();
+        await loadFoods(searchQuery);
       } catch (error) {
         console.error("Failed to delete food:", error);
         setError(error instanceof Error ? error.message : "Failed to delete food");
@@ -260,14 +274,7 @@ export default function ManageFoods() {
     setShowForm(true);
   }
 
-  const visibleFoods = foods.filter((food) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      !query ||
-      food.name.toLowerCase().includes(query) ||
-      (food.description || "").toLowerCase().includes(query)
-    );
-  });
+  const visibleFoods = foods;
 
   return (
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">

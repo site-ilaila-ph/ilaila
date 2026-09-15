@@ -7,6 +7,6 @@
             "<node_internals>/**"
         ],
         "type": "node-terminal",
-        "envFile": "${workspaceFolder}/.env"
+        "envFile": "${workspaceFolder}/.env",
     }]
 }

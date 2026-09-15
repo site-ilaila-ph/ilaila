@@ -6,7 +6,7 @@ import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
 import { withLogging } from "@/lib/logging";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ListOptionsError, parseListOptions } from "@/lib/api/list-options";
 import { listFoods, sortableFields, filterableFields, includeableRelations } from "@/lib/repos/food";
 

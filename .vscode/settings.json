@@ -20,7 +20,7 @@
   },
 
   "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
 
   "window.density.layout": "compact",
@@ -81,5 +81,5 @@
     "path": "${workspaceFolder}/bin/dbash.sh"
   },
 
-  "js/ts.tsdk.path": "node_modules/typescript/lib"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
 }

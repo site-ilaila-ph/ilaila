@@ -88,7 +88,6 @@ async function getBusiness(req: NextRequest, { params }: { params: Promise<{ id:
         orderBy: { createdAt: "desc" },
       },
       foods: true,
-      tags: true,
     },
   });
 
@@ -206,7 +205,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
         const updatedFile =
           file instanceof Blob
             ? await storageManager.upload({
-                key: join("businesses", businessId, "images", img.id!),
+                key: join("businesses", businessId!, "images", img.id!),
                 fileOrBody: file,
                 options: { contentType: file.type },
               })
@@ -222,7 +221,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
       })
     );
 
-    const updatedBusiness = await db.$transaction(async (tx: any) => {
+    const updatedBusiness = await db.$transaction(async (tx) => {
       const _updated = await tx.business.update({
         where: { id: (await params).id },
         data: {
@@ -250,7 +249,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
     // commits, so a failed write never destroys referenced objects.
     const removals = await Promise.allSettled(
       toRemove.map((img) =>
-        storageManager.delete({ key: join("businesses", businessId, "images", img.id!) })
+        storageManager.delete({ key: join("businesses", businessId!, "images", img.id!) })
       )
     );
     removals.forEach((result) => {

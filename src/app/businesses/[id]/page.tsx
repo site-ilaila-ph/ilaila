@@ -88,8 +88,8 @@ export default function BusinessProfilePage({
 
       setBusiness(businessData ?? null);
       if (businessData) {
-        const tags = new Set<string>(businessData.tags.map((tag: { value: string }) => tag.value));
-        const related = (businessesData ?? []).filter((item: BusinessListItem) => item.id !== businessData.id && item.tags.some((tag) => tags.has(tag.value))).slice(0, 3);
+        const tags = new Set<string>(businessData.tags);
+        const related = (businessesData ?? []).filter((item: BusinessListItem) => item.id !== businessData.id && item.tags.some((tag) => tags.has(tag))).slice(0, 3);
         setRelatedBusinesses(related);
       }
 
@@ -300,10 +300,10 @@ export default function BusinessProfilePage({
             <div className="mt-4 flex flex-wrap gap-2">
               {business.tags.map((tag) => (
                 <span
-                  key={tag.id}
+                  key={tag}
                   className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
                 >
-                  {tag.value}
+                  {tag}
                 </span>
               ))}
             </div>

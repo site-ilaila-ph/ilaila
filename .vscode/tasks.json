@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Launch NextJS Development Server",
+            "type": "shell",
+            "command": "pnpm dev",
+            "runOn": "folderOpen",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^.*$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": "Ready in|Local:" // Adjusts based on Next.js startup stdout
+                }
+            }
+        }
+    ]
+}

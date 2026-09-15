@@ -88,9 +88,6 @@ function buildBusinessInclude(include: IncludeList): Prisma.BusinessInclude | un
       case "images":
         result.images = true;
         break;
-      case "tags":
-        result.tags = true;
-        break;
       case "reviews":
         result.reviews = true;
         break;
@@ -106,7 +103,10 @@ function buildBusinessInclude(include: IncludeList): Prisma.BusinessInclude | un
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
-export async function listBusinesses(options: ListOptions) {
+export async function listBusinesses(
+  options: ListOptions,
+  opts?: { includeUnpublished?: boolean },
+) {
   const db = acquirePrismaClient();
 
   const where: Prisma.BusinessWhereInput | undefined = options.filter.length > 0
@@ -137,9 +137,13 @@ export async function listBusinesses(options: ListOptions) {
         ? options.page.offset
         : (options.page.page - 1) * options.page.limit;
 
+    const baseWhere: Prisma.BusinessWhereInput = opts?.includeUnpublished
+    ? {}
+    : { isPublished: true };
+
   return db.business.findMany({
     where: {
-      isPublished: true,
+      ...baseWhere,
       ...where,
     },
     orderBy,

@@ -1,5 +1,5 @@
 import { acquirePrismaClient } from "@/lib/infra";
-import type { ListOptions, FieldType, SortableFields, FilterableFields, IncludeList } from "@/lib/api/list-options";
+import type { ListOptions, SortableFields, FilterableFields, IncludeList } from "@/lib/api/list-options";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const sortableFields: SortableFields = [
@@ -80,11 +80,8 @@ function buildFoodInclude(include: IncludeList): Prisma.FoodInclude | undefined 
       case "images":
         result.images = true;
         break;
-      case "tags":
-        result.tags = true;
-        break;
       case "businesses":
-        result.businesses = { include: { business: { include: { images: true, tags: true } } } };
+        result.businesses = { include: { business: { include: { images: true } } } };
         break;
     }
   }
@@ -95,7 +92,7 @@ function buildFoodInclude(include: IncludeList): Prisma.FoodInclude | undefined 
 export async function listFoods(options: ListOptions) {
   const db = acquirePrismaClient();
 
-  const where: Prisma.FoodWhereInput = options.filter.length > 0
+  const where: Prisma.FoodWhereInput | undefined = options.filter.length > 0
     ? {
         AND: options.filter.map((f) => {
           const prismaOp = filterOpToPrisma(f.op);

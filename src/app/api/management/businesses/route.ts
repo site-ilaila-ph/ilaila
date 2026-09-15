@@ -8,6 +8,13 @@ import {
   conflictProblem,
   notFoundProblem,
 } from "@/lib/api/responses";
+import { ListOptionsError, parseListOptions } from "@/lib/api/list-options";
+import {
+  listBusinesses,
+  sortableFields,
+  filterableFields,
+  includeableRelations,
+} from "@/lib/repos/business";
 
 export const runtime = "nodejs";
 
@@ -49,13 +56,26 @@ function mapBusinessPrismaError(req: NextRequest, error: unknown): NextResponse 
   throw error;
 }
 
-async function getBusinesses() {
-  const db = acquirePrismaClient();
-  const data = await db.business.findMany({
-    include: { tags: true, createdBy: true },
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json(data, { status: 200 });
+async function getBusinesses(req: NextRequest) {
+  try {
+    const options = parseListOptions(
+      req.nextUrl.searchParams,
+      sortableFields,
+      filterableFields,
+      includeableRelations,
+    );
+    const data = await listBusinesses(options, { includeUnpublished: true });
+    return NextResponse.json(data, { status: 200 });
+  } catch (err) {
+    if (err instanceof ListOptionsError) {
+      return badRequestProblem(req, {
+        code: "bad-list-options",
+        title: "Maling Request",
+        detail: err.message,
+      });
+    }
+    throw err;
+  }
 }
 
 async function postBusiness(req: NextRequest) {

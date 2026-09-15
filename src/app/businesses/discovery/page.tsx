@@ -25,7 +25,7 @@ export default function BusinessDiscoveryPage() {
     let isMounted = true;
     setIsLoading(true);
     fetch("/api/businesses")
-      .then(r => {
+      .then(async (r) => {
         if (!r.ok) throw new Error(await readProblemMessage(r, `Failed to load businesses: ${r.status}`));
         return r.json();
       })
@@ -48,7 +48,7 @@ export default function BusinessDiscoveryPage() {
     const url = "/api/businesses?" + params.toString();
     let isMounted = true;
     fetch(url)
-      .then(r => {
+      .then(async (r) => {
         if (!r.ok) throw new Error(await readProblemMessage(r, `Failed to load businesses: ${r.status}`));
         return r.json();
       })
@@ -57,10 +57,18 @@ export default function BusinessDiscoveryPage() {
     return () => { isMounted = false; };
   }, [query]);
 
-  const tags = useMemo(() => ["Lahat ng lugar", ...new Set(businesses.flatMap((business) => business.tags.map((item) => item.value)))], [businesses]);
+  const tags = useMemo(() => {
+    const tagSet = new Set<string>();
+    for (const business of businesses) {
+      for (const t of business.tags) {
+        tagSet.add(t);
+      }
+    }
+    return ["Lahat ng lugar", ...tagSet];
+  }, [businesses]);
   const filtered = useMemo(() => {
     if (tag === "Lahat ng lugar") return businesses;
-    return businesses.filter((business) => business.tags.some((item) => item.value === tag));
+    return businesses.filter((business) => business.tags.includes(tag));
   }, [businesses, tag]);
   const topRated = useMemo(() => [...filtered].sort((a, b) => ratingFor(b) - ratingFor(a)).slice(0, 3), [filtered]);
 
@@ -150,14 +158,14 @@ function BusinessCard({ business, featured }: { business: BusinessListItem; feat
             <Image src={primaryImageUrl} alt={business.name} fill unoptimized className="object-cover transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <span className="absolute bottom-3 left-3 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur-xs">
-              {business.tags[0]?.value ?? "Lokal na lugar"}
+              {business.tags[0] ?? "Lokal na lugar"}
             </span>
           </div>
         ) : (
           <div className={`relative flex items-end bg-brand-deep p-5 text-white ${featured ? "h-36" : "h-28"}`}>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,var(--color-brand-accent),transparent_38%)]" />
             <span className="relative text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {business.tags[0]?.value ?? "Lokal na lugar"}
+              {business.tags[0] ?? "Lokal na lugar"}
             </span>
           </div>
         )}

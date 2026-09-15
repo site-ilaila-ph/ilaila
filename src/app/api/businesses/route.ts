@@ -26,7 +26,6 @@ async function getBusinesses(req: NextRequest) {
         where: { id },
         include: {
           images: true,
-          tags: true,
           reviews: { include: { user: { include: { authUser: true } } } },
           menuItems: true,
           foods: { include: { food: { include: { images: true } } } },
@@ -46,7 +45,6 @@ async function getBusinesses(req: NextRequest) {
         },
         include: {
           images: true,
-          tags: true,
           reviews: { include: { user: { include: { authUser: true } } } },
           menuItems: true,
           foods: { include: { food: { include: { images: true } } } },
