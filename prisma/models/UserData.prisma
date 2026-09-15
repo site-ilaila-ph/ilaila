@@ -1,6 +1,6 @@
 model UserData {
   id               String      @id @db.Uuid
-  authId           String      @db.Uuid
+  authId           String      @db.Uuid @default(uuid())
   authUser         AuthUser        @relation(fields: [authId], references: [id])
   role             UserRole    @default(viewer)
   createdAt        DateTime    @default(now())
@@ -15,5 +15,4 @@ model UserData {
   @@index([authId])
   @@map("user_data")
   @@schema("app")
-  resources Resource[]
 }

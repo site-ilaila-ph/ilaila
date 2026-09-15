@@ -16,7 +16,7 @@ model Business {
   createdBy   UserData        @relation(fields: [createdById], references: [id])
   foods       BusinessFood[]
   images      BusinessImage[]
-  tags        BusinessTag[]
+  tags        String[]
   menuItems   MenuItem[]
   reviews     BusinessReview[]
 

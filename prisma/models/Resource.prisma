@@ -1,9 +1,0 @@
-model Resource {
-  id         String   @id @default(uuid()) @db.Uuid
-  ownerId    String
-  owner      UserData @relation(fields: [ownerId], references: [id])
-  category   String
-
-  @@map("resources")
-  @@schema("app")
-}

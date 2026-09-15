@@ -142,7 +142,7 @@ export default function ManageAppReviews() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Karaniwang Marka</p>
               <p className="mt-2 text-3xl font-bold text-primary">
-                {stats.averageRating.toFixed(1)}/5
+                {stats.averageRating.toFixed(1) / 5}
               </p>
             </CardContent>
           </Card>

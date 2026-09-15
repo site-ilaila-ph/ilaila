@@ -16,7 +16,6 @@ async function main() {
   await prisma.businessBookmark.deleteMany();
   await prisma.menuItem.deleteMany();
   await prisma.businessImage.deleteMany();
-  await prisma.businessTag.deleteMany();
   await prisma.businessFood.deleteMany();
   await prisma.business.deleteMany();
   await prisma.foodImage.deleteMany();

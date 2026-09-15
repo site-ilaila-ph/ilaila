@@ -15,8 +15,7 @@ ALTER COLUMN "url" SET NOT NULL;
 ALTER TABLE "app"."foods" ADD COLUMN     "tags" TEXT[];
 
 -- AlterTable
-ALTER TABLE "app"."user_data" ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "authId" SET NOT NULL;
+ALTER TABLE "app"."user_data" ALTER COLUMN "authId" SET NOT NULL;
 ALTER TABLE "app"."user_data" RENAME CONSTRAINT "users_pkey" TO "user_data_pkey";
 
 -- DropTable
