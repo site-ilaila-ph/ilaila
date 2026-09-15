@@ -1,62 +1,47 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Utensils } from "lucide-react";
-import type { FoodListItem } from "./types";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { ErrorAlert } from "@/components/ui/error-alert";
-import { readProblemMessage } from "@/lib/api/client";
+import { AppNav } from "@/components/app-nav";
+import { FoodCard } from "@/components/food-card";
 import { Input } from "@/components/ui/input";
-import { Route } from "next";
+import { ErrorAlert } from "@/components/ui/error-alert";
+import { api, ApiProblemError } from "@/lib/api/client";
+import type { FoodListItem } from "./types";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstMount = useRef(true);
 
   const loadFoods = useCallback(async (query: string) => {
-    setIsSearching(query.length > 0);
-    const params = new URLSearchParams();
-    if (query.length > 0) {
-      params.set("filter", "name:contains:" + encodeURIComponent(query));
-    }
-    const qs = params.toString();
-    const url = qs ? "/api/foods?" + qs : "/api/foods";
+    setIsSearching(true);
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(await readProblemMessage(response, "Hindi na-load ang mga pagkain."));
-      const data = await response.json();
-      if (data) setFoods(data as FoodListItem[]);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain.");
+      const url = query ? `/api/foods?search=${encodeURIComponent(query)}` : "/api/foods";
+      const data = await api<FoodListItem[]>(url);
+      setFoods(data ?? []);
+      setLoadError(null);
+    } catch (error) {
+      console.error("Failed to load foods:", error);
+      setLoadError(
+        error instanceof ApiProblemError
+          ? error.problem.detail || error.problem.title
+          : "Hindi na-load ang mga pagkain. Subukang muli mamaya."
+      );
     } finally {
       setIsSearching(false);
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    fetch("/api/foods")
-      .then(async (r) => {
-        if (!r.ok) throw new Error(await readProblemMessage(r, "Hindi na-load ang mga pagkain."));
-        return r.json();
-      })
-      .then(d => { if (isMounted) { if (d) setFoods(d as FoodListItem[]); setIsLoading(false); } })
-      .catch(err => { if (isMounted) { setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain."); setIsLoading(false); } });
-    return () => { isMounted = false; };
-  }, []);
-
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (searchQuery.trim() === "") {
-      debounceRef.current = setTimeout(() => loadFoods(""), 200);
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      void loadFoods("");
     } else {
       debounceRef.current = setTimeout(() => loadFoods(searchQuery.trim()), 300);
     }
@@ -66,14 +51,7 @@ export default function FoodsPage() {
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background text-foreground">
-        <nav className="border-b border-border bg-card/80 backdrop-blur">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-            <Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">
-              <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
-              Ilaila
-            </Link>
-          </div>
-        </nav>
+        <AppNav brandHref="/home" />
         <div className="mx-auto max-w-6xl px-6 py-20 text-center">
           <p className="text-muted-foreground">Naglo-load ng mga pagkain...</p>
         </div>
@@ -85,13 +63,7 @@ export default function FoodsPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <nav className="border-b border-border bg-card/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">
-            Ilaila
-          </Link>
-        </div>
-      </nav>
+      <AppNav brandHref="/home" />
       <div className="mx-auto max-w-6xl px-6 py-12">
         <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <div className="mb-12 text-center">
@@ -113,7 +85,11 @@ export default function FoodsPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full transition placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
               />
-              {isSearching && <span className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground"><Utensils size={12} /></span>}
+              {isSearching && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground">
+                  <Utensils size={12} />
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -129,35 +105,9 @@ export default function FoodsPage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {foods.map((food) => {
-              const primaryImageUrl = food.images?.find((img) => Boolean(img.url))?.url;
-              return (
-                <Link
-                  key={food.id}
-                  href={("/foods/" + food.id) as Route}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
-                >
-                  {primaryImageUrl ? (
-                    <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                      <Image src={primaryImageUrl} alt={food.name} width={400} height={225} unoptimized className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    </div>
-                  ) : null}
-                  <div className="p-6">
-                    <div className="mb-4 flex items-center justify-between">
-                      <span className="rounded-lg bg-primary/10 p-2.5 text-xl"><Utensils aria-hidden="true" className="size-5 text-primary" /></span>
-                      <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition">Tingnan ang Resipe &rarr;</span>
-                    </div>
-                    <h3 className="mb-2 text-xl font-bold tracking-tight group-hover:text-primary transition">{food.name}</h3>
-                    <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{food.description}</p>
-                    {food.tags && food.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border/50">
-                        {food.tags.map((tag) => (<span key={tag} className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">{tag}</span>))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
+            {foods.map((food) => (
+              <FoodCard key={food.id} food={food} />
+            ))}
           </div>
         )}
       </div>

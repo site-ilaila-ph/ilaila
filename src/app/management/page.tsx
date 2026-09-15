@@ -1,5 +1,6 @@
 "use client";
 import { ManagementCard } from "@/components/management-card";
+import { ManagementHeader } from "@/components/management-header";
 import { StatCard } from "@/components/stat-card";
 import { SummaryStat } from "@/components/summary-stat";
 import { CircleUserRound, Users, Store, Utensils, MessageSquareText, ClipboardList, CheckCircle2, BarChart3 } from "lucide-react";
@@ -40,17 +41,16 @@ export default function Page() {
 
   return (
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">
-      <div className="mb-7 flex items-end justify-between gap-4">
-        <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground">Mga Pahina / Dashboard</p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        </div>
+      <ManagementHeader
+        breadcrumb="Mga Pahina / Dashboard"
+        title="Dashboard"
+      >
         <div className="hidden items-center gap-3 sm:flex">
           <div className="flex items-center gap-2 rounded-full bg-card px-4 py-2 text-xs text-muted-foreground shadow-sm border border-border">
             <CircleUserRound size={15} /> Admin
           </div>
         </div>
-      </div>
+      </ManagementHeader>
 
       <ErrorAlert message={loadError} className="mb-4" onDismiss={() => setLoadError(null)} />
 

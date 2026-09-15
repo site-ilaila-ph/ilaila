@@ -1,41 +1,30 @@
 "use client";
 
-import { startTransition, useEffect, useState } from "react";
-import { MoreHorizontal, Search, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { MoreHorizontal } from "lucide-react";
+import { ManagementHeader } from "@/components/management-header";
+import { ManagementSearchBar } from "@/components/management-search-bar";
+import { ManagementReviewCard, type ManagementReviewItem } from "@/components/management-review-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
-interface Review {
-  id: string;
-  text: string;
-  foodQuality: number;
-  service: number;
-  ambiance: number;
-  value: number;
-  createdAt: Date;
-  user?: {
-    email: string;
-    userName: string | null;
-  };
-  business?: {
-    name: string;
-  };
-}
-
 export default function ManageReviews() {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ManagementReviewItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    loadReviews();
+  }, []);
 
   async function loadReviews() {
     try {
       const response = await fetch("/api/management/reviews");
       if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load reviews"));
       const data = await response.json();
-      setReviews(data as Review[]);
+      setReviews(data);
     } catch (error) {
       console.error("Failed to load reviews:", error);
       setError(error instanceof Error ? error.message : "Failed to load reviews");
@@ -43,12 +32,6 @@ export default function ManageReviews() {
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    startTransition(() => {
-      void loadReviews();
-    });
-  }, []);
 
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
@@ -63,7 +46,7 @@ export default function ManageReviews() {
     }
   }
 
-  const getAverageRating = (review: Review) => {
+  const getAverageRating = (review: ManagementReviewItem) => {
     return ((review.foodQuality + review.service + review.ambiance + review.value) / 4).toFixed(1);
   };
 
@@ -74,86 +57,47 @@ export default function ManageReviews() {
 
   return (
     <div className="px-1 py-2 sm:px-3 lg:px-5 lg:py-4">
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-        <div><p className="mb-2 text-xs font-medium text-muted-foreground">Mga Pahina / Mga Review</p><h1 className="text-3xl font-bold tracking-tight text-foreground">Mga Review</h1></div>
-        <div className="flex w-full items-center gap-2 sm:w-auto"><div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-sm border border-border sm:w-64 sm:flex-none"><Search size={16} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Maghanap" className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground" /></div><button type="button" aria-label="Higit pang mga opsyon" className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground border border-border shadow-sm transition hover:text-primary"><MoreHorizontal size={19} /></button></div>
-      </div>
+      <ManagementHeader
+        breadcrumb="Mga Pahina / Mga Review"
+        title="Mga Review"
+      >
+        <ManagementSearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
+        <button
+          type="button"
+          aria-label="Higit pang mga opsyon"
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground border border-border shadow-sm transition hover:text-primary"
+        >
+          <MoreHorizontal size={19} />
+        </button>
+      </ManagementHeader>
 
-        <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
+      <ErrorAlert message={error} className="mb-4" onDismiss={() => setError(null)} />
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Ikinakarga ang mga review...</p>
-          </div>
-        ) : visibleReviews.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Wala pang review</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {visibleReviews.map((review) => (
-              <Card key={review.id} className="rounded-2xl border-border bg-card shadow-sm transition hover:border-primary/50">
-                <CardContent className="py-4">
-                  <div className="mb-3 flex items-start justify-between">
-                    <div>
-                      <p className="font-semibold">{review.business?.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Ni {review.user?.userName || review.user?.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="flex items-center gap-1 text-lg font-bold text-primary"><Star size={15} fill="currentColor" />{getAverageRating(review)}</p>
-                      <p className="text-xs text-muted-foreground">Karaniwang Marka</p>
-                    </div>
-                  </div>
-
-                  <p className="mb-3 text-sm">{review.text}</p>
-
-                  <div className="mb-4 grid gap-2 text-xs md:grid-cols-4">
-                    <div>
-                      <span className="text-muted-foreground">Kalidad ng Pagkain:</span>
-                      <p className="font-semibold">{review.foodQuality}/5</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Serbisyo:</span>
-                      <p className="font-semibold">{review.service}/5</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Kapaligiran:</span>
-                      <p className="font-semibold">{review.ambiance}/5</p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Halaga:</span>
-                      <p className="font-semibold">{review.value}/5</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled
-                    >
-                      Aprubahan
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(review.id)}
-                    >
-                      Tanggalin
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+      {isLoading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Ikinakarga ang mga review...</p>
+        </div>
+      ) : visibleReviews.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-muted-foreground">Wala pang review</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {visibleReviews.map((review) => (
+            <ManagementReviewCard
+              key={review.id}
+              review={review}
+              averageRating={getAverageRating(review)}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

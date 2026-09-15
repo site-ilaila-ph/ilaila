@@ -3,7 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { MapPin, Store, Utensils } from "lucide-react";
+import { AppNav } from "@/components/app-nav";
+import { HomeCategoryCards } from "@/components/home-category-cards";
+import { HomeLearnMore } from "@/components/home-learn-more";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "@/app/businesses/types";
@@ -51,24 +53,14 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <nav className="border-b border-border bg-card/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
-          >
-            Ilaila
-          </Link>
-          <div className="flex gap-3">
-            <Link
-              href="/auth/sign-out"
-              className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
-            >
-              Mag-sign out
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <AppNav brandHref="/">
+        <Link
+          href="/auth/sign-out"
+          className="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition hover:bg-muted"
+        >
+          Mag-sign out
+        </Link>
+      </AppNav>
 
       <main className="mx-auto max-w-6xl px-6 py-20">
         <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
@@ -81,46 +73,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mb-16">
-          <Link
-            href="/businesses/discovery"
-            className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-          >
-            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
-              <Store aria-hidden="true" className="size-6 shrink-0 text-primary" />
-              Tuklasin ang mga negosyo
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Mag-browse ng mga lokal na negosyo at restawran sa San Pedro
-            </p>
-          </Link>
-
-          <Link
-            href="/foods"
-            className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-          >
-            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
-              <Utensils aria-hidden="true" className="size-6 shrink-0 text-primary" />
-              Mga pagkaing pamana
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Alamin ang tungkol sa mga tradisyonal na pagkain at recipe
-            </p>
-          </Link>
-
-          <Link
-            href="/about/san-pedro"
-            className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-          >
-            <h2 className="mb-2 flex items-center gap-2 text-xl font-semibold">
-              <MapPin aria-hidden="true" className="size-6 shrink-0 text-primary" />
-              Tungkol sa San Pedro
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Tuklasin ang kasaysayan at kultura ng lugar
-            </p>
-          </Link>
-        </div>
+        <HomeCategoryCards />
 
         {!isLoading && (
           <>
@@ -211,32 +164,11 @@ export default function HomePage() {
                 </div>
               </section>
             )}
-
           </>
         )}
 
-        <section className="rounded-lg border border-border bg-card p-8 text-center">
-          <h2 className="mb-4 text-2xl font-bold">Gusto mo pa bang matuto?</h2>
-          <p className="mb-6 text-muted-foreground">
-            Bisitahin ang aming mga pahina upang higit pang makilala ang San Pedro at ang aming layunin
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link
-              href="/about/the-team"
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
-            >
-              Kilalanin ang koponan
-            </Link>
-            <Link
-              href="/about/the-website"
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
-            >
-              Tungkol sa Ilaila
-            </Link>
-          </div>
-        </section>
+        <HomeLearnMore />
       </main>
     </div>
   );
 }
-
