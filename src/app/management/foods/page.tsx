@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronDown,
@@ -64,18 +64,8 @@ export default function ManageFoods() {
   });
   const [formImages, setFormImages] = useState<FoodImage[]>([]);
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setIsLoading(true);
-    debounceRef.current = setTimeout(() => {
-      void loadFoods(searchQuery);
-    }, searchQuery ? 300 : 0);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery, loadFoods]);
-
-  async function loadFoods(query: string) {
+  
+  const loadFoods = useCallback(async function(query: string) {
     try {
       const params = new URLSearchParams();
       if (query.trim()) {
@@ -93,7 +83,21 @@ export default function ManageFoods() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(true);
+
+    debounceRef.current = setTimeout(() => {
+      void loadFoods(searchQuery);
+    }, searchQuery ? 300 : 0);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchQuery, loadFoods]);
 
   function releaseObjectUrls(images: FoodImage[]) {
     for (const image of images) {

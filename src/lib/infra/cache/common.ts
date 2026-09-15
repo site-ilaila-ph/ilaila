@@ -1,4 +1,5 @@
 import { after } from "next/server";
+import { LRUCache } from "lru-cache";
 import { joinKey } from "../utils";
 
 export type CacheKey = string | string[];
@@ -13,40 +14,31 @@ export interface CacheLayer {
 
 // --- In-memory layer ---------------------------------------------------
 
-export function createMemoryCache(): CacheLayer {
-  interface Entry {
-    value: unknown;
-    expiresAt?: number;
-  }
-  const store = new Map<string, Entry>();
-
-  function readEntry(key: string): Entry | null {
-    const item = store.get(key);
-    if (!item) return null;
-    if (item.expiresAt && Date.now() > item.expiresAt) {
-      store.delete(key);
-      return null;
-    }
-    return item;
-  }
+export function createMemoryCache(options?: { max?: number }): CacheLayer {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  const cache = new LRUCache<string, {}>({ max: options?.max ?? 1000 });
 
   return {
     async get<T>(key: string): Promise<T | null> {
-      const item = readEntry(key);
-      return item ? (item.value as T) : null;
+      const value = cache.get(key);
+      return value === undefined ? null : (value as unknown as T);
     },
     async set(key, value, ttlSeconds) {
-      const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined;
-      store.set(key, { value, expiresAt });
+      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+      const stored = value as {};
+      if (typeof ttlSeconds === "number" && ttlSeconds > 0) {
+        cache.set(key, stored, { ttl: ttlSeconds * 1000 });
+      } else {
+        cache.set(key, stored);
+      }
     },
     async delete(key) {
-      store.delete(key);
+      cache.delete(key);
     },
     async remainingTtl(key) {
-      const item = readEntry(key);
-      if (!item?.expiresAt) return 0;
-      const ttl = Math.floor((item.expiresAt - Date.now()) / 1000);
-      return ttl > 0 ? ttl : 0;
+      const ttlMs = cache.getRemainingTTL(key);
+      if (ttlMs === undefined || ttlMs <= 0 || ttlMs === Infinity || Number.isNaN(ttlMs)) return 0;
+      return Math.floor(ttlMs / 1000);
     },
   };
 }

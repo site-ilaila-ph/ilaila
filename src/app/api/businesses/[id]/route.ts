@@ -143,7 +143,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
     }
     businessId = urlId;
 
-    const { id: _unusedId, images, ...businessFields } = body;
+    const { images, ...businessFields } = body;
 
     const toUpdate = images?.filter((img) => !img.new && !img.remove) ?? [];
     const toCreate = images?.filter((img) => img.new) ?? [];

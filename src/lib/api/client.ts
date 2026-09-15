@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ProblemDetails } from "./responses";
 
 export class ApiProblemError extends Error {

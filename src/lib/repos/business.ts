@@ -1,5 +1,5 @@
 import { acquirePrismaClient } from "@/lib/infra";
-import type { ListOptions, FieldType, SortableFields, FilterableFields, IncludeList } from "@/lib/api/list-options";
+import type { ListOptions, SortableFields, FilterableFields, IncludeList } from "@/lib/api/list-options";
 import type { Prisma } from "@/generated/prisma/client";
 
 export const sortableFields: SortableFields = [
