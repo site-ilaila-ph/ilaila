@@ -1,0 +1,11 @@
+model ReviewImage {
+  id          String         @id @default(uuid()) @db.Uuid
+  reviewId    String         @db.Uuid
+  description String
+  url         String
+
+  review      BusinessReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_images")
+  @@schema("app")
+}

@@ -6,7 +6,8 @@ import Image from "next/image";
 import { ArrowLeft, Camera, ExternalLink, Image as ImageIcon, MapPin, Star, ThumbsUp, X, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
 
@@ -26,6 +27,43 @@ export default function BusinessProfilePage({
   const [reviewScores, setReviewScores] = useState({ foodQuality: 5, service: 5, ambiance: 5, value: 5 });
   const [relatedBusinesses, setRelatedBusinesses] = useState<BusinessListItem[]>([]);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [reviewImages, setReviewImages] = useState<
+    { id: string; file: File; description: string; previewUrl: string }[]
+  >([]);
+
+  function addReviewImages(fileList: FileList | null) {
+    const files = Array.from(fileList ?? []);
+    if (files.length === 0) return;
+    setReviewImages((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        description: "",
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ]);
+  }
+
+  function removeReviewImage(id: string) {
+    setReviewImages((current) => {
+      const target = current.find((img) => img.id === id);
+      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
+      return current.filter((img) => img.id !== id);
+    });
+  }
+
+  function updateReviewImageDescription(id: string, description: string) {
+    setReviewImages((current) =>
+      current.map((img) => (img.id === id ? { ...img, description } : img))
+    );
+  }
+
+  function clearReviewImages(images: { previewUrl: string }[]) {
+    for (const image of images) {
+      URL.revokeObjectURL(image.previewUrl);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -138,23 +176,31 @@ export default function BusinessProfilePage({
     event.preventDefault();
     setReviewMessage("");
     setReviewError(null);
-    const supabase = createClient();
-    const session = (await supabase.auth.getSession()).data.session!;
-    const response = await fetch("/api/reviews", {
+    const form = new FormData();
+    form.append(
+      "metadata",
+      JSON.stringify({
+        review: {
+          businessId,
+          text: reviewText,
+          ...reviewScores,
+        },
+        images: reviewImages.map((image) => ({ description: image.description })),
+      })
+    );
+    for (const image of reviewImages) {
+      form.append("images", image.file);
+    }
+    const response = await fetch(`/api/businesses/${businessId}/reviews`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "create",
-        userId: session.user.id,
-        businessId,
-        text: reviewText,
-        ...reviewScores,
-      }),
+      body: form,
     });
 
     if (response.ok) {
       setReviewMessage("Na-save na ang iyong review.");
       setReviewText("");
+      clearReviewImages(reviewImages);
+      setReviewImages([]);
     } else {
       setReviewError(await readProblemMessage(response, "Hindi pa namin na-save ang iyong review. Subukang muli mamaya."));
     }
@@ -447,13 +493,36 @@ export default function BusinessProfilePage({
                         </div>
                       </div>
                       <p className="text-muted-foreground">{review.text}</p>
+                      {review.images.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                          {review.images.map((image) => (
+                            <div key={image.id} className="overflow-hidden rounded-lg border border-border bg-muted">
+                              {image.url ? (
+                                <Image
+                                  src={image.url}
+                                  alt={image.description || "Larawan mula sa review"}
+                                  width={240}
+                                  height={160}
+                                  unoptimized
+                                  className="h-28 w-full object-cover"
+                                />
+                              ) : (
+                                <div className="grid h-28 w-full place-items-center text-muted-foreground">
+                                  <ImageIcon className="size-6" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <button
                         onClick={async () => {
-                          const upvoteResponse = await fetch("/api/reviews", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ action: "upvote", reviewId: review.id }),
-                          });
+                          const form = new FormData();
+                          form.append("metadata", JSON.stringify({ id: review.id, upvote: true }));
+                          const upvoteResponse = await fetch(
+                            `/api/businesses/${businessId}/reviews/${review.id}?id=${encodeURIComponent(review.id)}`,
+                            { method: "PATCH", body: form }
+                          );
                           if (!upvoteResponse.ok) {
                             setReviewError(
                               await readProblemMessage(
@@ -498,6 +567,58 @@ export default function BusinessProfilePage({
                       </select>
                     </label>
                   ))}
+                </div>
+                <div>
+                  <Label htmlFor="review-images" className="text-xs font-medium text-muted-foreground">
+                    Mga Larawan (opsyonal)
+                  </Label>
+                  <Input
+                    id="review-images"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple
+                    className="mt-1"
+                    onChange={(event) => {
+                      addReviewImages(event.target.files);
+                      event.target.value = "";
+                    }}
+                  />
+                  {reviewImages.length > 0 && (
+                    <ul className="mt-3 space-y-2">
+                      {reviewImages.map((image, index) => (
+                        <li key={image.id} className="flex items-start gap-3 rounded-lg border border-border bg-card p-2">
+                          <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
+                            <Image
+                              src={image.previewUrl}
+                              alt={`Preview ng larawan ${index + 1}`}
+                              width={120}
+                              height={80}
+                              unoptimized
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <textarea
+                              value={image.description}
+                              onChange={(event) => updateReviewImageDescription(image.id, event.target.value)}
+                              placeholder="Paglalarawan ng larawan (opsyonal)"
+                              rows={2}
+                              className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeReviewImage(image.id)}
+                            >
+                              <X className="size-4" />
+                              <span className="sr-only">Alisin</span>
+                            </Button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <textarea
                   value={reviewText}

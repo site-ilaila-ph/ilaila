@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Camera, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,18 @@ import { Label } from "@/components/ui/label";
 import { readProblemMessage } from "@/lib/api/client";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Route } from "next";
+interface BusinessImage {
+  id: string;
+  url?: string | null;
+  description: string;
+  /** Newly added image that still needs a file upload. */
+  isNew?: boolean;
+  /** Existing image marked for removal (row + stored object). */
+  removed?: boolean;
+  file?: File | null;
+  previewUrl?: string | null;
+}
+
 interface Business {
   id: string;
   name: string;
@@ -20,10 +33,9 @@ interface Business {
   hours: string;
   history: string | null;
   isPublished: boolean;
-  _count?: {
-    reviews: number;
-    foods: number;
-  };
+  images?: BusinessImage[];
+  reviews?: unknown[];
+  foods?: unknown[];
 }
 
 export default function ManageBusinesses() {
@@ -40,8 +52,8 @@ export default function ManageBusinesses() {
     longitude: 0,
     hours: "",
     history: "",
-    imageData: "",
   });
+  const [formImages, setFormImages] = useState<BusinessImage[]>([]);
 
   useEffect(() => {
     loadBusinesses();
@@ -49,7 +61,7 @@ export default function ManageBusinesses() {
 
   async function loadBusinesses() {
     try {
-      const response = await fetch("/api/management/businesses");
+      const response = await fetch("/api/businesses");
       if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load businesses"));
       const data = await response.json();
       setBusinesses(data as Business[]);
@@ -61,19 +73,138 @@ export default function ManageBusinesses() {
     }
   }
 
+  function releaseObjectUrls(images: BusinessImage[]) {
+    for (const image of images) {
+      if (image.previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+    }
+  }
+
+  function resetForm() {
+    releaseObjectUrls(formImages);
+    setFormData({
+      name: "",
+      description: "",
+      address: "",
+      latitude: 0,
+      longitude: 0,
+      hours: "",
+      history: "",
+    });
+    setFormImages([]);
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function addImageFiles(fileList: FileList | null) {
+    const files = Array.from(fileList ?? []);
+    if (files.length === 0) return;
+    setFormImages((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        url: null,
+        description: "",
+        isNew: true,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ]);
+  }
+
+  function toggleRemoved(image: BusinessImage) {
+    if (image.isNew) {
+      if (image.previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+      setFormImages((current) => current.filter((img) => img.id !== image.id));
+    } else {
+      setFormImages((current) =>
+        current.map((img) => (img.id === image.id ? { ...img, removed: !img.removed } : img))
+      );
+    }
+  }
+
+  function updateImageDescription(id: string, description: string) {
+    setFormImages((current) =>
+      current.map((img) => (img.id === id ? { ...img, description } : img))
+    );
+  }
+
+  function startEditing(business: Business) {
+    setEditingId(business.id);
+    setFormData({
+      name: business.name,
+      description: business.description,
+      address: business.address,
+      latitude: business.latitude,
+      longitude: business.longitude,
+      hours: business.hours,
+      history: business.history ?? "",
+    });
+    setFormImages(
+      (business.images ?? []).map((img) => ({
+        id: img.id,
+        url: img.url ?? null,
+        description: img.description ?? "",
+        file: null,
+      }))
+    );
+    setShowForm(true);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     try {
-      const payload = { ...formData };
-      const response = await fetch("/api/management/businesses", {
-        method: editingId ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(await readProblemMessage(response, "Failed to save business"));
+      const activeImages = formImages.filter((img) => !img.removed);
+      const removedImages = formImages.filter((img) => img.removed && !img.isNew);
+      const form = new FormData();
+
+      if (editingId) {
+        const metadata = {
+          id: editingId,
+          ...formData,
+          images: [
+            ...activeImages.map((img) =>
+              img.isNew
+                ? { id: img.id, new: true, description: img.description }
+                : { id: img.id, description: img.description }
+            ),
+            ...removedImages.map((img) => ({ id: img.id, remove: true })),
+          ],
+        };
+        form.append("metadata", JSON.stringify(metadata));
+        for (const img of activeImages) {
+          if (img.isNew && img.file) form.append(`image:${img.id}`, img.file);
+        }
+        const response = await fetch(`/api/businesses/${editingId}`, {
+          method: "PATCH",
+          body: form,
+        });
+        if (!response.ok) {
+          throw new Error(await readProblemMessage(response, "Failed to save business"));
+        }
+      } else {
+        const newImages = activeImages.filter((img) => img.isNew && img.file);
+        const metadata = {
+          business: { ...formData },
+          images: newImages.map((img) => ({ description: img.description })),
+        };
+        form.append("metadata", JSON.stringify(metadata));
+        for (const img of newImages) {
+          if (img.file) form.append("images", img.file);
+        }
+        const response = await fetch("/api/businesses", {
+          method: "POST",
+          body: form,
+        });
+        if (!response.ok) {
+          throw new Error(await readProblemMessage(response, "Failed to save business"));
+        }
       }
+
       resetForm();
       await loadBusinesses();
     } catch (error) {
@@ -83,9 +214,13 @@ export default function ManageBusinesses() {
   }
 
   async function handleDelete(id: string) {
-    if (confirm("Sigurado ka bang gusto mong tanggalin ang negosyong ito?")) {
+    if (
+      confirm(
+        "Sigurado ka bang gusto mong tanggalin ang negosyong ito? Tatanggalin din ang mga larawan nito sa storage."
+      )
+    ) {
       try {
-        const response = await fetch(`/api/management/businesses?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+        const response = await fetch(`/api/businesses/${id}?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete business"));
         await loadBusinesses();
       } catch (error) {
@@ -93,21 +228,6 @@ export default function ManageBusinesses() {
         setError(error instanceof Error ? error.message : "Failed to delete business");
       }
     }
-  }
-
-  function resetForm() {
-    setFormData({
-      name: "",
-      description: "",
-      address: "",
-      latitude: 0,
-      longitude: 0,
-      hours: "",
-      history: "",
-      imageData: "",
-    });
-    setEditingId(null);
-    setShowForm(false);
   }
 
   return (
@@ -167,21 +287,84 @@ export default function ManageBusinesses() {
                 </div>
 
                 <div>
-                  <Label htmlFor="business-image">Larawan ng Negosyo</Label>
+                  <Label htmlFor="business-images">Mga Larawan ng Negosyo</Label>
                   <Input
-                    id="business-image"
+                    id="business-images"
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => setFormData((current) => ({ ...current, imageData: String(reader.result) }));
-                      reader.readAsDataURL(file);
+                      addImageFiles(e.target.files);
+                      e.target.value = "";
                     }}
                   />
-                  {formData.imageData && (
-                    <Image src={formData.imageData} alt="Preview ng negosyo" width={240} height={140} unoptimized className="mt-3 h-28 w-48 rounded-lg object-cover" />
+                  {formImages.length > 0 ? (
+                    <ul className="mt-3 space-y-2">
+                      {formImages.map((img, index) => (
+                        <li
+                          key={img.id}
+                          className={`flex items-start gap-3 rounded-lg border border-border bg-background p-2 ${img.removed ? "opacity-50" : ""}`}
+                        >
+                          <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
+                            {img.previewUrl ? (
+                              <Image
+                                src={img.previewUrl}
+                                alt={`Preview ng larawan ${index + 1}`}
+                                width={120}
+                                height={80}
+                                unoptimized
+                                className="h-full w-full object-cover"
+                              />
+                            ) : img.url ? (
+                              <Image
+                                src={img.url}
+                                alt={img.description || `Larawan ${index + 1}`}
+                                width={120}
+                                height={80}
+                                unoptimized
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="grid h-full w-full place-items-center text-muted-foreground">
+                                <Camera aria-hidden="true" className="size-5" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {img.removed
+                                ? "Tatanggalin sa pag-save"
+                                : img.isNew
+                                  ? "Bagong larawan"
+                                  : "Umiiral na larawan"}
+                            </p>
+                            <textarea
+                              value={img.description}
+                              onChange={(e) => updateImageDescription(img.id, e.target.value)}
+                              placeholder="Paglalarawan ng larawan (opsyonal)"
+                              rows={2}
+                              className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm"
+                            />
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                variant={img.removed ? "outline" : "destructive"}
+                                size="sm"
+                                onClick={() => toggleRemoved(img)}
+                              >
+                                {img.removed ? <Undo2 className="size-4" /> : <X className="size-4" />}
+                                <span className="sr-only">{img.removed ? "Ibalik" : "Alisin"}</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Wala pang larawan. Maaari kang magdagdag ng isa o higit pa.
+                    </p>
                   )}
                 </div>
 
@@ -259,8 +442,9 @@ export default function ManageBusinesses() {
                     <h3 className="font-semibold">{business.name}</h3>
                     <p className="text-sm text-muted-foreground">{business.address}</p>
                     <div className="mt-2 flex gap-4 text-xs">
-                      <span>Mga Review: {business._count?.reviews || 0}</span>
-                      <span>Mga Pagkain: {business._count?.foods || 0}</span>
+                      <span>Mga Review: {business.reviews?.length || 0}</span>
+                      <span>Mga Pagkain: {business.foods?.length || 0}</span>
+                      <span>Mga Larawan: {business.images?.length || 0}</span>
                       <span>Katayuan: {business.isPublished ? "Nailathala" : "Hindi pa nailathala"}</span>
                     </div>
                   </div>
@@ -273,20 +457,7 @@ export default function ManageBusinesses() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setEditingId(business.id);
-                        setFormData({
-                          name: business.name,
-                          description: business.description,
-                          address: business.address,
-                          latitude: business.latitude,
-                          longitude: business.longitude,
-                          hours: business.hours,
-                          history: business.history ?? "",
-                          imageData: "",
-                        });
-                        setShowForm(true);
-                      }}
+                      onClick={() => startEditing(business)}
                     >
                       Mag-edit
                     </Button>

@@ -13,6 +13,7 @@ model BusinessReview {
 
   business    Business @relation(fields: [businessId], references: [id])
   user        UserData @relation(fields: [userId], references: [id])
+  images      ReviewImage[]
 
   @@unique([userId, businessId])
   @@map("reviews")
