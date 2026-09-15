@@ -2,13 +2,34 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Search, Trash2, Utensils } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  Search,
+  Trash2,
+  Undo2,
+  Utensils,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { readProblemMessage } from "@/lib/api/client";
 import { ErrorAlert } from "@/components/ui/error-alert";
+interface FoodImage {
+  id: string;
+  url?: string | null;
+  description: string;
+  /** Newly added image that still needs a file upload. */
+  isNew?: boolean;
+  /** Existing image marked for removal (row + stored object). */
+  removed?: boolean;
+  file?: File | null;
+  previewUrl?: string | null;
+}
+
 interface Food {
   id: string;
   name: string;
@@ -18,9 +39,9 @@ interface Food {
   recipe: string;
   culturalSignificance: string;
   isHeritage: boolean;
+  images?: FoodImage[];
   _count?: {
     businesses: number;
-    images: number;
   };
 }
 
@@ -39,8 +60,8 @@ export default function ManageFoods() {
     recipe: "",
     culturalSignificance: "",
     isHeritage: true,
-    imageData: "",
   });
+  const [formImages, setFormImages] = useState<FoodImage[]>([]);
 
   useEffect(() => {
     loadFoods();
@@ -48,10 +69,10 @@ export default function ManageFoods() {
 
   async function loadFoods() {
     try {
-      const response = await fetch("/api/management/foods");
+      const response = await fetch("/api/foods");
       if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load foods"));
-      const data = await response.json();
-      setFoods(data as Food[]);
+      const data = (await response.json()) as Food[];
+      setFoods(data);
     } catch (error) {
       console.error("Failed to load foods:", error);
       setError(error instanceof Error ? error.message : "Failed to load foods");
@@ -60,19 +81,133 @@ export default function ManageFoods() {
     }
   }
 
+  function releaseObjectUrls(images: FoodImage[]) {
+    for (const image of images) {
+      if (image.previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+    }
+  }
+
+  function resetForm() {
+    releaseObjectUrls(formImages);
+    setFormData({
+      name: "",
+      description: "",
+      history: "",
+      preparation: "",
+      recipe: "",
+      culturalSignificance: "",
+      isHeritage: true,
+    });
+    setFormImages([]);
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function addImageFiles(fileList: FileList | null) {
+    const files = Array.from(fileList ?? []);
+    if (files.length === 0) return;
+    setFormImages((current) => [
+      ...current,
+      ...files.map((file) => ({
+        id: crypto.randomUUID(),
+        url: null,
+        description: "",
+        isNew: true,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ]);
+  }
+
+  function toggleRemoved(image: FoodImage) {
+    if (image.isNew) {
+      if (image.previewUrl?.startsWith("blob:")) {
+        URL.revokeObjectURL(image.previewUrl);
+      }
+      setFormImages((current) => current.filter((img) => img.id !== image.id));
+    } else {
+      setFormImages((current) =>
+        current.map((img) =>
+          img.id === image.id ? { ...img, removed: !img.removed } : img
+        )
+      );
+    }
+  }
+
+  function updateImageDescription(id: string, description: string) {
+    setFormImages((current) =>
+      current.map((img) => (img.id === id ? { ...img, description } : img))
+    );
+  }
+
+  function moveImage(id: string, direction: -1 | 1) {
+    setFormImages((current) => {
+      const from = current.findIndex((img) => img.id === id);
+      const to = from + direction;
+      if (from < 0 || to < 0 || to >= current.length) return current;
+      const next = [...current];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     try {
-      const payload = { ...formData };
-      const response = await fetch("/api/management/foods", {
-        method: editingId ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: editingId ? JSON.stringify({ id: editingId, ...payload }) : JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(await readProblemMessage(response, "Failed to save food"));
+      const activeImages = formImages.filter((img) => !img.removed);
+      const removedImages = formImages.filter((img) => img.removed && !img.isNew);
+      const form = new FormData();
+
+      if (editingId) {
+        const metadata = {
+          id: editingId,
+          ...formData,
+          images: [
+            ...activeImages.map((img, index) =>
+              img.isNew
+                ? { id: img.id, new: true, position: index, description: img.description }
+                : { id: img.id, position: index, description: img.description }
+            ),
+            ...removedImages.map((img) => ({ id: img.id, remove: true })),
+          ],
+        };
+        form.append("metadata", JSON.stringify(metadata));
+        for (const img of activeImages) {
+          if (img.isNew && img.file) form.append(`image:${img.id}`, img.file);
+        }
+        const response = await fetch(`/api/foods/${editingId}`, {
+          method: "PATCH",
+          body: form,
+        });
+        if (!response.ok) {
+          throw new Error(await readProblemMessage(response, "Failed to save food"));
+        }
+      } else {
+        const newImages = activeImages.filter((img) => img.isNew && img.file);
+        const metadata = {
+          food: { ...formData },
+          images: newImages.map((img, index) => ({
+            position: index,
+            description: img.description,
+          })),
+        };
+        form.append("metadata", JSON.stringify(metadata));
+        for (const img of newImages) {
+          if (img.file) form.append("images", img.file);
+        }
+        const response = await fetch("/api/foods", {
+          method: "POST",
+          body: form,
+        });
+        if (!response.ok) {
+          throw new Error(await readProblemMessage(response, "Failed to save food"));
+        }
       }
+
       resetForm();
       await loadFoods();
     } catch (error) {
@@ -82,10 +217,19 @@ export default function ManageFoods() {
   }
 
   async function handleDelete(id: string) {
-    if (confirm("Sigurado ka bang gusto mong tanggalin ang pagkaing ito?")) {
+    if (
+      confirm(
+        "Sigurado ka bang gusto mong tanggalin ang pagkaing ito? Tatanggalin din ang mga larawan nito sa storage."
+      )
+    ) {
       try {
-        const response = await fetch(`/api/management/foods?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete food"));
+        const response = await fetch(
+          `/api/foods/${id}?id=${encodeURIComponent(id)}`,
+          { method: "DELETE" }
+        );
+        if (!response.ok) {
+          throw new Error(await readProblemMessage(response, "Failed to delete food"));
+        }
         await loadFoods();
       } catch (error) {
         console.error("Failed to delete food:", error);
@@ -94,24 +238,35 @@ export default function ManageFoods() {
     }
   }
 
-  function resetForm() {
+  function startEditing(food: Food) {
+    setEditingId(food.id);
     setFormData({
-      name: "",
-      description: "",
-      history: "",
-      preparation: "",
-      recipe: "",
-      culturalSignificance: "",
-      isHeritage: true,
-      imageData: "",
+      name: food.name,
+      description: food.description,
+      history: food.history,
+      preparation: food.preparation,
+      recipe: food.recipe,
+      culturalSignificance: food.culturalSignificance,
+      isHeritage: food.isHeritage,
     });
-    setEditingId(null);
-    setShowForm(false);
+    setFormImages(
+      (food.images ?? []).map((img) => ({
+        id: img.id,
+        url: img.url ?? null,
+        description: img.description ?? "",
+        file: null,
+      }))
+    );
+    setShowForm(true);
   }
 
   const visibleFoods = foods.filter((food) => {
     const query = searchQuery.toLowerCase();
-    return !query || food.name.toLowerCase().includes(query) || food.description.toLowerCase().includes(query);
+    return (
+      !query ||
+      food.name.toLowerCase().includes(query) ||
+      (food.description || "").toLowerCase().includes(query)
+    );
   });
 
   return (
@@ -176,21 +331,104 @@ export default function ManageFoods() {
                 </div>
 
                 <div>
-                  <Label htmlFor="food-image">Larawan ng Pagkain</Label>
+                  <Label htmlFor="food-images">Mga Larawan ng Pagkain</Label>
                   <Input
-                    id="food-image"
+                    id="food-images"
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = () => setFormData((current) => ({ ...current, imageData: String(reader.result) }));
-                      reader.readAsDataURL(file);
+                      addImageFiles(e.target.files);
+                      e.target.value = "";
                     }}
                   />
-                  {formData.imageData && (
-                    <Image src={formData.imageData} alt="Preview ng pagkain" width={240} height={140} unoptimized className="mt-3 h-28 w-48 rounded-lg object-cover" />
+                  {formImages.length > 0 ? (
+                    <ul className="mt-3 space-y-2">
+                      {formImages.map((img, index) => (
+                        <li
+                          key={img.id}
+                          className={`flex items-start gap-3 rounded-lg border border-border bg-background p-2 ${img.removed ? "opacity-50" : ""}`}
+                        >
+                          <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
+                            {img.previewUrl ? (
+                              <Image
+                                src={img.previewUrl}
+                                alt={`Preview ng larawan ${index + 1}`}
+                                width={120}
+                                height={80}
+                                unoptimized
+                                className="h-full w-full object-cover"
+                              />
+                            ) : img.url ? (
+                              <Image
+                                src={img.url}
+                                alt={img.description || `Larawan ${index + 1}`}
+                                width={120}
+                                height={80}
+                                unoptimized
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="grid h-full w-full place-items-center text-muted-foreground">
+                                <Utensils aria-hidden="true" className="size-5" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {img.removed
+                                ? "Tatanggalin sa pag-save"
+                                : img.isNew
+                                  ? "Bagong larawan"
+                                  : "Umiiral na larawan"}
+                            </p>
+                            <textarea
+                              value={img.description}
+                              onChange={(e) => updateImageDescription(img.id, e.target.value)}
+                              placeholder="Paglalarawan ng larawan (opsyonal)"
+                              rows={2}
+                              className="w-full rounded-md border border-border bg-background px-2 py-1 text-sm"
+                            />
+                            <div className="flex items-center gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => moveImage(img.id, -1)}
+                                disabled={index === 0}
+                              >
+                                <ChevronUp className="size-4" />
+                                <span className="sr-only">Itaas</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => moveImage(img.id, 1)}
+                                disabled={index === formImages.length - 1}
+                              >
+                                <ChevronDown className="size-4" />
+                                <span className="sr-only">Ibaba</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={img.removed ? "outline" : "destructive"}
+                                size="sm"
+                                onClick={() => toggleRemoved(img)}
+                              >
+                                {img.removed ? <Undo2 className="size-4" /> : <X className="size-4" />}
+                                <span className="sr-only">{img.removed ? "Ibalik" : "Alisin"}</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Wala pang larawan. Pumili ng isa o higit pang mga file sa itaas.
+                    </p>
                   )}
                 </div>
 
@@ -273,26 +511,32 @@ export default function ManageFoods() {
               <div className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] gap-4 border-b border-border px-5 py-4 text-xs font-semibold text-muted-foreground"><span>Pagkain</span><span>Negosyo</span><span>Larawan</span><span>Uri</span><span /></div>
             {visibleFoods.map((food) => (
               <div key={food.id} className="grid grid-cols-[2fr_1fr_1fr_1fr_110px] items-center gap-4 border-b border-border px-5 py-4 last:border-0 hover:bg-muted/50">
-                  <div className="flex min-w-0 items-center gap-3"><div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground"><Utensils aria-hidden="true" className="size-4" /></div><div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{food.name}</p><p className="truncate text-xs text-muted-foreground">{food.description}</p></div></div>
-                  <span className="text-sm text-foreground">{food._count?.businesses || 0}</span><span className="text-sm text-foreground">{food._count?.images || 0}</span><span className="text-sm text-muted-foreground">{food.isHeritage ? "Pamanang-kultura" : "Karaniwan"}</span>
+                  <div className="flex min-w-0 items-center gap-3">
+                    {(() => {
+                      const primaryImageUrl = food.images?.find((img) => img.url)?.url;
+                      return primaryImageUrl ? (
+                        <Image
+                          src={primaryImageUrl}
+                          alt=""
+                          width={36}
+                          height={36}
+                          unoptimized
+                          className="size-9 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
+                          <Utensils aria-hidden="true" className="size-4" />
+                        </div>
+                      );
+                    })()}
+                    <div className="min-w-0"><p className="truncate text-sm font-semibold text-foreground">{food.name}</p><p className="truncate text-xs text-muted-foreground">{food.description}</p></div>
+                  </div>
+                  <span className="text-sm text-foreground">{food._count?.businesses || 0}</span><span className="text-sm text-foreground">{food.images?.length || 0}</span><span className="text-sm text-muted-foreground">{food.isHeritage ? "Pamanang-kultura" : "Karaniwan"}</span>
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        setEditingId(food.id);
-                        setFormData({
-                          name: food.name,
-                          description: food.description,
-                          history: food.history,
-                          preparation: food.preparation,
-                          recipe: food.recipe,
-                          culturalSignificance: food.culturalSignificance,
-                          isHeritage: food.isHeritage,
-                          imageData: "",
-                        });
-                        setShowForm(true);
-                      }}
+                      onClick={() => startEditing(food)}
                     >
                       Mag-edit
                     </Button>

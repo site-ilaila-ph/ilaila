@@ -9,6 +9,7 @@ import type {
 } from "./common";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { assert } from "@/lib/assert";
 
 export function supabaseStorage(): StorageProvider {
   const supabaseUrl =
@@ -18,7 +19,9 @@ export function supabaseStorage(): StorageProvider {
     process.env.SUPABASE_SECRET_KEY ??
     process.env.SUPABASE_PUBLISHABLE_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET ?? "assets";
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET;
+
+  assert(bucket, "Config error: SUPABASE_STORAGE_BUCKET is required for Supabase storage.");
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(

@@ -57,7 +57,10 @@ function mapFoodPrismaError(req: NextRequest, error: unknown): NextResponse {
 async function getFoods() {
   const db = acquirePrismaClient();
   const data = await db.food.findMany({
-    include: { images: true },
+    include: {
+      images: true,
+      _count: { select: { businesses: true } },
+    },
     orderBy: { name: "asc" },
   });
   return NextResponse.json(data, { status: 200 });
@@ -92,15 +95,20 @@ async function createFood(req: NextRequest) {
     });
   }
 
+  let foodId: string | undefined;
+  let uploadedFoodImageIds: string[] = [];
+
   try {
     const db = acquirePrismaClient();
-    const foodId = randomUUID();
+    foodId = randomUUID();
+    const storageManager = acquireStorageManager();
+    const targetFoodId = foodId;
 
     const uploaded = await Promise.all(
       imageFiles.map(async (blob, i) => {
         const foodImageId = randomUUID();
-        const { url } = await acquireStorageManager().upload({
-          key: join("foods", foodId, "images", foodImageId),
+        const { url } = await storageManager.upload({
+          key: join("foods", targetFoodId, "images", foodImageId),
           fileOrBody: blob,
           options: { contentType: blob.type },
         });
@@ -111,6 +119,7 @@ async function createFood(req: NextRequest) {
         };
       })
     );
+    uploadedFoodImageIds = uploaded.map((image) => image.id);
 
     const food = await db.food.create({
       data: {
@@ -123,6 +132,16 @@ async function createFood(req: NextRequest) {
 
     return ok(food);
   } catch (error: unknown) {
+    // Do not leave orphaned objects behind if the DB write fails.
+    if (foodId && uploadedFoodImageIds.length > 0) {
+      const storageManager = acquireStorageManager();
+      const targetFoodId = foodId;
+      await Promise.allSettled(
+        uploadedFoodImageIds.map((imageId) =>
+          storageManager.delete({ key: join("foods", targetFoodId, "images", imageId) })
+        )
+      );
+    }
     return mapFoodPrismaError(req, error);
   }
 }
