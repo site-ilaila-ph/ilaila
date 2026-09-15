@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react"
 
 const MOBILE_BREAKPOINT = 768
 
-function useIsMobile() {
+export function useIsMobile() {
   return useSyncExternalStore(
     (callback) => {
       const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
@@ -13,5 +13,3 @@ function useIsMobile() {
     () => false
   )
 }
-
-export { useIsMobile };

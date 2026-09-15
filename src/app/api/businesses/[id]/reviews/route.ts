@@ -81,7 +81,7 @@ async function postReview(req: NextRequest) {
     return badRequestProblem(req, { code: "review-required", detail: "metadata.review is required." });
   }
 
-  const { businessId, userId, text, foodQuality, service, ambiance, value } = parsed.review;
+  const { businessId, text, foodQuality, service, ambiance, value } = parsed.review;
 
   if (!businessId || !UUID_PATTERN.test(businessId)) {
     return badRequestProblem(req, {
