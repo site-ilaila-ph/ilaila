@@ -7,7 +7,7 @@ import { withLogging } from "@/lib/logging";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
 import { NextRequest } from "next/server";
-import { parseListOptions, type ListOptionsError } from "@/lib/api/list-options";
+import { ListOptionsError, parseListOptions } from "@/lib/api/list-options";
 import { listFoods, sortableFields, filterableFields, includeableRelations } from "@/lib/repos/food";
 
 function mapFoodPrismaError(req: NextRequest, error: unknown): NextResponse {

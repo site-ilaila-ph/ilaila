@@ -132,7 +132,7 @@ function parseFilterEntry(
   }
 
   const field = raw.slice(0, firstColon).trim();
-  const op = raw.slice(firstColon + 1, secondColon).trim().toLowerCase();
+  const op = raw.slice(firstColon + 1, secondColon).trim();
   const value = raw.slice(secondColon + 1);
 
   if (!field) {

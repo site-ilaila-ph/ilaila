@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import { Input } from "@/components/ui/input";
+import { Route } from "next";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
@@ -39,9 +40,11 @@ export default function FoodsPage() {
 
   useEffect(() => {
     let isMounted = true;
+    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     fetch("/api/foods")
-      .then(r => {
+      .then(async (r) => {
         if (!r.ok) throw new Error(await readProblemMessage(r, "Hindi na-load ang mga pagkain."));
         return r.json();
       })
@@ -131,7 +134,7 @@ export default function FoodsPage() {
               return (
                 <Link
                   key={food.id}
-                  href="/foods/" + food.id
+                  href={("/foods/" + food.id) as Route}
                   className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
                 >
                   {primaryImageUrl ? (
