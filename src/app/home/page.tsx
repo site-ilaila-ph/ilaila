@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { MapPin, Star, Store, Utensils } from "lucide-react";
+import { MapPin, Store, Utensils } from "lucide-react";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "@/app/businesses/types";
@@ -12,7 +12,6 @@ import type { FoodListItem } from "@/app/foods/types";
 export default function HomePage() {
   const [businesses, setBusinesses] = useState<BusinessListItem[]>([]);
   const [foods, setFoods] = useState<FoodListItem[]>([]);
-  const [topRatedFoods, setTopRatedFoods] = useState<(FoodListItem & { averageRating: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -20,28 +19,25 @@ export default function HomePage() {
     let isMounted = true;
 
     async function loadData() {
-      const [businessesResponse, foodsResponse, topRatedResponse] = await Promise.all([
+      const [businessesResponse, foodsResponse] = await Promise.all([
         fetch("/api/businesses"),
         fetch("/api/foods"),
-        fetch("/api/foods?topRated=1"),
       ]);
 
       if (!isMounted) return;
 
-      const failed = [businessesResponse, foodsResponse, topRatedResponse].find((response) => !response.ok);
+      const failed = [businessesResponse, foodsResponse].find((response) => !response.ok);
       if (failed) {
         setLoadError(await readProblemMessage(failed, "Hindi na-load ang nilalaman. Subukang muli mamaya."));
       }
 
-      const [businessesData, foodsData, topRatedData] = await Promise.all([
+      const [businessesData, foodsData] = await Promise.all([
         businessesResponse.ok ? businessesResponse.json() : Promise.resolve([]),
         foodsResponse.ok ? foodsResponse.json() : Promise.resolve([]),
-        topRatedResponse.ok ? topRatedResponse.json() : Promise.resolve([]),
       ]);
 
       setBusinesses(businessesData ?? []);
       setFoods(foodsData ?? []);
-      setTopRatedFoods(topRatedData ?? []);
 
       setIsLoading(false);
     }
@@ -216,54 +212,6 @@ export default function HomePage() {
               </section>
             )}
 
-            {topRatedFoods.length > 0 && (
-              <section className="mb-16">
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Pinakamataas ang rating na pagkain</h2>
-                  <Link href="/foods" className="text-sm text-primary hover:underline">
-                    Tingnan lahat
-                  </Link>
-                </div>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {topRatedFoods.map((food) => (
-                    <Link
-                      key={food.id}
-                      href={`/foods/${food.id}`}
-                      className="rounded-lg border border-border bg-card p-6 transition hover:border-primary hover:shadow-lg"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="text-lg font-semibold hover:text-primary">
-                          {food.name}
-                        </h3>
-                        <div className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1">
-                          <span className="text-sm font-bold text-primary">
-                            {food.averageRating.toFixed(1)}
-                          </span>
-                          <span className="text-xs text-primary">
-                            <Star aria-hidden="true" className="size-3 fill-current" />
-                          </span>
-                        </div>
-                      </div>
-                      <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
-                        {food.description}
-                      </p>
-                      {food.tags && food.tags.length > 0 && (
-                        <div className="flex gap-1">
-                          {food.tags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs text-primary"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
           </>
         )}
 
@@ -291,3 +239,4 @@ export default function HomePage() {
     </div>
   );
 }
+

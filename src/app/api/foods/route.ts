@@ -6,7 +6,9 @@ import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
 import { withLogging } from "@/lib/logging";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest } from "next/server";
+import { parseListOptions, type ListOptionsError } from "@/lib/api/list-options";
+import { listFoods, sortableFields, filterableFields, includeableRelations } from "@/lib/repos/food";
 
 function mapFoodPrismaError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
@@ -54,16 +56,26 @@ function mapFoodPrismaError(req: NextRequest, error: unknown): NextResponse {
   throw error;
 }
 
-async function getFoods() {
-  const db = acquirePrismaClient();
-  const data = await db.food.findMany({
-    include: {
-      images: true,
-      _count: { select: { businesses: true } },
-    },
-    orderBy: { name: "asc" },
-  });
-  return NextResponse.json(data, { status: 200 });
+async function getFoods(req: NextRequest) {
+  try {
+    const options = parseListOptions(
+      req.nextUrl.searchParams,
+      sortableFields,
+      filterableFields,
+      includeableRelations,
+    );
+    const data = await listFoods(options);
+    return ok(data);
+  } catch (err) {
+    if (err instanceof ListOptionsError) {
+      return badRequestProblem(req, {
+        code: "bad-list-options",
+        title: "Maling Request",
+        detail: err.message,
+      });
+    }
+    throw err;
+  }
 }
 
 async function createFood(req: NextRequest) {

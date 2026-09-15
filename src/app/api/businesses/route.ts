@@ -7,6 +7,8 @@ import { withLogging } from "@/lib/logging";
 import { isMissingIdError, withUnhandledApiErrorHandling } from "@/lib/error-handling";
 import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
 import { badRequestProblem, conflictProblem, notFoundProblem, ok } from "@/lib/api/responses";
+import { parseListOptions, type ListOptionsError } from "@/lib/api/list-options";
+import { listBusinesses, sortableFields, filterableFields, includeableRelations } from "@/lib/repos/business";
 
 
 export const runtime = "nodejs";
@@ -59,19 +61,25 @@ async function getBusinesses(req: NextRequest) {
     return NextResponse.json(data, { status: 200 });
   }
 
-  const data = await db.business.findMany({
-    where: { isPublished: true },
-    include: {
-      images: true,
-      tags: true,
-      reviews: true,
-      menuItems: true,
-      foods: { include: { food: { include: { images: true } } } },
-    },
-    orderBy: { name: "asc" },
-  });
-
-  return ok(data);
+  try {
+    const options = parseListOptions(
+      req.nextUrl.searchParams,
+      sortableFields,
+      filterableFields,
+      includeableRelations,
+    );
+    const data = await listBusinesses(options);
+    return ok(data);
+  } catch (err) {
+    if (err instanceof ListOptionsError) {
+      return badRequestProblem(req, {
+        code: "bad-list-options",
+        title: "Maling Request",
+        detail: err.message,
+      });
+    }
+    throw err;
+  }
 }
 
 export const GET = withLogging(withUnhandledApiErrorHandling(getBusinesses), "getBusinesses");

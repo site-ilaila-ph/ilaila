@@ -4,56 +4,68 @@ import Link from "next/link";
 import Image from "next/image";
 import { Utensils } from "lucide-react";
 import type { FoodListItem } from "./types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
+import { Input } from "@/components/ui/input";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const loadFoods = useCallback(async (query: string) => {
+    setIsSearching(query.length > 0);
+    const params = new URLSearchParams();
+    if (query.length > 0) {
+      params.set("filter", "name:contains:" + encodeURIComponent(query));
+    }
+    const qs = params.toString();
+    const url = qs ? "/api/foods?" + qs : "/api/foods";
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Hindi na-load ang mga pagkain."));
+      const data = await response.json();
+      if (data) setFoods(data as FoodListItem[]);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain.");
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
-
-    async function loadFoods() {
-      const response = await fetch("/api/foods");
-
-      if (response.ok) {
-        const data = await response.json();
-        if (isMounted) setFoods(data ?? []);
-      } else if (isMounted) {
-        setLoadError(await readProblemMessage(response, "Hindi na-load ang mga pagkain."));
-      }
-
-      if (isMounted) setIsLoading(false);
-    }
-
-    void loadFoods();
-
-    return () => {
-      isMounted = false;
-    };
+    setIsLoading(true);
+    fetch("/api/foods")
+      .then(r => {
+        if (!r.ok) throw new Error(await readProblemMessage(r, "Hindi na-load ang mga pagkain."));
+        return r.json();
+      })
+      .then(d => { if (isMounted) { if (d) setFoods(d as FoodListItem[]); setIsLoading(false); } })
+      .catch(err => { if (isMounted) { setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain."); setIsLoading(false); } });
+    return () => { isMounted = false; };
   }, []);
 
-  const filteredFoods = foods.filter((food) => {
-    const matchesSearch =
-      food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (food.description && food.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (food.tags && food.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())));
-    return matchesSearch;
-  });
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery.trim() === "") {
+      debounceRef.current = setTimeout(() => loadFoods(""), 200);
+    } else {
+      debounceRef.current = setTimeout(() => loadFoods(searchQuery.trim()), 300);
+    }
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery, loadFoods]);
 
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background text-foreground">
         <nav className="border-b border-border bg-card/80 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-            <Link
-              href="/home"
-              className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
-            >
+            <Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">
               <Image src="/icon.svg" alt="Ilaila Logo" width={28} height={28} />
               Ilaila
             </Link>
@@ -66,19 +78,17 @@ export default function FoodsPage() {
     );
   }
 
+  const hasResults = foods.length > 0;
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <nav className="border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <Link
-            href="/home"
-            className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary"
-          >
+          <Link href="/home" className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight text-primary">
             Ilaila
           </Link>
         </div>
       </nav>
-
       <div className="mx-auto max-w-6xl px-6 py-12">
         <ErrorAlert message={loadError} className="mb-6" onDismiss={() => setLoadError(null)} />
         <div className="mb-12 text-center">
@@ -89,26 +99,22 @@ export default function FoodsPage() {
             Mga Pagkaing Pamana ng San Pedro
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Tuklasin ang mga tunay na lasa, tradisyunal na resipe, at malalim na pamana ng kultura ng lutuing San Pedro.
+            Tuklasin ang mga tunay na lasa, tradisyunal na resipe, at malalim na pamana ng kultura ng luts
           </p>
-
-          <div className="mx-auto mt-8 max-w-md">
+          <div className="mt-8 max-w-md mx-auto">
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground">
-                🔍
-              </span>
-              <input
-                type="text"
-                placeholder="Maghanap ng mga tradisyunal na ulam, sangkap, tag..."
+              <Input
+                type="search"
+                placeholder="Hanapin ang pagkain..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-border bg-card py-3 pr-4 pl-10 text-sm text-foreground shadow-xs transition placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
+                className="w-full transition placeholder:text-muted-foreground focus:border-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20"
               />
+              {isSearching && <span className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground"><Utensils size={12} /></span>}
             </div>
           </div>
         </div>
-
-        {filteredFoods.length === 0 ? (
+        {!hasResults ? (
           <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-xs">
             <h3 className="flex items-center justify-center gap-2 text-lg font-semibold">
               <Utensils aria-hidden="true" className="size-6 shrink-0 text-primary" />
@@ -120,54 +126,29 @@ export default function FoodsPage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredFoods.map((food) => {
+            {foods.map((food) => {
               const primaryImageUrl = food.images?.find((img) => Boolean(img.url))?.url;
-
               return (
                 <Link
                   key={food.id}
-                  href={`/foods/${food.id}`}
+                  href="/foods/" + food.id
                   className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl"
                 >
                   {primaryImageUrl ? (
                     <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                      <Image
-                        src={primaryImageUrl}
-                        alt={food.name}
-                        width={400}
-                        height={225}
-                        unoptimized
-                        className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+                      <Image src={primaryImageUrl} alt={food.name} width={400} height={225} unoptimized className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     </div>
                   ) : null}
-
                   <div className="p-6">
                     <div className="mb-4 flex items-center justify-between">
-                      <span className="rounded-lg bg-primary/10 p-2.5 text-xl">
-                        <Utensils aria-hidden="true" className="size-5 text-primary" />
-                      </span>
-                      <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition">
-                        Tingnan ang Resipe &rarr;
-                      </span>
+                      <span className="rounded-lg bg-primary/10 p-2.5 text-xl"><Utensils aria-hidden="true" className="size-5 text-primary" /></span>
+                      <span className="text-xs font-medium text-muted-foreground group-hover:text-primary transition">Tingnan ang Resipe &rarr;</span>
                     </div>
-                    <h3 className="mb-2 text-xl font-bold tracking-tight group-hover:text-primary transition">
-                      {food.name}
-                    </h3>
-                    <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
-                      {food.description}
-                    </p>
-
+                    <h3 className="mb-2 text-xl font-bold tracking-tight group-hover:text-primary transition">{food.name}</h3>
+                    <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{food.description}</p>
                     {food.tags && food.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border/50">
-                        {food.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+                        {food.tags.map((tag) => (<span key={tag} className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">{tag}</span>))}
                       </div>
                     )}
                   </div>
