@@ -30,7 +30,7 @@ export default function SingleFoodPage({
 
     async function loadFood() {
       const resolvedParams = await params;
-      const response = await fetch(`/api/foods?id=${encodeURIComponent(resolvedParams.id)}`);
+      const response = await fetch(`/api/foods/${encodeURIComponent(resolvedParams.id)}`);
 
       if (response.ok) {
         const data = await response.json();

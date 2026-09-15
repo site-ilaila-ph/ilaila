@@ -70,6 +70,18 @@ function mapFoodDetailPrismaError(req: NextRequest, error: unknown): NextRespons
   throw error;
 }
 
+async function getFood(req: NextRequest, { params }: { params: Promise<{ id: string}> }) {
+  const db = acquirePrismaClient();
+  const data = await db.food.findFirst({
+    include: {
+      images: true,
+      _count: { select: { businesses: true } },
+    },
+    where: { id: (await params).id },
+  });
+  return NextResponse.json(data, { status: 200 });
+}
+
 async function patchFood(req: NextRequest) {
   const contentType = req.headers.get("content-type") ?? "";
   if (!contentType.includes("multipart/form-data")) {
@@ -279,5 +291,7 @@ async function deleteFood(req: NextRequest) {
   }
 }
 
+
+export const GET = withLogging(withUnhandledApiErrorHandling(getFood), "getFood");
 export const PATCH = withLogging(withUnhandledApiErrorHandling(patchFood), "patchFood");
 export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteFood), "deleteFood");
