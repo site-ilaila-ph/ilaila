@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { join } from "node:path/posix";
-import type { ReviewImageCreateInput } from "@/generated/prisma/models";
 import { Prisma } from "@/generated/prisma/client";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
+import { acquirePrismaClient } from "@/lib/infra";
 import { createClient } from "@/lib/supabase/server";
 import { badRequestProblem, conflictProblem, created, notFoundProblem, unauthorizedProblem } from "@/lib/api/responses";
 
@@ -20,11 +17,6 @@ type ReviewInput = {
   service?: number;
   ambiance?: number;
   value?: number;
-};
-
-type ReviewMetadata = {
-  review: ReviewInput;
-  images?: ReviewImageCreateInput[];
 };
 
 function mapReviewPrismaError(req: NextRequest, error: unknown): NextResponse {
@@ -63,30 +55,14 @@ function mapReviewPrismaError(req: NextRequest, error: unknown): NextResponse {
 }
 
 async function postReview(req: NextRequest) {
-  const fd = await req.formData();
-  const metadataRaw = fd.get("metadata");
+  const parsed: ReviewInput = await req.json();
 
-  if (typeof metadataRaw !== "string") {
-    return badRequestProblem(req, { code: "metadata-required", detail: "A metadata JSON part is required." });
-  }
-
-  let parsed: ReviewMetadata;
-  try {
-    parsed = JSON.parse(metadataRaw);
-  } catch {
-    return badRequestProblem(req, { code: "metadata-invalid-json", detail: "metadata part must be valid JSON." });
-  }
-
-  if (!parsed?.review) {
-    return badRequestProblem(req, { code: "review-required", detail: "metadata.review is required." });
-  }
-
-  const { businessId, text, foodQuality, service, ambiance, value } = parsed.review;
+  const { businessId, text, foodQuality, service, ambiance, value } = parsed;
 
   if (!businessId || !UUID_PATTERN.test(businessId)) {
     return badRequestProblem(req, {
       code: "business-id-required",
-      detail: "A valid business id is required in metadata.review.businessId.",
+      detail: "A valid business id is required.",
     });
   }
 
@@ -99,7 +75,7 @@ async function postReview(req: NextRequest) {
   ) {
     return badRequestProblem(req, {
       code: "review-fields-required",
-      detail: "metadata.review requires text, foodQuality, service, ambiance, and value.",
+      detail: "The data text, foodQuality, service, ambiance, and value are required.",
     });
   }
 
@@ -127,42 +103,10 @@ async function postReview(req: NextRequest) {
     });
   }
 
-  const imageFiles = fd.getAll("images").filter((f): f is File => f instanceof File);
-  const imagesMeta = parsed.images ?? [];
-
-  if (imagesMeta.length > 0 && imagesMeta.length !== imageFiles.length) {
-    return badRequestProblem(req, {
-      code: "images-files-mismatch",
-      detail: `metadata.images has ${imagesMeta.length} entries but ${imageFiles.length} image files were uploaded.`,
-    });
-  }
-
-  let reviewId: string | undefined;
-  let uploadedReviewImageIds: string[] = [];
+  const reviewerId = reviewer.id;
+  const reviewId = crypto.randomUUID();
 
   try {
-    reviewId = randomUUID();
-    const storageManager = acquireStorageManager();
-    const targetReviewId = reviewId;
-    const reviewerId = reviewer.id;
-
-    const uploaded = await Promise.all(
-      imageFiles.map(async (blob, i) => {
-        const reviewImageId = randomUUID();
-        const { url } = await storageManager.upload({
-          key: join("reviews", targetReviewId, "images", reviewImageId),
-          fileOrBody: blob,
-          options: { contentType: blob.type },
-        });
-        return {
-          ...(imagesMeta[i] ?? {}),
-          id: reviewImageId,
-          url,
-        };
-      })
-    );
-    uploadedReviewImageIds = uploaded.map((image) => image.id);
-
     const review = await db.businessReview.create({
       data: {
         id: reviewId,
@@ -174,23 +118,11 @@ async function postReview(req: NextRequest) {
         ambiance,
         value,
         upvotes: 0,
-        images: uploaded.length > 0 ? { create: uploaded } : undefined,
       },
-      include: { images: true },
     });
 
     return created(review);
   } catch (error: unknown) {
-    // Do not leave orphaned objects behind if the DB write fails.
-    if (reviewId && uploadedReviewImageIds.length > 0) {
-      const storageManager = acquireStorageManager();
-      const targetReviewId = reviewId;
-      await Promise.allSettled(
-        uploadedReviewImageIds.map((imageId) =>
-          storageManager.delete({ key: join("reviews", targetReviewId, "images", imageId) })
-        )
-      );
-    }
     return mapReviewPrismaError(req, error);
   }
 }

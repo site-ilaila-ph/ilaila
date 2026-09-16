@@ -136,7 +136,12 @@ const ANIMATION_STYLES: Record<AboutPageKey, string> = {
           opacity: 0;
           transition: opacity 0.8s ease-in-out;
         }
-"the-team": `
+
+        .scroll-fade.visible {
+          opacity: 1;
+        }
+      `,
+  "the-team": `
         @keyframes fadeUp {
           0% {
             opacity: 0;
@@ -362,8 +367,23 @@ const ANIMATION_STYLES: Record<AboutPageKey, string> = {
       `,
 };
 
-        .scroll-fade.visible {
-          opacity: 1;
-        }
-      `,
+interface AboutShellProps extends React.PropsWithChildren {
+  /** Identifies which about page is rendered — drives the nav state and animation set. */
+  current: AboutPageKey;
+}
+
+const AboutShell = ({ current, children }: AboutShellProps) => {
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-(--surface) text-foreground">
+      <style>{ANIMATION_STYLES[current]}</style>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 bg-linear-to-b from-(--primary-muted)/60 via-transparent to-transparent"
+      />
+      <AboutNav current={current} />
+      {children}
+    </div>
+  );
 };
+
+export { AboutShell };

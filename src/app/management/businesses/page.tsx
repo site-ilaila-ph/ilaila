@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Route } from "next";
 import { Search } from "lucide-react";
@@ -47,11 +47,8 @@ export default function ManageBusinesses() {
 
   const [formImages, setFormImages] = useState<BusinessFormImage[]>([]);
 
-  useEffect(() => {
-    loadBusinesses();
-  }, [searchQuery]);
-
-  async function loadBusinesses() {
+  
+  const loadBusinesses = useCallback(async function() {
     try {
       const url = searchQuery
         ? `/api/businesses?search=${encodeURIComponent(searchQuery)}`
@@ -66,7 +63,11 @@ export default function ManageBusinesses() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    requestIdleCallback(loadBusinesses);
+  }, [loadBusinesses, searchQuery]);
 
   function resetForm() {
     for (const img of formImages) {
@@ -188,7 +189,7 @@ export default function ManageBusinesses() {
         for (const img of newImages) {
           if (img.file) form.append("images", img.file);
         }
-        const response = await fetch("/api/management/businesses", {
+        const response = await fetch("/api/businesses", {
           method: "POST",
           body: form,
         });

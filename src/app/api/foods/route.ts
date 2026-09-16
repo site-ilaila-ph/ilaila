@@ -5,8 +5,8 @@ import { ValidationError } from "@/lib/api/domain-errors";
 import type { Prisma } from "@/generated/prisma/client";
 import { ok } from "@/lib/api/responses";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
-import { sortableFields, filterableFields, includeableRelations } from "@/lib/repos/food";
-import { listFoodsService, createFoodService } from "@/lib/services/food";
+import { sortableFields, filterableFields, includeableRelations } from "@/repositories/food-repository";
+import { listFoodsService, createFoodService } from "@/services/food-service";
 
 async function getFoods(req: NextRequest) {
   try {

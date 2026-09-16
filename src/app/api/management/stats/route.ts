@@ -1,7 +1,7 @@
 import { withLogging } from "@/lib/logging";
 import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { ok } from "@/lib/api/responses";
-import { getDashboardCountsService } from "@/lib/services/management";
+import { getDashboardCountsService } from "@/services/management-service";
 
 export const runtime = "nodejs";
 

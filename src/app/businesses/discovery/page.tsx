@@ -12,16 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, ApiProblemError } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
-
-const tags = [
-  "Lahat",
-  "Kainan",
-  "Kapehan",
-  "Panghimagas",
-  "Pamana",
-  "Inumin",
-  "Pasalubong",
-];
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
 async function fetchBusinesses(): Promise<BusinessListItem[]> {
   return api<BusinessListItem[]>("/api/businesses");
@@ -85,40 +76,24 @@ export default function BusinessDiscoveryPage() {
               Tuklasin ang iyong susunod na paboritong lugar.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Mga independiyenteng restawran, kapitbahay na kapehan, at mga lokal na negosyo na handang ibigay ang
+              Mga kainan, kapehan, at mga lokal na negosyo na handang ibigay ang
               pinakamagandang karanasan sa San Pedro, Laguna.
             </p>
           </div>
-        </div>
-      </section>
 
-      <div className="border-b border-brand-border bg-card/40 px-6 py-6 sm:py-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="relative mb-4">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+          <InputGroup className="mt-6">
+            <InputGroupInput
               type="search"
               placeholder="Maghanap ng lugar..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
             />
-          </div>
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {tags.map((t) => (
-              <Button
-                key={t}
-                variant={tag === t ? "default" : "outline"}
-                size="sm"
-                className="shrink-0 shadow-xs"
-                onClick={() => setTag(t)}
-              >
-                {t}
-              </Button>
-            ))}
-          </div>
+            <InputGroupAddon align="inline-start" className="mx-6">
+              <Search />
+            </InputGroupAddon>
+          </InputGroup>
         </div>
-      </div>
+      </section>
 
       {error && (
         <div className="mx-auto max-w-7xl px-6 pt-6">

@@ -1,8 +1,8 @@
 import { ValidationError, UnauthorizedError } from "@/lib/api/domain-errors";
-import { listAllReviews, deleteReviewById } from "@/lib/repos/review";
-import { listAppReviews, createAppReview } from "@/lib/repos/app-review";
-import { listUsers, updateUserRole, deleteUserById } from "@/lib/repos/user";
-import { getDashboardCounts } from "@/lib/repos/management";
+import { listAllReviews, deleteReviewById } from "@/repositories/review-repository";
+import { listAppReviews, createAppReview } from "@/repositories/app-review-repository";
+import { listUsers, updateUserRole, deleteUserById } from "@/repositories/user-repository";
+import { getDashboardCounts } from "@/repositories/management-repository";
 
 export async function listAllReviewsService() {
   return listAllReviews();

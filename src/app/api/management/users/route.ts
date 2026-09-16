@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withDomainErrorBoundary } from "@/lib/api/boundary";
-import { listUsersService, updateUserRoleService, deleteUserService } from "@/lib/services/management";
+import { listUsersService, updateUserRoleService, deleteUserService } from "@/services/management-service";
 
 export const runtime = "nodejs";
 

@@ -8,7 +8,7 @@ import {
   getAllAppReviews,
   getApprovedAppReviews,
   getPendingAppReviews,
-} from "@/lib/repos/app-review";
+} from "@/repositories/app-review-repository";
 
 export async function listAppReviewsService() {
   return listAppReviews();

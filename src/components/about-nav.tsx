@@ -1,3 +1,4 @@
+import { Route } from "next";
 import Link from "next/link";
 
 type AboutPageKey = "san-pedro" | "the-team" | "the-website";
@@ -10,7 +11,6 @@ const aboutLinks: { key: AboutPageKey; href: string; label: string }[] = [
 
 interface AboutNavProps {
   current: AboutPageKey;
-  /** Secondary text token used by the sibling links — it differs per about page. */
   linkClassName?: string;
 }
 
@@ -37,7 +37,7 @@ export function AboutNav({
             .map((link) => (
               <Link
                 key={link.key}
-                href={link.href}
+                href={link.href as Route}
                 className={`rounded-full border border-border px-4 py-2 text-sm font-medium ${linkClassName} transition hover:bg-muted`}
               >
                 {link.label}

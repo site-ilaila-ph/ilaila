@@ -5,7 +5,7 @@ import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { ValidationError } from "@/lib/api/domain-errors";
 import z from "zod";
 import { ok, noContent } from "@/lib/api/responses";
-import { listAppReviewsService, createAppReviewService } from "@/lib/services/management";
+import { listAppReviewsService, createAppReviewService } from "@/services/management-service";
 
 export const runtime = "nodejs";
 

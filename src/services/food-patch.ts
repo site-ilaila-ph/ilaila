@@ -1,6 +1,6 @@
 import { ValidationError } from "@/lib/api/domain-errors";
-import { getFoodDetailService, deleteFoodService } from "./food";
-import { patchFoodWithImages, type FoodPatchImageInput } from "@/lib/repos/food-patch";
+import { getFoodDetailService, deleteFoodService } from "./food-service";
+import { patchFoodWithImages, type FoodPatchImageInput } from "@/repositories/food-patch";
 
 export async function patchFoodService(input: {
   id: string;

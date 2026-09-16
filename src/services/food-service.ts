@@ -1,9 +1,9 @@
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError } from "@/lib/api/domain-errors";
 import type { Prisma } from "@/generated/prisma/client";
-import { listFoods } from "@/lib/repos/food";
-import { findFoodDetailById, createFoodWithImages, createSimpleFood, findFoodImageIds, deleteFoodById } from "@/lib/repos/food-write";
-import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload";
+import { listFoods } from "@/repositories/food-repository";
+import { findFoodDetailById, createFoodWithImages, createSimpleFood, findFoodImageIds, deleteFoodById } from "@/repositories/food-write";
+import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
 
 export async function listFoodsService(options: ListOptions) {
   return listFoods(options);

@@ -97,12 +97,12 @@ export default function BusinessProfilePage({ params }: { params: Promise<{ id: 
     },
     onSuccess: () => {
       setReviewText("");
-      clearReviewImages(reviewImages);
       setReviewImages([]);
       void queryClient.invalidateQueries({ queryKey: ["business", id] });
     },
   });
 
+  // TODO: Make it so we can only vote once.
   const upvoteMutation = useMutation({
     mutationFn: async (reviewId: string) => {
       const form = new FormData();
@@ -123,36 +123,6 @@ export default function BusinessProfilePage({ params }: { params: Promise<{ id: 
     if (menuSort === "price-high") items.sort((a, b) => Number(b.price) - Number(a.price));
     return items;
   }, [business?.menuItems, menuSort]);
-
-  function addReviewImages(fileList: FileList | null) {
-    const files = Array.from(fileList ?? []);
-    if (files.length === 0) return;
-    setReviewImages((current) => [
-      ...current,
-      ...files.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        description: "",
-        previewUrl: URL.createObjectURL(file),
-      })),
-    ]);
-  }
-
-  function removeReviewImage(imageId: string) {
-    setReviewImages((current) => {
-      const target = current.find((img) => img.id === imageId);
-      if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
-      return current.filter((img) => img.id !== imageId);
-    });
-  }
-
-  function updateReviewImageDescription(imageId: string, description: string) {
-    setReviewImages((current) => current.map((img) => (img.id === imageId ? { ...img, description } : img)));
-  }
-
-  function clearReviewImages(images: { previewUrl: string }[]) {
-    for (const image of images) URL.revokeObjectURL(image.previewUrl);
-  }
 
   if (businessQuery.isLoading) {
     return (
@@ -249,10 +219,6 @@ export default function BusinessProfilePage({ params }: { params: Promise<{ id: 
               onReviewScoresChange={setReviewScores}
               reviewText={reviewText}
               onReviewTextChange={setReviewText}
-              reviewImages={reviewImages}
-              onAddReviewImages={addReviewImages}
-              onRemoveReviewImage={removeReviewImage}
-              onUpdateImageDescription={updateReviewImageDescription}
               onSubmit={(e) => {
                 e.preventDefault();
                 submitReviewMutation.mutate();

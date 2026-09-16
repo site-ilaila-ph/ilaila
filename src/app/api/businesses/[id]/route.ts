@@ -84,7 +84,6 @@ async function getBusiness(req: NextRequest, { params }: { params: Promise<{ id:
       images: true,
       createdBy: true,
       reviews: {
-        include: { images: true, user: true },
         orderBy: { createdAt: "desc" },
       },
       foods: true,

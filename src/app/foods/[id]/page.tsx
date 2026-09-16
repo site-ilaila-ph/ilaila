@@ -9,11 +9,12 @@ import { FoodGallery } from "@/components/food-gallery";
 import { ImageLightbox, type LightboxImage } from "@/components/image-lightbox";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { api, ApiProblemError } from "@/lib/api/client";
-import type { FoodDetail } from "../types";
+import { FoodWithRelations } from "../types";
+
 
 export default function FoodDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [food, setFood] = useState<FoodDetail | null>(null);
+  const [food, setFood] = useState<FoodWithRelations | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
@@ -23,7 +24,7 @@ export default function FoodDetailPage({ params }: { params: Promise<{ id: strin
 
     async function loadFood() {
       try {
-        const data = await api<FoodDetail>(`/api/foods?id=${encodeURIComponent(id)}`);
+        const data = await api<FoodWithRelations>(`/api/foods/${encodeURIComponent(id)}`);
         if (!isMounted) return;
         setFood(data);
         setLoadError(null);

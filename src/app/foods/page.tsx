@@ -6,42 +6,56 @@ import { AppNav } from "@/components/app-nav";
 import { FoodCard } from "@/components/food-card";
 import { Input } from "@/components/ui/input";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { api, ApiProblemError } from "@/lib/api/client";
+import { readProblemMessage } from "@/lib/api/client";
 import type { FoodListItem } from "./types";
 
 export default function FoodsPage() {
   const [foods, setFoods] = useState<FoodListItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const isFirstMount = useRef(true);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadFoods = useCallback(async (query: string) => {
-    setIsSearching(true);
+    setIsSearching(query.length > 0);
+    const params = new URLSearchParams();
+    if (query.length > 0) {
+      params.set("filter", "name:contains:" + encodeURIComponent(query));
+    }
+    const qs = params.toString();
+    const url = qs ? "/api/foods?" + qs : "/api/foods";
     try {
-      const url = query ? `/api/foods?search=${encodeURIComponent(query)}` : "/api/foods";
-      const data = await api<FoodListItem[]>(url);
-      setFoods(data ?? []);
-      setLoadError(null);
-    } catch (error) {
-      console.error("Failed to load foods:", error);
-      setLoadError(
-        error instanceof ApiProblemError
-          ? error.problem.detail || error.problem.title
-          : "Hindi na-load ang mga pagkain. Subukang muli mamaya."
-      );
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(await readProblemMessage(response, "Hindi na-load ang mga pagkain."));
+      const data = await response.json();
+      if (data) setFoods(data as FoodListItem[]);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain.");
     } finally {
       setIsSearching(false);
-      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      void loadFoods("");
+    let isMounted = true;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(true);
+    fetch("/api/foods")
+      .then(async (r) => {
+        if (!r.ok) throw new Error(await readProblemMessage(r, "Hindi na-load ang mga pagkain."));
+        return r.json();
+      })
+      .then(d => { if (isMounted) { if (d) setFoods(d as FoodListItem[]); setIsLoading(false); } })
+      .catch(err => { if (isMounted) { setLoadError(err instanceof Error ? err.message : "Hindi na-load ang mga pagkain."); setIsLoading(false); } });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery.trim() === "") {
+      debounceRef.current = setTimeout(() => loadFoods(""), 200);
     } else {
       debounceRef.current = setTimeout(() => loadFoods(searchQuery.trim()), 300);
     }

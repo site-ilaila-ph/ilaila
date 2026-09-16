@@ -1,8 +1,5 @@
-import Image from "next/image";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,10 +12,6 @@ interface BusinessReviewFormProps {
   onReviewScoresChange: (scores: ReviewScores) => void;
   reviewText: string;
   onReviewTextChange: (text: string) => void;
-  reviewImages: ReviewImageDraft[];
-  onAddReviewImages: (files: FileList | null) => void;
-  onRemoveReviewImage: (id: string) => void;
-  onUpdateImageDescription: (id: string, description: string) => void;
   onSubmit: (event: React.FormEvent) => void;
   isSubmitting: boolean;
   submitError: string | null;
@@ -30,10 +23,6 @@ export function BusinessReviewForm({
   onReviewScoresChange,
   reviewText,
   onReviewTextChange,
-  reviewImages,
-  onAddReviewImages,
-  onRemoveReviewImage,
-  onUpdateImageDescription,
   onSubmit,
   isSubmitting,
   submitError,
@@ -66,54 +55,6 @@ export function BusinessReviewForm({
           ))}
         </div>
 
-        <div>
-          <Label htmlFor="review-images" className="text-xs font-medium text-muted-foreground">
-            Mga Larawan (opsyonal)
-          </Label>
-          <Input
-            id="review-images"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            multiple
-            className="mt-1"
-            onChange={(event) => {
-              onAddReviewImages(event.target.files);
-              event.target.value = "";
-            }}
-          />
-          {reviewImages.length > 0 && (
-            <ul className="mt-3 space-y-2">
-              {reviewImages.map((image, index) => (
-                <li key={image.id} className="flex items-start gap-3 rounded-lg border border-border bg-card p-2">
-                  <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-md bg-muted">
-                    <Image
-                      src={image.previewUrl}
-                      alt={`Preview ng larawan ${index + 1}`}
-                      width={120}
-                      height={80}
-                      unoptimized
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <Textarea
-                      value={image.description}
-                      onChange={(event) => onUpdateImageDescription(image.id, event.target.value)}
-                      placeholder="Paglalarawan ng larawan (opsyonal)"
-                      rows={2}
-                      className="text-sm"
-                    />
-                    <Button type="button" variant="destructive" size="sm" onClick={() => onRemoveReviewImage(image.id)}>
-                      <X className="size-4" />
-                      <span className="sr-only">Alisin</span>
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
         <Textarea
           value={reviewText}
           onChange={(event) => onReviewTextChange(event.target.value)}
@@ -126,7 +67,7 @@ export function BusinessReviewForm({
             Sinasaklaw ng iyong review ang pagkain, serbisyo, ambiance, at halaga.
           </span>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Nagpapadala..." : "I-publish ang review"}
+            {isSubmitting ? "Nagpapadala..." : "Ipadala ang review"}
           </Button>
         </div>
 

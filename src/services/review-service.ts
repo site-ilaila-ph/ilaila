@@ -1,5 +1,5 @@
 import { ValidationError } from "@/lib/api/domain-errors";
-import { listAllReviews, deleteReviewById, listReviewsForBusiness, createReview, updateReview } from "@/lib/repos/review";
+import { listAllReviews, deleteReviewById, listReviewsForBusiness, createReview, updateReview } from "@/repositories/review-repository";
 
 export async function listReviewsService(businessId?: string) {
   if (businessId) {

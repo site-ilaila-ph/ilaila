@@ -1,5 +1,4 @@
-import Image from "next/image";
-import { Image as ImageIcon, ThumbsUp } from "lucide-react";
+import { ThumbsUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import type { BusinessListItem } from "@/app/businesses/types";
@@ -44,28 +43,6 @@ export function BusinessReviewsList({
               </div>
             </div>
             <p className="text-muted-foreground">{review.text}</p>
-            {review.images.length > 0 && (
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {review.images.map((image) => (
-                  <div key={image.id} className="overflow-hidden rounded-lg border border-border bg-muted">
-                    {image.url ? (
-                      <Image
-                        src={image.url}
-                        alt={image.description || "Larawan mula sa review"}
-                        width={240}
-                        height={160}
-                        unoptimized
-                        className="h-28 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid h-28 w-full place-items-center text-muted-foreground">
-                        <ImageIcon className="size-6" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
             <button
               onClick={() => onUpvote(review.id)}
               disabled={isUpvoting}

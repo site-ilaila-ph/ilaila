@@ -5,8 +5,8 @@ import { ValidationError } from "@/lib/api/domain-errors";
 import type { Prisma } from "@/generated/prisma/client";
 import { ok } from "@/lib/api/responses";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
-import { sortableFields, filterableFields, includeableRelations } from "@/lib/repos/business";
-import { getBusinessByIdOrNameService, listBusinessesService, createBusinessService } from "@/lib/services/business";
+import { sortableFields, filterableFields, includeableRelations } from "@/repositories/business-repository";
+import { getBusinessByIdOrNameService, listBusinessesService, createBusinessService } from "@/services/business-service";
 
 
 export const runtime = "nodejs";

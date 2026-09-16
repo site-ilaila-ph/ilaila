@@ -8,12 +8,12 @@ import {
   createSimpleBusinessService,
   updateSimpleBusinessService,
   deleteBusinessService,
-} from "@/lib/services/business";
+} from "@/services/business-service";
 import {
   sortableFields,
   filterableFields,
   includeableRelations,
-} from "@/lib/repos/business";
+} from "@/repositories/business-repository";
 
 export const runtime = "nodejs";
 

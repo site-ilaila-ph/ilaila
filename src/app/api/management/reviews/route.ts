@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withDomainErrorBoundary } from "@/lib/api/boundary";
-import { listAllReviewsService, deleteReviewService } from "@/lib/services/management";
+import { listAllReviewsService, deleteReviewService } from "@/services/management-service";
 
 export const runtime = "nodejs";
 

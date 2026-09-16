@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope, Montserrat } from "next/font/google";
 import "@/app/styles/globals.css";
 import { cn } from "@/lib/utils";
+import { QueryClientProvider } from "./query-client-provider";
 
 const montserratHeading = Montserrat({
   subsets: ["latin"],
@@ -47,7 +48,11 @@ export default async function RootLayout({
         "notranslate"
       )}
     >
-      <body className="min-h-full w-full flex flex-col">{children}</body>
+      <body className="min-h-full w-full flex flex-col">
+        <QueryClientProvider>
+          {children}
+        </QueryClientProvider>
+      </body>
     </html>
   );
 }

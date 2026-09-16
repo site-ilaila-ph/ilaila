@@ -53,7 +53,7 @@ export default function AppReviewsPage() {
 
       <div className="mx-auto max-w-2xl px-6 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Ibahagi ang Iyong Feedback</h1>
+          <h1 className="text-4xl font-bold mb-2">Ibahagi ang Iyong Paghuhusga</h1>
           <p className="text-muted-foreground">
             Tulungan kaming mapabuti ang Ilaila sa pamamagitan ng pagbabahagi ng iyong mga saloobin at karanasan
           </p>

@@ -4,9 +4,9 @@ import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { ValidationError } from "@/lib/api/domain-errors";
 import { ok } from "@/lib/api/responses";
 
-import { getFoodDetailService, deleteFoodService } from "@/lib/services/food";
-import { patchFoodService } from "@/lib/services/food-patch";
-import type { FoodPatchImageInput } from "@/lib/repos/food-patch";
+import { getFoodDetailService, deleteFoodService } from "@/services/food-service";
+import { patchFoodService } from "@/services/food-patch";
+import type { FoodPatchImageInput } from "@/repositories/food-patch";
 
 export const runtime = "nodejs";
 

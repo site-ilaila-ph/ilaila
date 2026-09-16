@@ -1,7 +1,7 @@
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
 import type { Prisma } from "@/generated/prisma/client";
-import { listBusinesses } from "@/lib/repos/business";
+import { listBusinesses } from "@/repositories/business-repository";
 import {
   findBusinessByIdOrName,
   findBusinessDetailById,
@@ -10,9 +10,9 @@ import {
   updateSimpleBusiness,
   deleteBusinessById,
   findBusinessImageIds,
-} from "@/lib/repos/business-write";
-import { findFirstUserId } from "@/lib/repos/user";
-import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload";
+} from "@/repositories/business-write";
+import { findFirstUserId } from "@/repositories/user-repository";
+import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
 
 export async function listBusinessesService(options: ListOptions, opts?: { includeUnpublished?: boolean }) {
   return listBusinesses(options, opts);

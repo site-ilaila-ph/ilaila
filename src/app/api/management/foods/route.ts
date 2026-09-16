@@ -2,8 +2,8 @@ import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { withLogging } from "@/lib/logging";
 import { NextRequest, NextResponse } from "next/server";
 import { ValidationError } from "@/lib/api/domain-errors";
-import { listFoodsService, createSimpleFoodService } from "@/lib/services/food";
-import { sortableFields, filterableFields, includeableRelations } from "@/lib/repos/food";
+import { listFoodsService, createSimpleFoodService } from "@/services/food-service";
+import { sortableFields, filterableFields, includeableRelations } from "@/repositories/food-repository";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
 
 async function getFoods(req: NextRequest) {
