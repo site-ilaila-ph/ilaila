@@ -5,7 +5,8 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient, acquireStorageManager } from "@/lib/infra";
+import { acquirePrismaClient } from "@/lib/infra";
+import { acquireStorageManager } from "@/lib/storage";
 import {
   badRequestProblem,
   conflictProblem,

@@ -1,6 +1,7 @@
 import { join } from "node:path/posix";
 import { randomUUID } from "node:crypto";
-import { acquireStorageManager, type StorageManager } from "@/lib/infra";
+import { type StorageManager } from "@/lib/infra";
+import { acquireStorageManager } from "@/lib/storage";
 import { ValidationError } from "@/lib/api/domain-errors";
 
 export interface ImageBlobInput {

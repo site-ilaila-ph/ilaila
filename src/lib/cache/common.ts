@@ -1,6 +1,6 @@
 import { after } from "next/server";
 import { LRUCache } from "lru-cache";
-import { joinKey } from "../utils";
+import { joinKey } from "./utils";
 
 export type CacheKey = string | string[];
 

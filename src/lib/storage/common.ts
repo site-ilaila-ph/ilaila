@@ -1,4 +1,4 @@
-import { joinKey } from "../utils";
+import { joinKey } from "../cache/utils";
 
 export type StorageKey = string | string[];
 

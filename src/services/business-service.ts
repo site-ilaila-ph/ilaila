@@ -1,8 +1,8 @@
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
 import type { Prisma } from "@/generated/prisma/client";
-import { listBusinesses } from "@/repositories/business-repository";
 import {
+  listBusinesses,
   findBusinessByIdOrName,
   findBusinessDetailById,
   createBusinessWithImages,
@@ -10,7 +10,7 @@ import {
   updateSimpleBusiness,
   deleteBusinessById,
   findBusinessImageIds,
-} from "@/repositories/business-write";
+} from "@/repositories/business-repository";
 import { findFirstUserId } from "@/repositories/user-repository";
 import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
 

@@ -6,7 +6,7 @@ import { ok } from "@/lib/api/responses";
 
 import { getFoodDetailService, deleteFoodService } from "@/services/food-service";
 import { patchFoodService } from "@/services/food-patch";
-import type { FoodPatchImageInput } from "@/repositories/food-patch";
+import type { FoodPatchImageInput } from "@/repositories/food-repository";
 
 export const runtime = "nodejs";
 
