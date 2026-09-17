@@ -31,7 +31,7 @@ async function fetchRelatedBusinesses(business: BusinessListItem): Promise<Busin
   const all = await api<BusinessListItem[]>("/api/businesses");
   const tags = new Set(business.tags);
   return (all ?? [])
-    .filter((item) => item.id !== business.id && item.tags.some((tag) => tags.has(tag)))
+    .filter((item) => item.id !== business.id && item.tags.some((tag: string) => tags.has(tag)))
     .slice(0, 3);
 }
 
@@ -162,17 +162,17 @@ export default function BusinessProfilePage({ params }: { params: Promise<{ id: 
   const averageRating =
     business.reviews.length > 0
       ? Math.round(
-          (business.reviews.reduce((sum, r) => sum + (r.foodQuality + r.service + r.ambiance + r.value) / 4, 0) /
+          (business.reviews.reduce((sum: number, r: { foodQuality: number; service: number; ambiance: number; value: number }) => sum + (r.foodQuality + r.service + r.ambiance + r.value) / 4, 0) /
             business.reviews.length) *
             10
         ) / 10
       : 0;
 
   const metricRatings: [string, number][] = [
-    ["Kalidad ng pagkain", business.reviews.reduce((sum, review) => sum + review.foodQuality, 0)],
-    ["Serbisyo", business.reviews.reduce((sum, review) => sum + review.service, 0)],
-    ["Ambiance", business.reviews.reduce((sum, review) => sum + review.ambiance, 0)],
-    ["Halaga", business.reviews.reduce((sum, review) => sum + review.value, 0)],
+    ["Kalidad ng pagkain", business.reviews.reduce((sum: number, review: { foodQuality: number; service: number; ambiance: number; value: number }) => sum + review.foodQuality, 0)],
+    ["Serbisyo", business.reviews.reduce((sum: number, review: { foodQuality: number; service: number; ambiance: number; value: number }) => sum + review.service, 0)],
+    ["Ambiance", business.reviews.reduce((sum: number, review: { foodQuality: number; service: number; ambiance: number; value: number }) => sum + review.ambiance, 0)],
+    ["Halaga", business.reviews.reduce((sum: number, review: { foodQuality: number; service: number; ambiance: number; value: number }) => sum + review.value, 0)],
   ];
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}`;

@@ -1,33 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma/client";
+
 import { isAuthError } from "@supabase/supabase-js";
 import {
-    badRequestProblem,
-    conflictProblem,
-    internalErrorProblem,
-    notFoundProblem,
-    tooManyRequestsProblem,
-    unauthorizedProblem,
-    unprocessableProblem,
+  badRequestProblem,
+  conflictProblem,
+  internalErrorProblem,
+  notFoundProblem,
+  tooManyRequestsProblem,
+  unauthorizedProblem,
+  unprocessableProblem,
 } from "./responses";
 
 export {
-    badGatewayProblem,
-    badRequestProblem,
-    conflictProblem,
-    forbiddenProblem,
-    internalErrorProblem,
-    notFoundProblem,
-    problemResponse,
-    tooManyRequestsProblem,
-    unauthorizedProblem,
-    unprocessableProblem,
-    unsupportedMediaTypeProblem,
+  badGatewayProblem,
+  badRequestProblem,
+  conflictProblem,
+  forbiddenProblem,
+  internalErrorProblem,
+  notFoundProblem,
+  problemResponse,
+  tooManyRequestsProblem,
+  unauthorizedProblem,
+  unprocessableProblem,
+  unsupportedMediaTypeProblem,
 } from "./responses";
 export type {
-    ProblemDefaults,
-    ProblemDetails,
-    ProblemOverrides,
+  ProblemDefaults,
+  ProblemDetails,
+  ProblemOverrides,
 } from "./responses";
 
 export type ErrorHandlingCallback = (
@@ -39,8 +39,8 @@ export type ErrorHandlingCallback = (
 
 export function isMissingIdError(err: unknown): boolean {
   return (
-    err instanceof Prisma.PrismaClientValidationError &&
-    /Argument `id` is missing/i.test(err.message)
+  err instanceof Error &&
+  /Argument `id` is missing/i.test(err.message)
   );
 }
 
@@ -57,175 +57,170 @@ export const commonErrorHandler: ErrorHandlingCallback = async (
   err: unknown,
 ): Promise<NextResponse> => {
   if (err instanceof SyntaxError) {
-    return badRequestProblem(request, {
-      code: "invalid-json",
-      title: "Maling Request",
-      detail: "Ang request body ay dapat na valid JSON.",
-    });
+  return badRequestProblem(request, {
+    code: "invalid-json",
+    title: "Maling Request",
+    detail: "Ang request body ay dapat na valid JSON.",
+  });
   }
 
   if (err instanceof TypeError) {
-    return badRequestProblem(request, {
-      code: "invalid-url",
-      title: "Maling Request",
-      detail: "Ang request URL ay hindi wasto.",
-    });
+  return badRequestProblem(request, {
+    code: "invalid-url",
+    title: "Maling Request",
+    detail: "Ang request URL ay hindi wasto.",
+  });
   }
 
   if (isMissingIdError(err)) {
+  return badRequestProblem(request, {
+    code: "id-required",
+    title: "Maling Request",
+    detail: "Kinakailangan ng id.",
+  });
+  }
+
+  if (err instanceof Error && (err as Error & { code?: string }).code) {
+  const code = (err as Error & { code?: string }).code;
+  switch (code) {
+    case "P2025": // record not found
+    return notFoundProblem(request, {
+      code: "resource-not-found",
+      title: "Hindi Nakita",
+      detail: "Ang hinahanap mo ay hindi umiiral.",
+    });
+    case "P2002": // unique constraint violation
+    return conflictProblem(request, {
+      code: "resource-conflict",
+      title: "Salungatan",
+      detail: "Mayroon na kami niyan.",
+    });
+    case "P2003": // foreign key constraint violation
     return badRequestProblem(request, {
-      code: "id-required",
+      code: "resource-invalid-reference",
       title: "Maling Request",
-      detail: "Kinakailangan ng id.",
+      detail: "Ang request ay nagre-reference ng record na hindi umiiral.",
     });
+    default:
+    break; // fall through to generic 500 below
+  }
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (err.code) {
-      case "P2025": // record not found
-        return notFoundProblem(request, {
-          code: "resource-not-found",
-          title: "Hindi Nakita",
-          detail: "Ang hinahanap mo ay hindi umiiral.",
-        });
-      case "P2002": // unique constraint violation
-        return conflictProblem(request, {
-          code: "resource-conflict",
-          title: "Salungatan",
-          detail: "Mayroon na kami niyan.",
-        });
-      case "P2003": // foreign key constraint violation
-        return badRequestProblem(request, {
-          code: "resource-invalid-reference",
-          title: "Maling Request",
-          detail: "Ang request ay nagre-reference ng record na hindi umiiral.",
-        });
-      default:
-        break; // fall through to generic 500 below
-    }
-  }
-
-  if (err instanceof Prisma.PrismaClientValidationError) {
-    // do not expose what happened.
-    return internalErrorProblem(request, {
-      code: "internal-error",
-      title: "Error sa Server",
-      detail:
-        "May mali sa pagkakaprogram ng website na ito, pakicontact ang gumawa.",
-    });
-  }
-
-  if (isAuthError(err)) {
-    const status = err.status ?? 400;
-
-    if (status === 401) {
-      return unauthorizedProblem(request, {
-        code: "unauthorized",
-        title: "Hindi Autentificado",
-        detail: "Di ka awtorisado.",
-      });
-    }
-    if (status === 400 || status === 422) {
-      return badRequestProblem(request, {
-        code: "bad-request",
-        title: "Maling Request",
-        detail: "May mali sa iyong request.",
-      });
-    }
-
-    if (status === 429) {
-      return tooManyRequestsProblem(request, {
-        code: "rate-limited",
-        title: "Maraming Request",
-        detail: "Napakaraming request. Pakisubukan muli sa ibang pagkakataon.",
-      });
-    }
-
-    if (status >= 500) {
-      return internalErrorProblem(request, {
-        code: "internal-error",
-        title: "Error sa Server",
-        detail: "May naganap na error sa server. Pakisubukan muli sa ibang pagkakataon.",
-      });
-    }
-
-    return badRequestProblem(request, {
-      code: "bad-request",
-      title: "Maling Request",
-      detail: "May mali sa iyong request.",
-    });
-  }
-
+  if (err instanceof Error) {
+  // do not expose what happened.
   return internalErrorProblem(request, {
     code: "internal-error",
     title: "Error sa Server",
+    detail:
+    "May mali sa pagkakaprogram ng website na ito, pakicontact ang gumawa.",
+  });
+  }
+
+  if (isAuthError(err)) {
+  const status = err.status ?? 400;
+
+  if (status === 401) {
+    return unauthorizedProblem(request, {
+    code: "unauthorized",
+    title: "Hindi Autentificado",
+    detail: "Di ka awtorisado.",
+    });
+  }
+  if (status === 400 || status === 422) {
+    return badRequestProblem(request, {
+    code: "bad-request",
+    title: "Maling Request",
+    detail: "May mali sa iyong request.",
+    });
+  }
+
+  if (status === 429) {
+    return tooManyRequestsProblem(request, {
+    code: "rate-limited",
+    title: "Maraming Request",
+    detail: "Napakaraming request. Pakisubukan muli sa ibang pagkakataon.",
+    });
+  }
+
+  if (status >= 500) {
+    return internalErrorProblem(request, {
+    code: "internal-error",
+    title: "Error sa Server",
     detail: "May naganap na error sa server. Pakisubukan muli sa ibang pagkakataon.",
+    });
+  }
+
+  return badRequestProblem(request, {
+    code: "bad-request",
+    title: "Maling Request",
+    detail: "May mali sa iyong request.",
+  });
+  }
+
+  return internalErrorProblem(request, {
+  code: "internal-error",
+  title: "Error sa Server",
+  detail: "May naganap na error sa server. Pakisubukan muli sa ibang pagkakataon.",
   });
 };
 
-export interface PrismaErrorDetail {
-  idRequired: ErrorDetail;
-  notFound: ErrorDetail;
-  conflict: ErrorDetail;
-  invalidRef?: ErrorDetail;
+
+export interface ErrorHandlerConfig {
+  idRequired: { code: string; title: string; detail: string };
+  notFound: { code: string; title: string; detail: string };
+  conflict: { code: string; title: string; detail: string };
+  invalidRef?: { code: string; title: string; detail: string };
 }
 
-export interface PrismaErrorHandlerConfig {
-  idRequired: PrismaErrorDetail["idRequired"];
-  notFound: PrismaErrorDetail["notFound"];
-  conflict: PrismaErrorDetail["conflict"];
-  invalidRef?: PrismaErrorDetail["invalidRef"];
-}
-
-function mapPrismaKnownError(
+function mapKnownError(
   request: NextRequest,
-  err: Prisma.PrismaClientKnownRequestError,
-  detail: PrismaErrorDetail,
+  err: Error & { code?: string },
+  detail: ErrorHandlerConfig,
 ): NextResponse | undefined {
   if (err.code === "P2025") {
-    return notFoundProblem(request, detail.notFound);
+  return notFoundProblem(request, detail.notFound);
   }
 
   if (err.code === "P2002") {
-    return conflictProblem(request, detail.conflict);
+  return conflictProblem(request, detail.conflict);
   }
 
   if (err.code === "P2003" && detail.invalidRef) {
-    return badRequestProblem(request, detail.invalidRef);
+  return badRequestProblem(request, detail.invalidRef);
   }
 
   return undefined;
 }
 
-export function mapPrismaError(
+export function mapError(
   request: NextRequest,
   err: unknown,
-  config: PrismaErrorHandlerConfig,
+  config: ErrorHandlerConfig,
 ): NextResponse {
   if (err instanceof SyntaxError) {
-    return badRequestProblem(request, {
-      code: "invalid-json",
-      title: "Maling Request",
-      detail: "Ang request body ay dapat na valid JSON.",
-    });
+  return badRequestProblem(request, {
+    code: "invalid-json",
+    title: "Maling Request",
+    detail: "Ang request body ay dapat na valid JSON.",
+  });
   }
 
   if (isMissingIdError(err)) {
-    return badRequestProblem(request, config.idRequired);
+  return badRequestProblem(request, config.idRequired);
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const mapped = mapPrismaKnownError(request, err, config);
-    if (mapped) return mapped;
+  if (err instanceof Error && (err as Error & { code?: string }).code) {
+    const mapped = mapKnownError(request, err as Error & { code?: string }, config);
+  if (mapped) return mapped;
   }
 
   throw err;
 }
 
-export function makePrismaErrorHandler(
-  config: PrismaErrorHandlerConfig,
+export function makeErrorHandler(
+  config: ErrorHandlerConfig,
 ): ErrorHandlingCallback {
-  return async (request, _ctx, err) => mapPrismaError(request, err, config);
+  return async (request, _ctx, err) => mapError(request, err, config);
 }
 
 export interface AuthErrorDetail {
@@ -252,23 +247,23 @@ function mapAuthStatusError(
   detail: AuthErrorDetail,
 ): NextResponse {
   if (status === 400) {
-    return badRequestProblem(request, { ...detail.generic, detail: message });
+  return badRequestProblem(request, { ...detail.generic, detail: message });
   }
 
   if (status === 401 && detail.invalidCredentials) {
-    return unauthorizedProblem(request, { ...detail.invalidCredentials, detail: message });
+  return unauthorizedProblem(request, { ...detail.invalidCredentials, detail: message });
   }
 
   if (status === 422 && detail.invalid) {
-    return unprocessableProblem(request, { ...detail.invalid, detail: message });
+  return unprocessableProblem(request, { ...detail.invalid, detail: message });
   }
 
   if (status === 429) {
-    return tooManyRequestsProblem(request, { ...detail.rateLimited, detail: message });
+  return tooManyRequestsProblem(request, { ...detail.rateLimited, detail: message });
   }
 
   if (status >= 500) {
-    return internalErrorProblem(request, detail.unavailable);
+  return internalErrorProblem(request, detail.unavailable);
   }
 
   return badRequestProblem(request, { ...detail.generic, detail: message });
@@ -281,34 +276,34 @@ export function mapAuthError(
 ): NextResponse {
 
   if (err instanceof SyntaxError) {
-    return badRequestProblem(request, {
-      code: "invalid-json",
-      title: "Maling Request",
-      detail: "Ang request body ay dapat na valid JSON.",
-    });
+  return badRequestProblem(request, {
+    code: "invalid-json",
+    title: "Maling Request",
+    detail: "Ang request body ay dapat na valid JSON.",
+  });
   }
 
   if (err instanceof TypeError) {
-    return badRequestProblem(request, {
-      code: "invalid-url",
-      title: "Maling Request",
-      detail: "Ang request URL ay hindi wasto.",
-    });
+  return badRequestProblem(request, {
+    code: "invalid-url",
+    title: "Maling Request",
+    detail: "Ang request URL ay hindi wasto.",
+  });
   }
 
   if (isAuthError(err)) {
-    const message = err.message || "Authentication failed.";
-    const status = err.status ?? 400;
+  const message = err.message || "Authentication failed.";
+  const status = err.status ?? 400;
 
-    if (status >= 500) {
-      console.error(
-        `${config.operationName} failed with upstream status`,
-        status,
-        message,
-      );
-    }
+  if (status >= 500) {
+    console.error(
+    `${config.operationName} failed with upstream status`,
+    status,
+    message,
+    );
+  }
 
-    return mapAuthStatusError(request, status, message, config);
+  return mapAuthStatusError(request, status, message, config);
   }
 
   throw err;

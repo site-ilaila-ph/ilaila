@@ -1,9 +1,9 @@
 
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/infra";
 import { badRequestProblem, conflictProblem, notFoundProblem, ok } from "@/lib/api/responses";
-import { Prisma } from "@/generated/prisma/client";
+
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -19,7 +19,7 @@ type PatchBody = {
   value?: number;
 };
 
-function mapReviewDetailPrismaError(req: NextRequest, error: unknown): NextResponse {
+function mapReviewDetailError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
       code: "invalid-json",
@@ -28,22 +28,22 @@ function mapReviewDetailPrismaError(req: NextRequest, error: unknown): NextRespo
     });
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
+  if (error instanceof Error) {
+    if ((error as Error & { code?: string }).code === "P2025") {
       return notFoundProblem(req, {
         code: "review-not-found",
         detail: "The review does not exist.",
       });
     }
 
-    if (error.code === "P2002") {
+    if ((error as Error & { code?: string }).code === "P2002") {
       return conflictProblem(req, {
         code: "review-conflict",
         detail: "A review for this business already exists.",
       });
     }
 
-    if (error.code === "P2003") {
+    if ((error as Error & { code?: string }).code === "P2003") {
       return badRequestProblem(req, {
         code: "review-invalid-reference",
         detail: "The review references a business or user that does not exist.",
@@ -63,7 +63,7 @@ async function patchReview(req: NextRequest) {
     });
   }
 
-  const db = acquirePrismaClient();
+  const db = acquireDatabase();
 
   try {
     const fd = await req.formData();
@@ -85,8 +85,8 @@ async function patchReview(req: NextRequest) {
 
     const { id, upvote, ...reviewFields } = body;
 
-    const data = await db.$transaction(async (tx: Prisma.TransactionClient) => {
-      const reviewData: Prisma.BusinessReviewUncheckedUpdateInput = {
+    const data = await db.$transaction(async (tx: TransactionClient) => {
+      const reviewData: BusinessReviewUncheckedUpdateInput = {
         ...(upvote ? { upvotes: { increment: 1 } } : {}),
         ...(reviewFields.text !== undefined ? { text: reviewFields.text } : {}),
         ...(reviewFields.foodQuality !== undefined ? { foodQuality: reviewFields.foodQuality } : {}),
@@ -104,7 +104,7 @@ async function patchReview(req: NextRequest) {
 
     return ok(data);
   } catch (error: unknown) {
-    return mapReviewDetailPrismaError(req, error);
+    return mapReviewDetailError(req, error);
   }
 }
 
@@ -113,15 +113,17 @@ async function deleteReview(req: NextRequest) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return badRequestProblem(req, { code: "review-id-required", detail: "A review id is required." });
-    const db = acquirePrismaClient();
+    const db = acquireDatabase();
 
     await db.businessReview.delete({ where: { id } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapReviewDetailPrismaError(req, error);
+    return mapReviewDetailError(req, error);
   }
 }
 
 export const PATCH = withLogging(withUnhandledApiErrorHandling(patchReview), "patchReview");
 
 export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteReview), "deleteReview");
+export type TransactionClient = any;
+export type BusinessReviewUncheckedUpdateInput = any;

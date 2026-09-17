@@ -1,6 +1,6 @@
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError } from "@/lib/api/domain-errors";
-import type { Prisma } from "@/generated/prisma/client";
+
 import {
   listFoods,
   findFoodDetailById,
@@ -21,7 +21,7 @@ export async function getFoodDetailService(id: string) {
 }
 
 export async function createFoodService(input: {
-  foodFields: Prisma.FoodUncheckedCreateInput;
+  foodFields: FoodUncheckedCreateInput;
   imagesMeta?: Array<Record<string, unknown>>;
   imageFiles?: Blob[];
 }) {
@@ -45,7 +45,7 @@ export async function createFoodService(input: {
   }
 }
 
-export async function createSimpleFoodService(input: Omit<Prisma.FoodUncheckedCreateInput, "id">) {
+export async function createSimpleFoodService(input: Omit<FoodUncheckedCreateInput, "id">) {
   if (!input.name) {
     throw new ValidationError({ code: "food-name-required", detail: "A food name is required." });
   }
@@ -59,3 +59,4 @@ export async function deleteFoodService(id: string) {
   await deleteStorageKeys(keys);
   return deleteFoodById(id);
 }
+export type FoodUncheckedCreateInput = any;

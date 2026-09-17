@@ -8,7 +8,7 @@ import type { BusinessListItem } from "@/app/businesses/types";
 export function ratingFor(business: BusinessListItem): number {
   if (!business.reviews.length) return 0;
   const sum = business.reviews.reduce(
-    (acc, r) => acc + (r.foodQuality + r.service + r.ambiance + r.value) / 4,
+    (acc: number, r: { foodQuality: number; service: number; ambiance: number; value: number }) => acc + (r.foodQuality + r.service + r.ambiance + r.value) / 4,
     0
   );
   return Math.round((sum / business.reviews.length) * 10) / 10;
@@ -21,7 +21,7 @@ interface BusinessCardProps {
 
 export function BusinessCard({ business, featured }: BusinessCardProps) {
   const rating = ratingFor(business);
-  const primaryImageUrl = business.images?.find((img) => Boolean(img.url))?.url;
+  const primaryImageUrl = business.images?.find((img: { url?: string }) => Boolean(img.url))?.url;
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}`;
 
   return (

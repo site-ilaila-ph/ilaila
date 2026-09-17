@@ -9,7 +9,7 @@ interface FoodCardProps {
 }
 
 export function FoodCard({ food }: FoodCardProps) {
-  const primaryImageUrl = food.images?.find((img) => Boolean(img.url))?.url;
+  const primaryImageUrl = food.images?.find((img: { url?: string }) => Boolean(img.url))?.url;
 
   return (
     <Link
@@ -45,7 +45,7 @@ export function FoodCard({ food }: FoodCardProps) {
         </p>
         {food.tags && food.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-4 border-t border-border/50">
-            {food.tags.map((tag) => (
+            {food.tags.map((tag: string) => (
               <span
                 key={tag}
                 className="inline-block rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"

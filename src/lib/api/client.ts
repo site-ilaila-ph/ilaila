@@ -30,6 +30,7 @@ export async function throwProblem(res: Response): Promise<void> {
             title: res.statusText || "Request failed",
             status: res.status,
             detail: `Request failed with status ${res.status}`,
+            code: "request-failed",
         });
     }
 
@@ -41,6 +42,7 @@ export async function throwProblem(res: Response): Promise<void> {
             title: "Malformed error response",
             status: res.status,
             detail: "Server returned an error without a valid problem details body.",
+            code: "malformed-error",
         });
     }
 

@@ -31,7 +31,7 @@ export function BusinessReviewsList({
         />
       )}
       <div className="space-y-4">
-        {reviews.map((review) => (
+        {reviews.map((review: { id: string; user: { authUser: { email?: string } }; foodQuality: number; service: number; ambiance: number; value: number; text?: string; upvotes: number }) => (
           <Card key={review.id} className="p-6">
             <div className="mb-2 flex items-center justify-between">
               <h3 className="font-semibold">{review.user.authUser.email ?? "Lokal na reviewer"}</h3>

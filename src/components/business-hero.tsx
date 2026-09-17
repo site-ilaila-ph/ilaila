@@ -87,7 +87,7 @@ export function BusinessHero({
 
       {business.tags && business.tags.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {business.tags.map((tag) => (
+          {business.tags.map((tag: string) => (
             <span key={tag} className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary">
               {tag}
             </span>

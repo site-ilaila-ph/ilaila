@@ -2,7 +2,7 @@ import { NextRequest, NextResponse, ProxyConfig } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { match } from "path-to-regexp";
 
-import { acquirePrismaClient } from "./lib/infra";
+import { acquireDatabase } from "./lib/infra";
 import { notFoundProblem, redirectResponse } from "./lib/api/responses";
 import { assert } from "./lib/assert";
 
@@ -80,7 +80,7 @@ export const proxy = async (request: NextRequest) => {
     return response;
   }
 
-  const userData = await acquirePrismaClient().userData.findFirstOrThrow({
+  const userData = await acquireDatabase().userData.findFirstOrThrow({
     select: {
       id: true,
       role: true,

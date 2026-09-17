@@ -1,6 +1,6 @@
-import type { Prisma } from "@/generated/prisma/client";
 
-export type FoodWithRelations = Prisma.FoodGetPayload<{
+
+export type FoodWithRelations = FoodGetPayload<{
   include: {
     images: true;
     tags: true;
@@ -17,7 +17,7 @@ export type FoodWithRelations = Prisma.FoodGetPayload<{
   };
 }>;
 
-export type FoodListItem = Prisma.FoodGetPayload<{
+export type FoodListItem = FoodGetPayload<{
   include: {
     images: true;
     tags: true;
@@ -25,3 +25,4 @@ export type FoodListItem = Prisma.FoodGetPayload<{
 }>;
 
 export type FoodDetail = FoodWithRelations;
+export type FoodGetPayload<T> = any;

@@ -30,7 +30,7 @@ export function BusinessMenu({
         <section className="mb-12">
           <h2 className="mb-4 text-2xl font-semibold">Mga Pagkaing Inihahain</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {business.foods.map((bf) => (
+            {business.foods.map((bf: { id: string; food: { id: string; name: string; description?: string } }) => (
               <Link
                 key={bf.id}
                 href={`/foods/${bf.food.id}`}
@@ -60,7 +60,7 @@ export function BusinessMenu({
             </Select>
           </div>
           <div className="space-y-4">
-            {visibleMenu.map((item) => (
+            {visibleMenu.map((item: { id: string; name: string; description?: string; price: number }) => (
               <div key={item.id} className="border-b border-border pb-4 last:border-b-0">
                 <div className="flex items-start justify-between">
                   <div>

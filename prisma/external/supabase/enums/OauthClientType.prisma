@@ -1,7 +1,0 @@
-enum OauthClientType {
-  public
-  confidential
-
-  @@map("oauth_client_type")
-  @@schema("auth")
-}

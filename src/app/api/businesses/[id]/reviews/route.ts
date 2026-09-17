@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma/client";
+
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/infra";
 import { createClient } from "@/lib/supabase/server";
 import { badRequestProblem, conflictProblem, created, notFoundProblem, unauthorizedProblem } from "@/lib/api/responses";
 
@@ -19,7 +19,7 @@ type ReviewInput = {
   value?: number;
 };
 
-function mapReviewPrismaError(req: NextRequest, error: unknown): NextResponse {
+function mapReviewError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
       code: "invalid-json",
@@ -28,22 +28,22 @@ function mapReviewPrismaError(req: NextRequest, error: unknown): NextResponse {
     });
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
+  if (error instanceof Error) {
+    if ((error as Error & { code?: string }).code === "P2025") {
       return notFoundProblem(req, {
         code: "review-not-found",
         detail: "The review does not exist.",
       });
     }
 
-    if (error.code === "P2002") {
+    if ((error as Error & { code?: string }).code === "P2002") {
       return conflictProblem(req, {
         code: "review-conflict",
         detail: "A review for this business already exists.",
       });
     }
 
-    if (error.code === "P2003") {
+    if ((error as Error & { code?: string }).code === "P2003") {
       return badRequestProblem(req, {
         code: "review-invalid-reference",
         detail: "The review references a business or user that does not exist.",
@@ -91,7 +91,7 @@ async function postReview(req: NextRequest) {
     });
   }
 
-  const db = acquirePrismaClient();
+  const db = acquireDatabase();
   const reviewer = await db.userData.findFirst({
     select: { id: true },
     where: { authId: authUser.sub },
@@ -123,7 +123,7 @@ async function postReview(req: NextRequest) {
 
     return created(review);
   } catch (error: unknown) {
-    return mapReviewPrismaError(req, error);
+    return mapReviewError(req, error);
   }
 }
 

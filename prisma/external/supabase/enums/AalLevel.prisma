@@ -1,8 +1,0 @@
-enum AalLevel {
-  aal1
-  aal2
-  aal3
-
-  @@map("aal_level")
-  @@schema("auth")
-}

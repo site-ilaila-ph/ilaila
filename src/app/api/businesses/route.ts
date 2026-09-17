@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { ValidationError } from "@/lib/api/domain-errors";
-import type { Prisma } from "@/generated/prisma/client";
+
 import { ok } from "@/lib/api/responses";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
 import { sortableFields, filterableFields, includeableRelations } from "@/repositories/business-repository";
@@ -39,7 +39,7 @@ async function getBusinesses(req: NextRequest) {
 export const GET = withLogging(withDomainErrorBoundary(getBusinesses), "getBusinesses");
 
 type CreateMetadata = {
-  business: Omit<Prisma.BusinessUncheckedCreateInput, "createdById" | "id"> & {
+  business: Omit<BusinessUncheckedCreateInput, "createdById" | "id"> & {
     createdBy?: unknown;
     createdById?: string;
   };
@@ -84,3 +84,4 @@ async function createBusiness(req: NextRequest) {
 
 export const POST = withLogging(withDomainErrorBoundary(createBusiness), "createBusiness");
 
+export type BusinessUncheckedCreateInput = any;

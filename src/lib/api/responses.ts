@@ -11,9 +11,7 @@ export function successResponse<T>(
 }
 
 export function ok<T>(data: T): NextResponse {
-    return successResponse(data, {
-        status: 200,
-    });
+    return successResponse(data);
 }
 
 export function created<T>(data: T): NextResponse {
@@ -53,6 +51,7 @@ export interface ProblemDetails {
     title: string;
     status: number;
     detail: string;
+    code: string;
     instance?: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     errors?: Record<string, any>;
@@ -72,14 +71,8 @@ export type ProblemOverrides = Partial<
     code?: string;
 };
 
-function typeFromCode(request: Request, code: string): string {
-    const origin = new URL(request.url).origin;
-
+function typeFromCode(origin: string, code: string): string {
     return `${origin}/problems/${code}`;
-}
-
-function instanceFromRequest(request: Request): string {
-    return new URL(request.url).toString();
 }
 
 export function problemResponse(
@@ -114,13 +107,15 @@ function defineProblem(status: number, defaults: ProblemDefaults) {
         } = overrides ?? {};
 
         const resolvedCode = code ?? defaults.code;
+        const url = new URL(request.url);
 
         const problem: ProblemDetails = {
             ...rest,
-            type: typeFromCode(request, resolvedCode),
+            type: typeFromCode(url.origin, resolvedCode),
             title: title ?? defaults.title,
             detail: detail ?? defaults.detail,
-            instance: instance ?? instanceFromRequest(request),
+            code: resolvedCode,
+            instance: instance ?? url.toString(),
             errors,
             status,
         };

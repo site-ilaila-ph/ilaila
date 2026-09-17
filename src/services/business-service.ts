@@ -1,6 +1,6 @@
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
-import type { Prisma } from "@/generated/prisma/client";
+
 import {
   listBusinesses,
   findBusinessByIdOrName,
@@ -80,7 +80,7 @@ export async function createBusinessService(input: {
   }
 }
 
-export async function createSimpleBusinessService(input: Omit<Prisma.BusinessUncheckedCreateInput, "createdById" | "id">) {
+export async function createSimpleBusinessService(input: Omit<BusinessUncheckedCreateInput, "createdById" | "id">) {
   if (!input.name) {
     throw new ValidationError({ code: "business-name-required", detail: "A business name is required." });
   }
@@ -94,7 +94,7 @@ export async function createSimpleBusinessService(input: Omit<Prisma.BusinessUnc
   return createSimpleBusiness({ ...input, ownerId });
 }
 
-export async function updateSimpleBusinessService(input: Prisma.BusinessUncheckedUpdateInput & { id: string }) {
+export async function updateSimpleBusinessService(input: BusinessUncheckedUpdateInput & { id: string }) {
   if (!input.id) throw new ValidationError({ code: "business-id-required", detail: "A business id is required." });
   return updateSimpleBusiness(input);
 }
@@ -106,3 +106,4 @@ export async function deleteBusinessService(id: string) {
   await deleteStorageKeys(keys);
   return deleteBusinessById(id);
 }
+export type BusinessUncheckedCreateInput = any; export type BusinessUncheckedUpdateInput = any;

@@ -1,7 +1,0 @@
-enum OauthRegistrationType {
-  dynamic
-  manual
-
-  @@map("oauth_registration_type")
-  @@schema("auth")
-}

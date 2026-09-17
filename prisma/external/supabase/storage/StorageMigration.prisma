@@ -1,9 +1,0 @@
-model StorageMigration {
-  id         Int       @id
-  name       String    @unique @db.VarChar(100)
-  hash       String    @db.VarChar(40)
-  executedAt DateTime? @default(now()) @map("executed_at") @db.Timestamp(6)
-
-  @@map("migrations")
-  @@schema("storage")
-}

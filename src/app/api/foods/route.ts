@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { withLogging } from "@/lib/logging";
 import { withDomainErrorBoundary } from "@/lib/api/boundary";
 import { ValidationError } from "@/lib/api/domain-errors";
-import type { Prisma } from "@/generated/prisma/client";
+
 import { ok } from "@/lib/api/responses";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
 import { sortableFields, filterableFields, includeableRelations } from "@/repositories/food-repository";
@@ -34,7 +34,7 @@ async function createFood(req: NextRequest) {
     throw new ValidationError({ code: "metadata-required", detail: "A metadata JSON part is required." });
   }
 
-  let parsed: { food: Prisma.FoodUncheckedCreateInput; images?: Array<Record<string, unknown>> };
+  let parsed: { food: FoodUncheckedCreateInput; images?: Array<Record<string, unknown>> };
   try {
     parsed = JSON.parse(metadataRaw);
   } catch {
@@ -55,4 +55,4 @@ async function createFood(req: NextRequest) {
 
 export const GET = withLogging(withDomainErrorBoundary(getFoods), "getFoods");
 export const POST = withLogging(withDomainErrorBoundary(createFood), "createFood");
-export type { NextResponse };
+export type { NextResponse };export type FoodUncheckedCreateInput = any;

@@ -87,7 +87,7 @@ export default function HomePage() {
                 </div>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {businesses.map((business) => {
-                    const primaryImageUrl = business.images?.find((img) => Boolean(img.url))?.url;
+                    const primaryImageUrl = business.images?.find((img: { url?: string }) => Boolean(img.url))?.url;
 
                     return (
                       <Link
@@ -149,7 +149,7 @@ export default function HomePage() {
                       </p>
                       {food.tags && food.tags.length > 0 && (
                         <div className="flex gap-1">
-                          {food.tags.slice(0, 2).map((tag) => (
+                          {food.tags.slice(0, 2).map((tag: string) => (
                             <span
                               key={tag}
                               className="inline-block rounded-full bg-primary/10 px-2 py-1 text-xs text-primary"

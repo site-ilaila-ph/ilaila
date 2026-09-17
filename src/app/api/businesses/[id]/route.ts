@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { AnyRequestHandler } from "@/lib/next-types";
-import { Prisma } from "@/generated/prisma/client";
+
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/infra";
 import { acquireStorageManager } from "@/lib/storage";
 import {
   badRequestProblem,
@@ -13,7 +13,7 @@ import {
   notFoundProblem,
   ok,
 } from "@/lib/api/responses";
-import type { Business, BusinessImage } from "@/generated/prisma/client";
+// import type { Business, BusinessImage } from "@/prisma/client";
 
 type BusinessImageUpdate = Partial<Omit<BusinessImage, "id" | "businessId">>;
 
@@ -37,7 +37,7 @@ type PatchBody = Partial<
 
 export const runtime = "nodejs";
 
-function mapBusinessDetailPrismaError(req: NextRequest, error: unknown): NextResponse {
+function mapBusinessDetailError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
       code: "invalid-json",
@@ -46,8 +46,8 @@ function mapBusinessDetailPrismaError(req: NextRequest, error: unknown): NextRes
     });
   }
 
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    if (error.code === "P2025") {
+  if (error instanceof Error) {
+    if ((error as Error & { code?: string }).code === "P2025") {
       return notFoundProblem(req, {
         code: "business-not-found",
         title: "Hindi Nakita",
@@ -55,7 +55,7 @@ function mapBusinessDetailPrismaError(req: NextRequest, error: unknown): NextRes
       });
     }
 
-    if (error.code === "P2002") {
+    if ((error as Error & { code?: string }).code === "P2002") {
       return conflictProblem(req, {
         code: "business-conflict",
         title: "Salungatan",
@@ -63,7 +63,7 @@ function mapBusinessDetailPrismaError(req: NextRequest, error: unknown): NextRes
       });
     }
 
-    if (error.code === "P2003") {
+    if ((error as Error & { code?: string }).code === "P2003") {
       return badRequestProblem(req, {
         code: "business-invalid-reference",
         title: "Maling Request",
@@ -76,7 +76,7 @@ function mapBusinessDetailPrismaError(req: NextRequest, error: unknown): NextRes
 }
 
 async function getBusiness(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const db = acquirePrismaClient();
+  const db = acquireDatabase();
   const id = (await params).id;
 
   const business = await db.business.findUnique({
@@ -111,7 +111,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
     });
   }
 
-  const db = acquirePrismaClient();
+  const db = acquireDatabase();
   const urlId = (await params).id;
 
   let businessId: string | undefined;
@@ -221,7 +221,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
       })
     );
 
-    const updatedBusiness = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+    const updatedBusiness = await db.$transaction(async (tx: TransactionClient) => {
       const _updated = await tx.business.update({
         where: { id: (await params).id },
         data: {
@@ -271,7 +271,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
         )
       );
     }
-    return mapBusinessDetailPrismaError(req, error);
+    return mapBusinessDetailError(req, error);
   }
 }
 
@@ -279,7 +279,7 @@ async function deleteBusiness(req: NextRequest, { params }: { params: Promise<{ 
   try {
     const id = (await params).id;
     if (!id) return badRequestProblem(req, { code: "business-id-required", detail: "A business id is required." });
-    const db = acquirePrismaClient();
+    const db = acquireDatabase();
     const storageManager = acquireStorageManager();
 
     // Collect every storage key that may belong to this business: the objects
@@ -312,7 +312,7 @@ async function deleteBusiness(req: NextRequest, { params }: { params: Promise<{ 
     await db.business.delete({ where: { id: id! } });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
-    return mapBusinessDetailPrismaError(req, error);
+    return mapBusinessDetailError(req, error);
   }
 }
 
@@ -337,3 +337,5 @@ export const DELETE = withLogging(
   withUnhandledApiErrorHandling(adaptParams(deleteBusiness)),
   "deleteBusiness",
 );
+export type TransactionClient = any;
+type Business = any; type BusinessImage = any;

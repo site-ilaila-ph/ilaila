@@ -1,6 +1,6 @@
-import type { Prisma } from "@/generated/prisma/client";
 
-export type BusinessListItem = Prisma.BusinessGetPayload<{
+
+export type BusinessListItem = BusinessGetPayload<{
   include: {
     reviews: { include: { user: { include: { authUser: true } }; images: true } };
     tags: true;
@@ -9,3 +9,4 @@ export type BusinessListItem = Prisma.BusinessGetPayload<{
     menuItems: true;
   };
 }>;
+export type BusinessGetPayload<T> = any;

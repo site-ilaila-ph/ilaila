@@ -77,17 +77,17 @@ export default function FoodDetailPage({ params }: { params: Promise<{ id: strin
 
   // Filter out broken/missing image URLs so only valid images display
   const foodImages: LightboxImage[] = (food.images ?? [])
-    .map((img) => ({
+    .map((img: { url?: string; description?: string }) => ({
       url: img.url ? (img.url.startsWith("http") ? img.url : img.url) : null,
       description: img.description,
       source: "Food Gallery",
     }))
-    .filter((img) => Boolean(img.url));
+    .filter((img: { url: string | null }) => Boolean(img.url));
 
   const businessImages: LightboxImage[] = (food.businesses ?? [])
-    .flatMap((bf) =>
+    .flatMap((bf: { business: { name: string; images?: { url?: string; description?: string }[] } }) =>
       (bf.business?.images ?? [])
-        .map((bImg) => ({
+        .map((bImg: { url?: string; description?: string }) => ({
           url: bImg.url ? (bImg.url.startsWith("http") ? bImg.url : bImg.url) : null,
           description: `${bImg.description || food.name} (mula sa ${bf.business.name})`,
           source: bf.business.name,
@@ -154,7 +154,7 @@ export default function FoodDetailPage({ params }: { params: Promise<{ id: strin
               <h2 className="mb-6 text-xl font-bold">Makukuha sa</h2>
               {food.businesses && food.businesses.length > 0 ? (
                 <div className="space-y-4">
-                  {food.businesses.map((bf) => (
+                  {food.businesses.map((bf: { id: string; business: { id: string; name: string; address?: string } }) => (
                     <Link
                       key={bf.id}
                       href={`/businesses/${bf.business.id}`}

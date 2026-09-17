@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma/client";
+
 import { isAuthError } from "@supabase/supabase-js";
 import type { AnyRequestHandler } from "../next-types";
 import {
@@ -21,13 +21,14 @@ function problemForDomainError(request: NextRequest, err: DomainError): NextResp
     title: err.title,
     status: err.status,
     detail: err.detail,
+    code: err.code,
     instance: request.url,
     ...(err.errors !== undefined ? { errors: err.errors } : {}),
   });
 }
 
-function mapPrismaKnownRequestError(request: NextRequest, err: Prisma.PrismaClientKnownRequestError): NextResponse | undefined {
-  switch (err.code) {
+function mapKnownRequestError(request: NextRequest, err: Error & { code?: string }): NextResponse | undefined {
+  switch ((err as Error & { code?: string }).code) {
     case "P2025":
       return notFoundProblem(request, {
         code: "resource-not-found",
@@ -117,12 +118,12 @@ export function toProblemResponse(request: NextRequest, err: unknown): NextRespo
     });
   }
 
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const mapped = mapPrismaKnownRequestError(request, err);
+  if (err instanceof Error) {
+    const mapped = mapKnownRequestError(request, err);
     if (mapped) return mapped;
   }
 
-  if (err instanceof Prisma.PrismaClientValidationError) {
+  if (err instanceof Error) {
     return internalErrorProblem(request, {
       code: "internal-error",
       title: "Error sa Server",
