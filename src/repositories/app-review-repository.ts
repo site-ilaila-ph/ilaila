@@ -1,48 +1,45 @@
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/database";
+import { AppReview } from "@/entities";
 
 export async function listAppReviews() {
-  const db = acquirePrismaClient();
-  return db.appReview.findMany({
-    include: { user: { select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  return repo.find({ order: { createdAt: "DESC" } });
 }
 
 export async function createAppReview(input: { userId?: string; userName?: string; email?: string; rating: number; text: string }) {
-  const db = acquirePrismaClient();
-  await db.appReview.create({
-    data: { id: crypto.randomUUID(), ...input },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  await repo.insert({ id: crypto.randomUUID(), ...input });
 }
 
 export async function updateAppReviewStatus(id: string, isApproved: boolean) {
-  const db = acquirePrismaClient();
-  return db.appReview.update({
-    where: { id },
-    data: { isApproved },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  return repo.update({ id }, { isApproved });
 }
 
 export async function deleteAppReview(id: string) {
-  const db = acquirePrismaClient();
-  return db.appReview.delete({
-    where: { id },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  await repo.delete({ id });
+  return { success: true };
 }
 
 export async function getAppReviewStats() {
-  const db = acquirePrismaClient();
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
   const [total, approved, pending, avg] = await Promise.all([
-    db.appReview.count(),
-    db.appReview.count({ where: { isApproved: true } }),
-    db.appReview.count({ where: { isApproved: false } }),
-    db.appReview.aggregate({ _avg: { rating: true } }),
+    repo.count(),
+    repo.count({ where: { isApproved: true } }),
+    repo.count({ where: { isApproved: false } }),
+    repo.createQueryBuilder("appReview").select("AVG(appReview.rating)", "avg").getRawOne(),
   ]);
   return {
     total,
     approved,
     pending,
-    averageRating: avg._avg.rating ?? 0,
+    averageRating: avg?.avg ?? 0,
   };
 }
 
@@ -51,19 +48,13 @@ export async function getAllAppReviews() {
 }
 
 export async function getApprovedAppReviews() {
-  const db = acquirePrismaClient();
-  return db.appReview.findMany({
-    where: { isApproved: true },
-    include: { user: { select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  return repo.find({ where: { isApproved: true }, order: { createdAt: "DESC" } });
 }
 
 export async function getPendingAppReviews() {
-  const db = acquirePrismaClient();
-  return db.appReview.findMany({
-    where: { isApproved: false },
-    include: { user: { select: { id: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(AppReview);
+  return repo.find({ where: { isApproved: false }, order: { createdAt: "DESC" } });
 }

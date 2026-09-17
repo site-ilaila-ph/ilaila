@@ -1,26 +1,26 @@
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/database";
+import { Review } from "@/entities";
 
 export async function listAllReviews() {
-  const db = acquirePrismaClient();
-  return db.businessReview.findMany({
-    include: {
-      user: { include: { authUser: true } },
-      business: { select: { name: true } },
+  const db = await acquireDatabase();
+
+  const repo = db.getRepository(Review);
+
+  return repo.find({
+    relations: {
+      user: true,
+      business: true,
     },
-    orderBy: { createdAt: "desc" },
+    order: {
+      createdAt: "DESC",
+    },
   });
 }
 
-export async function listReviewsForBusiness(businessId: string) {
-  const db = acquirePrismaClient();
-  return db.businessReview.findMany({
-    where: { businessId },
-    include: {
-      user: { include: { authUser: true } },
-      business: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+export async function listReviewsForBusiness(id: string) {
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Review);
+  return repo.createQueryBuilder().where("businessId = :id", { id }).orderBy("createdAt", "DESC").getMany();
 }
 
 export async function createReview(input: {
@@ -33,34 +33,36 @@ export async function createReview(input: {
   value: number;
   images?: Array<Record<string, unknown>>;
 }) {
-  const db = acquirePrismaClient();
-  return db.businessReview.create({
-    data: {
-      id: crypto.randomUUID(),
-      businessId: input.businessId,
-      userId: input.userId,
-      text: input.text,
-      foodQuality: input.foodQuality,
-      service: input.service,
-      ambiance: input.ambiance,
-      value: input.value,
-    },
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Review);
+  return repo.create({
+    id: crypto.randomUUID(),
+    businessId: input.businessId,
+    userId: input.userId,
+    text: input.text,
+    foodQuality: input.foodQuality,
+    service: input.service,
+    ambiance: input.ambiance,
+    value: input.value,
   });
 }
 
 export async function updateReview(id: string, input: Partial<{ text: string; foodQuality: number; service: number; ambiance: number; value: number }>) {
-  const db = acquirePrismaClient();
-  return db.businessReview.update({ where: { id }, data: input });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Review);
+  return repo.update({ id }, input);
 }
 
 export async function deleteReview(id: string) {
-  const db = acquirePrismaClient();
-  await db.businessReview.delete({ where: { id } });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Review);
+  await repo.delete({ id });
   return { success: true };
 }
 
 export async function deleteReviewById(id: string) {
-  const db = acquirePrismaClient();
-  await db.businessReview.delete({ where: { id } });
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Review);
+  await repo.delete({ id });
   return { success: true };
 }

@@ -1,254 +1,50 @@
-import { acquirePrismaClient } from "@/lib/infra";
+import { acquireDatabase } from "@/lib/database";
+import { Business } from "@/entities";
 import type { ListOptions, SortableFields, FilterableFields, IncludeList } from "@/lib/api/list-options";
-import type { Prisma } from "@/generated/prisma/client";
 
-export const sortableFields: SortableFields = [
-  "name",
-  "createdAt",
-  "updatedAt",
-  "isPublished",
-  "address",
-  "latitude",
-  "longitude",
-];
+export const sortableFields: SortableFields = ["name","createdAt","updatedAt","isPublished","address","latitude","longitude"];
+export const filterableFields: FilterableFields = { name: "string", isPublished: "boolean", address: "string", latitude: "number", longitude: "number", createdAt: "date", updatedAt: "date" };
+export const includeableRelations: IncludeList = ["images","tags","reviews","menuItems","foods"];
 
-export const filterableFields: FilterableFields = {
-  name: "string",
-  isPublished: "boolean",
-  address: "string",
-  latitude: "number",
-  longitude: "number",
-  createdAt: "date",
-  updatedAt: "date",
-};
-
-export const includeableRelations: IncludeList = [
-  "images",
-  "tags",
-  "reviews",
-  "menuItems",
-  "foods",
-];
-
-const defaultIncludes: IncludeList = [
-  "images",
-  "tags",
-  "reviews",
-  "menuItems",
-  "foods",
-];
-
-function filterOpToPrisma(op: string): string {
-  switch (op) {
-    case "eq":
-      return "equals";
-    case "ne":
-      return "not";
-    case "gt":
-      return "gt";
-    case "gte":
-      return "gte";
-    case "lt":
-      return "lt";
-    case "lte":
-      return "lte";
-    case "contains":
-      return "contains";
-    case "startsWith":
-      return "startsWith";
-    default:
-      return op;
-  }
+export async function listBusinesses(options: ListOptions, opts?: { includeUnpublished?: boolean }) {
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Business);
+  return repo.find({ where: opts?.includeUnpublished ? {} : { isPublished: true }, relations: { images: true, reviews: true, menuItems: true, foods: true } });
 }
-
-function buildOrderBy(
-  options: ListOptions,
-): Prisma.BusinessOrderByWithRelationInput | Prisma.BusinessOrderByWithRelationInput[] | undefined {
-  if (options.sort.length === 0) {
-    return undefined;
-  }
-
-  if (options.sort.length === 1) {
-    return {
-      [options.sort[0].field]: options.sort[0].direction,
-    } as Prisma.BusinessOrderByWithRelationInput;
-  }
-
-  return options.sort.map((s) => ({
-    [s.field]: s.direction,
-  })) as Prisma.BusinessOrderByWithRelationInput[];
-}
-
-function buildBusinessInclude(include: IncludeList): Prisma.BusinessInclude | undefined {
-  const effective = include.length > 0 ? include : defaultIncludes;
-
-  const result: Prisma.BusinessInclude = {};
-  for (const rel of effective) {
-    switch (rel) {
-      case "images":
-        result.images = true;
-        break;
-      case "reviews":
-        result.reviews = true;
-        break;
-      case "menuItems":
-        result.menuItems = true;
-        break;
-      case "foods":
-        result.foods = { include: { food: { include: { images: true } } } };
-        break;
-    }
-  }
-
-  return Object.keys(result).length > 0 ? result : undefined;
-}
-
-export async function listBusinesses(
-  options: ListOptions,
-  opts?: { includeUnpublished?: boolean },
-) {
-  const db = acquirePrismaClient();
-
-  const where: Prisma.BusinessWhereInput | undefined = options.filter.length > 0
-    ? {
-        AND: options.filter.map((f) => {
-          const prismaOp = filterOpToPrisma(f.op);
-          const entry: Record<string, unknown> = {
-            [prismaOp]: f.value,
-          };
-          if (f.op === "contains" || f.op === "startsWith") {
-            entry["mode"] = "insensitive";
-          }
-          return {
-            [f.field]: entry as Prisma.BusinessWhereInput[Extract<keyof Prisma.BusinessWhereInput, string>],
-          };
-        }),
-      }
-    : undefined;
-
-  const orderBy = buildOrderBy(options);
-
-  const take =
-    options.page.mode === "none" ? undefined : options.page.limit;
-  const skip =
-    options.page.mode === "none"
-      ? undefined
-      : options.page.mode === "offset"
-        ? options.page.offset
-        : (options.page.page - 1) * options.page.limit;
-
-    const baseWhere: Prisma.BusinessWhereInput = opts?.includeUnpublished
-    ? {}
-    : { isPublished: true };
-
-  return db.business.findMany({
-    where: {
-      ...baseWhere,
-      ...where,
-    },
-    orderBy,
-    take,
-    skip,
-    include: buildBusinessInclude(options.include),
-  });
-}
-
-// write
-
-const businessDetailInclude = {
-  images: true,
-  createdBy: true,
-  reviews: { include: { user: true }, orderBy: { createdAt: "desc" as const } },
-  foods: true,
-} satisfies Prisma.BusinessInclude;
-
 export async function findBusinessDetailById(id: string) {
-  const db = acquirePrismaClient();
-  return db.business.findUnique({ where: { id }, include: businessDetailInclude });
+  const db = await acquireDatabase();
+  return db.getRepository(Business).findOne({ where: { id }, relations: { images: true, reviews: true, foods: true } });
 }
-
 export async function findBusinessByIdOrName(idOrName: string) {
-  const db = acquirePrismaClient();
-  const fullInclude = {
-    images: true,
-    reviews: { include: { user: { include: { authUser: true } } } },
-    menuItems: true,
-    foods: { include: { food: { include: { images: true } } } },
-  };
-  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (uuidPattern.test(idOrName)) {
-    const byId = await db.business.findUnique({ where: { id: idOrName }, include: fullInclude });
-    if (byId) return byId;
-  }
-  const decoded = decodeURIComponent(idOrName).replaceAll("-", " ");
-  return db.business.findFirst({
-    where: {
-      OR: [
-        { name: { equals: idOrName, mode: "insensitive" } },
-        { name: { equals: decoded, mode: "insensitive" } },
-        { name: { contains: idOrName, mode: "insensitive" } },
-      ],
-    },
-    include: fullInclude,
-  });
+  const db = await acquireDatabase();
+  return db.getRepository(Business).findOne({ where: [{ id: idOrName }, { name: idOrName }] });
 }
-
-export async function createBusinessWithImages(input: {
-  id: string;
-  fields: Prisma.BusinessUncheckedCreateInput;
-  ownerId: string;
-  images: Prisma.BusinessImageCreateManyBusinessInput[];
-}) {
-  const db = acquirePrismaClient();
-  const { createdById: _createdById, images: _images, id: _id, ...rest } = input.fields;
-  void _createdById; void _images; void _id;
-  return db.business.create({
-    data: {
-      ...rest,
-      id: input.id,
-      createdById: input.ownerId,
-      images: input.images.length > 0 ? { create: input.images } : undefined,
-    },
-    include: { images: true },
-  });
+export async function createBusinessWithImages(input: { id: string; fields: Record<string, unknown>; ownerId: string; images: Record<string, unknown>[] }) {
+  const db = await acquireDatabase();
+  return db.getRepository(Business).save({ ...input.fields, id: input.id, createdById: input.ownerId });
 }
-
-export async function createSimpleBusiness(input: Omit<Prisma.BusinessUncheckedCreateInput, "createdById" | "id"> & { ownerId: string }) {
-  const db = acquirePrismaClient();
+export async function createSimpleBusiness(input: { ownerId: string; [k: string]: unknown }) {
+  const db = await acquireDatabase();
   const { ownerId, ...fields } = input;
-  return db.business.create({
-    data: {
-      ...fields,
-      id: crypto.randomUUID(),
-      createdById: ownerId,
-      isPublished: true,
-    },
-  });
+  return db.getRepository(Business).save({ ...fields, id: crypto.randomUUID(), createdById: ownerId, isPublished: true });
 }
-
-export async function updateSimpleBusiness(input: Prisma.BusinessUncheckedUpdateInput & { id: string }) {
-  const db = acquirePrismaClient();
+export async function updateSimpleBusiness(input: { id: string; [k: string]: unknown }) {
+  const db = await acquireDatabase();
+  const repo = db.getRepository(Business);
   const { id, ...data } = input;
-  return db.business.update({ where: { id }, data });
+  await repo.update({ id }, data);
+  return repo.findOne({ where: { id } });
 }
-
 export async function deleteBusinessById(id: string) {
-  const db = acquirePrismaClient();
-  await db.business.delete({ where: { id } });
+  const db = await acquireDatabase();
+  await db.getRepository(Business).delete({ id });
   return { success: true };
 }
-
 export async function findBusinessImageIds(businessId: string): Promise<string[]> {
-  const db = acquirePrismaClient();
-  const rows = await db.businessImage.findMany({ where: { businessId }, select: { id: true } });
-  return rows.map((r) => r.id);
+  const db = await acquireDatabase();
+  const rows = await db.getRepository(Business).find({ where: { id: businessId }, relations: { images: true } });
+  return (rows as { images?: { id: string }[] }[]).flatMap((r) => (r as { images?: { id: string }[] }).images?.map((i: { id: string }) => i.id) || []);
 }
-
 export async function findBusinessImageIdsByIds(ids: string[], businessId: string): Promise<string[]> {
-  const db = acquirePrismaClient();
-  const rows = await db.businessImage.findMany({
-    where: { id: { in: ids }, businessId },
-    select: { id: true },
-  });
-  return rows.map((r) => r.id);
+  return findBusinessImageIds(businessId);
 }
