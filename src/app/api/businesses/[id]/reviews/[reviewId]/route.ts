@@ -85,7 +85,7 @@ async function patchReview(req: NextRequest) {
 
     const { id, upvote, ...reviewFields } = body;
 
-    const data = await db.$transaction(async (tx) => {
+    const data = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const reviewData: Prisma.BusinessReviewUncheckedUpdateInput = {
         ...(upvote ? { upvotes: { increment: 1 } } : {}),
         ...(reviewFields.text !== undefined ? { text: reviewFields.text } : {}),

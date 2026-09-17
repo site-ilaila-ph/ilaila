@@ -5,15 +5,17 @@ import { singleton } from "./singleton";
 
 export async function acquireDatabase(): Promise<DataSource> {
     const database = singleton("database", () => {
+        const entityValues = Object.values(Entities);
+        const entityClasses = entityValues.filter((e) => typeof e === "function" && "prototype" in e);
         const database = new DataSource({
             type: "postgres",
             url: process.env.DATABASE_URL,
-            entities: Object.values(Entities),
+            entities: entityClasses,
             poolSize: 4,
         });
 
         return database.initialize();
     });
 
-    return await database;    
+    return await database;
 }

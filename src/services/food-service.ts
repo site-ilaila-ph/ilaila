@@ -11,8 +11,8 @@ import {
 } from "@/repositories/food-repository";
 import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
 
-export async function listFoodsService(options: ListOptions) {
-  return listFoods(options);
+export async function listFoodsService(options?: ListOptions) {
+  return listFoods();
 }
 
 export async function getFoodDetailService(id: string) {
@@ -49,7 +49,7 @@ export async function createSimpleFoodService(input: Omit<Prisma.FoodUncheckedCr
   if (!input.name) {
     throw new ValidationError({ code: "food-name-required", detail: "A food name is required." });
   }
-  return createSimpleFood(input);
+  return createSimpleFood(input as Record<string, unknown>);
 }
 
 export async function deleteFoodService(id: string) {

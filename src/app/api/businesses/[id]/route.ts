@@ -221,7 +221,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
       })
     );
 
-    const updatedBusiness = await db.$transaction(async (tx) => {
+    const updatedBusiness = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const _updated = await tx.business.update({
         where: { id: (await params).id },
         data: {

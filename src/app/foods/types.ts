@@ -23,3 +23,5 @@ export type FoodListItem = Prisma.FoodGetPayload<{
     tags: true;
   };
 }>;
+
+export type FoodDetail = FoodWithRelations;

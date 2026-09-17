@@ -63,7 +63,7 @@ export async function collectEntityStorageKeys(input: {
   input.knownIds.forEach((id) => keys.add(join(input.folder, input.parentId, "images", id)));
   for (const folder of [join(input.folder, input.parentId), join(input.folder, input.parentId, "images")]) {
     const { blobs } = await storage.list({ prefix: folder });
-    blobs.forEach((blob) => keys.add(blob.pathname));
+    blobs.forEach((blob: { pathname: string }) => keys.add(blob.pathname));
   }
   return [...keys];
 }

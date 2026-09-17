@@ -29,7 +29,7 @@ export function FoodHero({ food, primaryImage }: FoodHeroProps) {
                     Pamanang Pagkain
                   </span>
                 )}
-                {food.tags?.map((tag) => (
+                {food.tags?.map((tag: string) => (
                   <span
                     key={tag}
                     className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium backdrop-blur-xs text-white"
@@ -57,7 +57,7 @@ export function FoodHero({ food, primaryImage }: FoodHeroProps) {
                 Pamanang Pagkain
               </span>
             )}
-            {food.tags?.map((tag) => (
+            {food.tags?.map((tag: string) => (
               <span
                 key={tag}
                 className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground"
