@@ -16,7 +16,6 @@ export async function createReviewService(input: {
   service: number;
   ambiance: number;
   value: number;
-  images?: Array<Record<string, unknown>>;
 }) {
   if (!input.businessId) throw new ValidationError({ code: "review-business-required", detail: "A business id is required." });
   if (!input.userId) throw new ValidationError({ code: "review-user-required", detail: "A user id is required." });

@@ -6,9 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { AppNav } from "@/components/app-nav";
 import { BusinessCard, ratingFor } from "@/components/business-card";
-import { Button } from "@/components/ui/button";
+
 import { ErrorAlert } from "@/components/ui/error-alert";
-import { Input } from "@/components/ui/input";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, ApiProblemError } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
@@ -20,7 +20,7 @@ async function fetchBusinesses(): Promise<BusinessListItem[]> {
 
 export default function BusinessDiscoveryPage() {
   const [query, setQuery] = useState("");
-  const [tag, setTag] = useState("Lahat");
+  const [tag] = useState("Lahat");
 
   const { data: businesses = [], isLoading, error } = useQuery({
     queryKey: ["businesses"],

@@ -4,7 +4,7 @@ import type { AnyRequestHandler } from "@/lib/next-types";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path/posix";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { acquireDatabase } from "@/lib/infra";
 import { acquireStorageManager } from "@/lib/storage";
 import {
@@ -13,11 +13,12 @@ import {
   notFoundProblem,
   ok,
 } from "@/lib/api/responses";
-// import type { Business, BusinessImage } from "@/prisma/client";
+import { Business, BusinessImage } from "@/entities";
+import { QueryFailedError } from "typeorm";
 
 type BusinessImageUpdate = Partial<Omit<BusinessImage, "id" | "businessId">>;
 
-type BusinessImageRowToCreate = Omit<BusinessImage, "businessId">;
+type BusinessImageRowToCreate = Omit<BusinessImage, "business">;
 
 type PatchImageInput = BusinessImageUpdate & {
   id: string;
@@ -37,6 +38,16 @@ type PatchBody = Partial<
 
 export const runtime = "nodejs";
 
+function getQueryFailedCode(err: unknown): string | undefined {
+  if (err instanceof QueryFailedError) {
+    return (err.driverError as { code?: string })?.code ?? (err as Error & { code?: string }).code;
+  }
+  if (err instanceof Error && (err as Error & { driverError?: { code?: string } }).driverError) {
+    return (err as Error & { driverError: { code?: string } }).driverError?.code ?? (err as Error & { code?: string }).code;
+  }
+  return (err as Error & { code?: string }).code;
+}
+
 function mapBusinessDetailError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
@@ -47,7 +58,8 @@ function mapBusinessDetailError(req: NextRequest, error: unknown): NextResponse 
   }
 
   if (error instanceof Error) {
-    if ((error as Error & { code?: string }).code === "P2025") {
+    const code = getQueryFailedCode(error);
+    if (code === "ENTITY_NOT_FOUND") {
       return notFoundProblem(req, {
         code: "business-not-found",
         title: "Hindi Nakita",
@@ -55,7 +67,7 @@ function mapBusinessDetailError(req: NextRequest, error: unknown): NextResponse 
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2002") {
+    if (code === "UNIQUE_CONSTRAINT") {
       return conflictProblem(req, {
         code: "business-conflict",
         title: "Salungatan",
@@ -63,7 +75,7 @@ function mapBusinessDetailError(req: NextRequest, error: unknown): NextResponse 
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2003") {
+    if (code === "FOREIGN_KEY_CONSTRAINT") {
       return badRequestProblem(req, {
         code: "business-invalid-reference",
         title: "Maling Request",
@@ -79,16 +91,10 @@ async function getBusiness(req: NextRequest, { params }: { params: Promise<{ id:
   const db = acquireDatabase();
   const id = (await params).id;
 
-  const business = await db.business.findUnique({
+  const businessRepo = (await acquireDatabase()).getRepository(Business);
+  const business = await businessRepo.findOne({
     where: { id },
-    include: {
-      images: true,
-      createdBy: true,
-      reviews: {
-        orderBy: { createdAt: "desc" },
-      },
-      foods: true,
-    },
+    relations: { images: true, reviews: true, foods: true },
   });
 
   if (!business) {
@@ -153,10 +159,11 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
     // touching storage/DB.
     const referencedIds = [...toUpdate, ...toRemove].map((img) => img.id);
     if (referencedIds.length > 0) {
-      const existingImages = await db.businessImage.findMany({
-        where: { id: { in: referencedIds }, businessId: businessId },
-        select: { id: true },
-      });
+      const imageRepo = (await acquireDatabase()).getRepository(BusinessImage);
+    const existingImages = await imageRepo.find({
+      where: { id: { in: referencedIds }, businessId: businessId },
+      select: { id: true },
+    });
       const foundIds = new Set(existingImages.map((img: { id: string }) => img.id));
       const missing = referencedIds.filter((imageId) => !foundIds.has(imageId));
       if (missing.length > 0) {
@@ -195,6 +202,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
         id: newImageId,
         description: img.description ?? "",
         url,
+        businessId
       });
     }
 
@@ -221,28 +229,29 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
       })
     );
 
-    const updatedBusiness = await db.$transaction(async (tx: TransactionClient) => {
-      const _updated = await tx.business.update({
-        where: { id: (await params).id },
-        data: {
-          ...businessFields,
-          images:
-            imageUpdates.length > 0 ||
-            imagesToCreate.length > 0 ||
-            toRemove.length > 0
-              ? {
-                  update: imageUpdates.length > 0 ? imageUpdates : undefined,
-                  create: imagesToCreate.length > 0 ? imagesToCreate : undefined,
-                  deleteMany:
-                    toRemove.length > 0
-                      ? { id: { in: toRemove.map((img) => img.id) } }
-                      : undefined,
-                }
-              : undefined,
-        },
-        include: { images: true },
-      });
-      return _updated;
+    // TypeORM transaction handling
+    const dbDataSource = await acquireDatabase();
+    const updatedBusiness = await dbDataSource.transaction(async (tx) => {
+      const businessRepo = tx.getRepository(Business);
+      const imageRepo = tx.getRepository(BusinessImage);
+
+      // Update business fields
+      await businessRepo.update({ id: (await params).id }, businessFields as Partial<Business>);
+
+      // Handle image updates
+      for (const img of toUpdate) {
+        await imageRepo.update({ id: img.id }, { description: img.description, url: img.url } as Partial<BusinessImage>);
+      }
+      // Create new images
+      for (const img of imagesToCreate) {
+        await imageRepo.save(img);
+      }
+      // Delete removed images
+      for (const img of toRemove) {
+        await imageRepo.delete({ id: img.id });
+      }
+
+      return await businessRepo.findOne({ where: { id: (await params).id }, relations: { images: true } });
     });
 
     // Remove the stored files of deleted images only after the transaction
@@ -286,10 +295,8 @@ async function deleteBusiness(req: NextRequest, { params }: { params: Promise<{ 
     // referenced by its BusinessImage rows plus any stray objects under the
     // business's folder (e.g. leftovers from earlier failures).
     const keysToDelete = new Set<string>();
-    const imageRows = await db.businessImage.findMany({
-      where: { businessId: id },
-      select: { id: true },
-    });
+    const imageRepo = (await acquireDatabase()).getRepository(BusinessImage);
+    const imageRows = await imageRepo.find({ where: { businessId: id }, select: { id: true } });
     imageRows.forEach((img: { id: string }) =>
       keysToDelete.add(join("businesses", id, "images", img.id))
     );
@@ -309,7 +316,8 @@ async function deleteBusiness(req: NextRequest, { params }: { params: Promise<{ 
       }
     });
 
-    await db.business.delete({ where: { id: id! } });
+    const businessRepo = (await acquireDatabase()).getRepository(Business);
+    await businessRepo.delete({ id: id! });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
     return mapBusinessDetailError(req, error);
@@ -337,5 +345,3 @@ export const DELETE = withLogging(
   withUnhandledApiErrorHandling(adaptParams(deleteBusiness)),
   "deleteBusiness",
 );
-export type TransactionClient = any;
-type Business = any; type BusinessImage = any;

@@ -16,29 +16,32 @@ export default function ManageReviews() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    loadReviews();
+    (async () => {
+      try {
+        const response = await fetch("/api/management/reviews");
+        if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load reviews"));
+        const data = await response.json();
+        setReviews(data);
+      } catch (error) {
+        console.error("Failed to load reviews:", error);
+        setError(error instanceof Error ? error.message : "Failed to load reviews");
+      } finally {
+        setIsLoading(false);
+      }
+    })();
   }, []);
-
-  async function loadReviews() {
-    try {
-      const response = await fetch("/api/management/reviews");
-      if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load reviews"));
-      const data = await response.json();
-      setReviews(data);
-    } catch (error) {
-      console.error("Failed to load reviews:", error);
-      setError(error instanceof Error ? error.message : "Failed to load reviews");
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   async function handleDelete(id: string) {
     if (confirm("Sigurado ka bang gusto mong tanggalin ang review na ito?")) {
       try {
         const response = await fetch(`/api/management/reviews?id=${encodeURIComponent(id)}`, { method: "DELETE" });
         if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to delete review"));
-        await loadReviews();
+        await (async () => {
+          const response = await fetch("/api/management/reviews");
+          if (!response.ok) throw new Error(await readProblemMessage(response, "Failed to load reviews"));
+          const data = await response.json();
+          setReviews(data);
+        })();
       } catch (error) {
         console.error("Failed to delete review:", error);
         setError(error instanceof Error ? error.message : "Failed to delete review");

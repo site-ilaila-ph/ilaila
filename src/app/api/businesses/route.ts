@@ -7,6 +7,7 @@ import { ok } from "@/lib/api/responses";
 import { parseListOptions, ListOptionsError } from "@/lib/api/list-options";
 import { sortableFields, filterableFields, includeableRelations } from "@/repositories/business-repository";
 import { getBusinessByIdOrNameService, listBusinessesService, createBusinessService } from "@/services/business-service";
+import { Business } from "@/entities";
 
 
 export const runtime = "nodejs";
@@ -40,10 +41,10 @@ export const GET = withLogging(withDomainErrorBoundary(getBusinesses), "getBusin
 
 type CreateMetadata = {
   business: Omit<BusinessUncheckedCreateInput, "createdById" | "id"> & {
-    createdBy?: unknown;
+    createdBy?: Partial<User>;
     createdById?: string;
   };
-  images?: Array<Record<string, unknown>>;
+  images?: Array<Partial<BusinessImage>>;
 };
 
 async function createBusiness(req: NextRequest) {
@@ -84,4 +85,4 @@ async function createBusiness(req: NextRequest) {
 
 export const POST = withLogging(withDomainErrorBoundary(createBusiness), "createBusiness");
 
-export type BusinessUncheckedCreateInput = any;
+export type BusinessUncheckedCreateInput = Partial<Omit<Business, "id" | "createdAt" | "updatedAt" | "createdById" | "bookmarks" | "foods" | "images" | "tags" | "menuItems" | "reviews">>;

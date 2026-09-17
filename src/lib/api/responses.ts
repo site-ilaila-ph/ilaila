@@ -53,10 +53,8 @@ export interface ProblemDetails {
     detail: string;
     code: string;
     instance?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    errors?: Record<string, any>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    errors?: Record<string, unknown>;
+    [key: string]: unknown;
 }
 
 export interface ProblemDefaults {

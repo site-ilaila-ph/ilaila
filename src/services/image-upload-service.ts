@@ -6,7 +6,7 @@ import { ValidationError } from "@/lib/api/domain-errors";
 
 export interface ImageBlobInput {
   blob: Blob;
-  meta?: Record<string, unknown>;
+  meta?: Partial<BusinessImage>;
 }
 
 export async function uploadImages(input: {
@@ -14,7 +14,7 @@ export async function uploadImages(input: {
   parentId: string;
   files: ImageBlobInput[];
   storage?: StorageManager;
-}): Promise<Array<Record<string, unknown> & { id: string; url: string }>> {
+}): Promise<Array<Partial<BusinessImage> & { id: string; url: string }>> {
   const storage = input.storage ?? acquireStorageManager();
   return Promise.all(
     input.files.map(async (file, i) => {
@@ -30,7 +30,7 @@ export async function uploadImages(input: {
   );
 }
 
-export function assertImagesMatchFiles(metas: unknown[], files: Blob[], context: string): void {
+export function assertImagesMatchFiles(metas: Partial<BusinessImage>[], files: Blob[], context: string): void {
   if (metas.length > 0 && metas.length !== files.length) {
     throw new ValidationError({
       code: "images-files-mismatch",

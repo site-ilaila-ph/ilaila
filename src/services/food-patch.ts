@@ -1,6 +1,17 @@
 import { ValidationError } from "@/lib/api/domain-errors";
+import { QueryFailedError } from "typeorm";
 import { getFoodDetailService, deleteFoodService } from "./food-service";
 import { patchFoodWithImages, type FoodPatchImageInput } from "@/repositories/food-repository";
+
+function getQueryFailedCode(err: unknown): string | undefined {
+  if (err instanceof QueryFailedError) {
+    return (err.driverError as { code?: string })?.code ?? (err as Error & { code?: string }).code;
+  }
+  if (err instanceof Error && (err as Error & { driverError?: { code?: string } }).driverError) {
+    return (err as Error & { driverError: { code?: string } }).driverError?.code ?? (err as Error & { code?: string }).code;
+  }
+  return (err as Error & { code?: string }).code;
+}
 
 export async function patchFoodService(input: {
   id: string;
@@ -23,10 +34,11 @@ export async function patchFoodService(input: {
   try {
     return await patchFoodWithImages(input);
   } catch (err) {
-    if (err instanceof Error && (err as Error & { code?: string }).code === "image-not-found") {
+    const code = getQueryFailedCode(err);
+    if (code === "image-not-found") {
       throw new ValidationError({ code: "image-not-found", detail: err.message });
     }
-    if (err instanceof Error && (err as Error & { code?: string }).code === "image-file-required") {
+    if (code === "image-file-required") {
       throw new ValidationError({ code: "image-file-required", detail: err.message });
     }
     throw err;

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { acquireDatabase } from "@/lib/infra";
 import { createClient } from "@/lib/supabase/server";
 import { badRequestProblem, conflictProblem, created, notFoundProblem, unauthorizedProblem } from "@/lib/api/responses";
+import { QueryFailedError } from "typeorm";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,16 @@ type ReviewInput = {
   value?: number;
 };
 
+function getQueryFailedCode(err: unknown): string | undefined {
+  if (err instanceof QueryFailedError) {
+    return (err.driverError as { code?: string })?.code ?? (err as Error & { code?: string }).code;
+  }
+  if (err instanceof Error && (err as Error & { driverError?: { code?: string } }).driverError) {
+    return (err as Error & { driverError: { code?: string } }).driverError?.code ?? (err as Error & { code?: string }).code;
+  }
+  return (err as Error & { code?: string }).code;
+}
+
 function mapReviewError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
@@ -29,21 +40,22 @@ function mapReviewError(req: NextRequest, error: unknown): NextResponse {
   }
 
   if (error instanceof Error) {
-    if ((error as Error & { code?: string }).code === "P2025") {
+    const code = getQueryFailedCode(error);
+    if (code === "ENTITY_NOT_FOUND") {
       return notFoundProblem(req, {
         code: "review-not-found",
         detail: "The review does not exist.",
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2002") {
+    if (code === "UNIQUE_CONSTRAINT") {
       return conflictProblem(req, {
         code: "review-conflict",
         detail: "A review for this business already exists.",
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2003") {
+    if (code === "FOREIGN_KEY_CONSTRAINT") {
       return badRequestProblem(req, {
         code: "review-invalid-reference",
         detail: "The review references a business or user that does not exist.",
@@ -91,7 +103,7 @@ async function postReview(req: NextRequest) {
     });
   }
 
-  const db = acquireDatabase();
+  const db = await acquireDatabase();
   const reviewer = await db.userData.findFirst({
     select: { id: true },
     where: { authId: authUser.sub },

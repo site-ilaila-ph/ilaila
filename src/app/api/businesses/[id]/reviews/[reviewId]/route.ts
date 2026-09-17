@@ -1,8 +1,10 @@
 
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import { acquireDatabase } from "@/lib/infra";
 import { badRequestProblem, conflictProblem, notFoundProblem, ok } from "@/lib/api/responses";
+import { QueryFailedError } from "typeorm";
+import { Review } from "@/entities";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,6 +21,16 @@ type PatchBody = {
   value?: number;
 };
 
+function getQueryFailedCode(err: unknown): string | undefined {
+  if (err instanceof QueryFailedError) {
+    return (err.driverError as { code?: string })?.code ?? (err as Error & { code?: string }).code;
+  }
+  if (err instanceof Error && (err as Error & { driverError?: { code?: string } }).driverError) {
+    return (err as Error & { driverError: { code?: string } }).driverError?.code ?? (err as Error & { code?: string }).code;
+  }
+  return (err as Error & { code?: string }).code;
+}
+
 function mapReviewDetailError(req: NextRequest, error: unknown): NextResponse {
   if (error instanceof SyntaxError) {
     return badRequestProblem(req, {
@@ -29,21 +41,22 @@ function mapReviewDetailError(req: NextRequest, error: unknown): NextResponse {
   }
 
   if (error instanceof Error) {
-    if ((error as Error & { code?: string }).code === "P2025") {
+    const code = getQueryFailedCode(error);
+    if (code === "ENTITY_NOT_FOUND") {
       return notFoundProblem(req, {
         code: "review-not-found",
         detail: "The review does not exist.",
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2002") {
+    if (code === "UNIQUE_CONSTRAINT") {
       return conflictProblem(req, {
         code: "review-conflict",
         detail: "A review for this business already exists.",
       });
     }
 
-    if ((error as Error & { code?: string }).code === "P2003") {
+    if (code === "FOREIGN_KEY_CONSTRAINT") {
       return badRequestProblem(req, {
         code: "review-invalid-reference",
         detail: "The review references a business or user that does not exist.",
@@ -62,8 +75,6 @@ async function patchReview(req: NextRequest) {
       detail: "PATCH requires multipart/form-data with a 'metadata' part.",
     });
   }
-
-  const db = acquireDatabase();
 
   try {
     const fd = await req.formData();
@@ -85,9 +96,12 @@ async function patchReview(req: NextRequest) {
 
     const { id, upvote, ...reviewFields } = body;
 
-    const data = await db.$transaction(async (tx: TransactionClient) => {
-      const reviewData: BusinessReviewUncheckedUpdateInput = {
-        ...(upvote ? { upvotes: { increment: 1 } } : {}),
+    // TypeORM transaction handling
+    const db = await acquireDatabase();
+    const data = await db.transaction(async (tx) => {
+      const reviewRepo = tx.getRepository(Review);
+      const reviewData: Partial<Review> = {
+        ...(upvote ? { upvotes: (await reviewRepo.findOne({ where: { id } }))?.upvotes ? (await reviewRepo.findOne({ where: { id } }))!.upvotes + 1 : 1 } : {}),
         ...(reviewFields.text !== undefined ? { text: reviewFields.text } : {}),
         ...(reviewFields.foodQuality !== undefined ? { foodQuality: reviewFields.foodQuality } : {}),
         ...(reviewFields.service !== undefined ? { service: reviewFields.service } : {}),
@@ -95,10 +109,8 @@ async function patchReview(req: NextRequest) {
         ...(reviewFields.value !== undefined ? { value: reviewFields.value } : {}),
       };
 
-      const updatedReview = await tx.businessReview.update({
-        where: { id },
-        data: reviewData,
-      });
+      await reviewRepo.update({ id }, reviewData);
+      const updatedReview = await reviewRepo.findOne({ where: { id } });
       return updatedReview;
     });
 
@@ -113,9 +125,9 @@ async function deleteReview(req: NextRequest) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return badRequestProblem(req, { code: "review-id-required", detail: "A review id is required." });
-    const db = acquireDatabase();
+    const db = await acquireDatabase();
 
-    await db.businessReview.delete({ where: { id } });
+    await db.getRepository(Review).delete({ id });
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
     return mapReviewDetailError(req, error);
@@ -123,7 +135,5 @@ async function deleteReview(req: NextRequest) {
 }
 
 export const PATCH = withLogging(withUnhandledApiErrorHandling(patchReview), "patchReview");
-
 export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteReview), "deleteReview");
-export type TransactionClient = any;
-export type BusinessReviewUncheckedUpdateInput = any;
+export type BusinessReviewUncheckedUpdateInput = Partial<Omit<Review, "id" | "businessId" | "userId" | "createdAt" | "updatedAt">>;

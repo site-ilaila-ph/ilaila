@@ -31,7 +31,6 @@ export async function createReview(input: {
   service: number;
   ambiance: number;
   value: number;
-  images?: Array<Record<string, unknown>>;
 }) {
   const db = await acquireDatabase();
   const repo = db.getRepository(Review);

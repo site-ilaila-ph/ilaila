@@ -22,7 +22,7 @@ export async function getFoodDetailService(id: string) {
 
 export async function createFoodService(input: {
   foodFields: FoodUncheckedCreateInput;
-  imagesMeta?: Array<Record<string, unknown>>;
+  imagesMeta?: Array<Partial<FoodImage>>;
   imageFiles?: Blob[];
 }) {
   if (!input.foodFields) {
@@ -38,7 +38,7 @@ export async function createFoodService(input: {
     files: files.map((blob, i) => ({ blob, meta: metas[i] })),
   });
   try {
-    return await createFoodWithImages({ id: foodId, fields: input.foodFields, images: uploaded as never });
+    return await createFoodWithImages({ id: foodId, fields: input.foodFields, images: uploaded as Partial<FoodImage>[] });
   } catch (err) {
     await cleanupUploadedImages({ folder: "foods", parentId: foodId, imageIds: uploaded.map((u) => u.id) });
     throw err;
@@ -49,7 +49,7 @@ export async function createSimpleFoodService(input: Omit<FoodUncheckedCreateInp
   if (!input.name) {
     throw new ValidationError({ code: "food-name-required", detail: "A food name is required." });
   }
-  return createSimpleFood(input as Record<string, unknown>);
+  return createSimpleFood(input as Partial<Food>);
 }
 
 export async function deleteFoodService(id: string) {
@@ -59,4 +59,4 @@ export async function deleteFoodService(id: string) {
   await deleteStorageKeys(keys);
   return deleteFoodById(id);
 }
-export type FoodUncheckedCreateInput = any;
+export type FoodUncheckedCreateInput = Partial<Omit<Food, "id" | "createdAt" | "updatedAt" | "images">>;

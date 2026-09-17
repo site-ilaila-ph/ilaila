@@ -9,12 +9,6 @@ export function HomeLearnMore() {
       </p>
       <div className="flex flex-wrap justify-center gap-3">
         <Link
-          href="/about/the-team"
-          className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
-        >
-          Kilalanin ang koponan
-        </Link>
-        <Link
           href="/about/the-website"
           className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted"
         >

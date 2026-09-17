@@ -19,7 +19,7 @@ export async function findBusinessByIdOrName(idOrName: string) {
   const db = await acquireDatabase();
   return db.getRepository(Business).findOne({ where: [{ id: idOrName }, { name: idOrName }] });
 }
-export async function createBusinessWithImages(input: { id: string; fields: Record<string, unknown>; ownerId: string; images: Record<string, unknown>[] }) {
+export async function createBusinessWithImages(input: { id: string; fields: Partial<Business>; ownerId: string; images: Partial<BusinessImage>[] }) {
   const db = await acquireDatabase();
   return db.getRepository(Business).save({ ...input.fields, id: input.id, createdById: input.ownerId });
 }

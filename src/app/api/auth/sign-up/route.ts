@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { withLogging } from "@/lib/logging";
-import { withUnhandledApiErrorHandling } from "@/lib/error-handling";
+import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
 import {
   badRequestProblem,
   conflictProblem,

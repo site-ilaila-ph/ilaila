@@ -13,6 +13,7 @@ import {
 } from "@/repositories/business-repository";
 import { findFirstUserId } from "@/repositories/user-repository";
 import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
+import { Business } from "@/entities";
 
 export async function listBusinessesService(options: ListOptions, opts?: { includeUnpublished?: boolean }) {
   return listBusinesses(options, opts);
@@ -37,14 +38,13 @@ export async function getBusinessByIdOrNameService(idOrName: string) {
 }
 
 export async function createBusinessService(input: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  businessFields: Record<string, any>;
+  businessFields: Partial<Omit<Business, "id" | "createdAt" | "updatedAt" | "createdById" | "bookmarks" | "foods" | "images" | "tags" | "menuItems" | "reviews">>;
   ownerId?: string;
-  imagesMeta?: Array<Record<string, unknown>>;
+  imagesMeta?: Array<Partial<BusinessImage>>;
   imageFiles?: Blob[];
 }) {
-  const businessFields = { ...input.businessFields };
-  delete (businessFields as Record<string, unknown>).createdBy;
+  const businessFields = { ...input.businessFields } as Partial<Business>;
+  delete (businessFields as Partial<Business>).createdBy;
   let ownerId = input.ownerId;
   if (!ownerId) {
     const fallback = await findFirstUserId();
@@ -68,11 +68,9 @@ export async function createBusinessService(input: {
   try {
     return await createBusinessWithImages({
       id: businessId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      fields: businessFields as any,
+      fields: businessFields,
       ownerId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      images: uploaded as any,
+      images: uploaded,
     });
   } catch (err) {
     await cleanupUploadedImages({ folder: "businesses", parentId: businessId, imageIds: uploaded.map((u) => u.id) });
@@ -106,4 +104,5 @@ export async function deleteBusinessService(id: string) {
   await deleteStorageKeys(keys);
   return deleteBusinessById(id);
 }
-export type BusinessUncheckedCreateInput = any; export type BusinessUncheckedUpdateInput = any;
+export type BusinessUncheckedCreateInput = Partial<Omit<Business, "id" | "createdAt" | "updatedAt" | "createdById" | "bookmarks" | "foods" | "images" | "tags" | "menuItems" | "reviews">>;
+export type BusinessUncheckedUpdateInput = Partial<Omit<Business, "id" | "createdAt" | "updatedAt" | "createdById" | "bookmarks" | "foods" | "images" | "tags" | "menuItems" | "reviews">>;

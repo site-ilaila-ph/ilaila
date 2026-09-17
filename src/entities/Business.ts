@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm";
 import { BusinessBookmark } from "./BusinessBookmark";
 import { BusinessFood } from "./BusinessFood";
-import { BusinessImage } from "./BusinessImage";
+import { Image } from "./Image";
 import { MenuItem } from "./MenuItem";
 import { Review } from "./Review";
 
@@ -52,8 +52,8 @@ export class Business {
   @OneToMany(() => BusinessFood, (bf) => bf.business)
   foods!: BusinessFood[];
 
-  @OneToMany(() => BusinessImage, (bi) => bi.business)
-  images!: BusinessImage[];
+  @OneToMany(() => Image, (img) => img.parentId, { createForeignKeyConstraints: false })
+  images!: Image[];
 
   @OneToMany(() => MenuItem, (m) => m.business)
   menuItems!: MenuItem[];

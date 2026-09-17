@@ -24,7 +24,7 @@ export async function findFoodDetailById(id: string) {
   return db.getRepository(Food).findOne({ where: { id }, relations: { images: true, tags: true, businesses: { business: true } } });
 }
 
-export async function createFoodWithImages(input: { id: string; fields: Record<string, unknown>; images: Array<Record<string, unknown>> }) {
+export async function createFoodWithImages(input: { id: string; fields: Partial<Food>; images: Array<Partial<FoodImage>> }) {
   const db = await acquireDatabase();
   const repo = db.getRepository(Food);
   const food = repo.create({ ...input.fields, id: input.id });
@@ -32,7 +32,7 @@ export async function createFoodWithImages(input: { id: string; fields: Record<s
   return saved;
 }
 
-export async function createSimpleFood(input: Record<string, unknown>) {
+export async function createSimpleFood(input: Partial<Food>) {
   const db = await acquireDatabase();
   const repo = db.getRepository(Food);
   return repo.save({ ...input, id: crypto.randomUUID() });
@@ -50,7 +50,7 @@ export async function deleteFoodById(id: string) {
   return { success: true };
 }
 
-export async function patchFoodWithImages(input: { id: string; foodFields: Record<string, unknown>; images?: FoodPatchImageInput[] }) {
+export async function patchFoodWithImages(input: { id: string; foodFields: Partial<Food>; images?: FoodPatchImageInput[] }) {
   const db = await acquireDatabase();
   const repo = db.getRepository(Food);
   await repo.update({ id: input.id }, input.foodFields);

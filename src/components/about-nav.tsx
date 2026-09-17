@@ -5,7 +5,6 @@ type AboutPageKey = "san-pedro" | "the-team" | "the-website";
 
 const aboutLinks: { key: AboutPageKey; href: string; label: string }[] = [
   { key: "san-pedro", href: "/about/san-pedro", label: "San Pedro" },
-  { key: "the-team", href: "/about/the-team", label: "Ang Koponan" },
   { key: "the-website", href: "/about/the-website", label: "Ang Website" },
 ];
 

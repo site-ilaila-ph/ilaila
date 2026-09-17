@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
 import { isAuthError } from "@supabase/supabase-js";
+import { QueryFailedError } from "typeorm";
 import type { AnyRequestHandler } from "../next-types";
 import {
   badRequestProblem,
@@ -27,21 +28,32 @@ function problemForDomainError(request: NextRequest, err: DomainError): NextResp
   });
 }
 
+function getQueryFailedCode(err: unknown): string | undefined {
+  if (err instanceof QueryFailedError) {
+    return (err.driverError as { code?: string })?.code ?? (err as Error & { code?: string }).code;
+  }
+  if (err instanceof Error && (err as Error & { driverError?: { code?: string } }).driverError) {
+    return (err as Error & { driverError: { code?: string } }).driverError?.code ?? (err as Error & { code?: string }).code;
+  }
+  return (err as Error & { code?: string }).code;
+}
+
 function mapKnownRequestError(request: NextRequest, err: Error & { code?: string }): NextResponse | undefined {
-  switch ((err as Error & { code?: string }).code) {
-    case "P2025":
+  const code = getQueryFailedCode(err);
+  switch (code) {
+    case "ENTITY_NOT_FOUND":
       return notFoundProblem(request, {
         code: "resource-not-found",
         title: "Hindi Nakita",
         detail: "Ang hinahanap mo ay hindi umiiral.",
       });
-    case "P2002":
+    case "UNIQUE_CONSTRAINT":
       return conflictProblem(request, {
         code: "resource-conflict",
         title: "Salungatan",
         detail: "Mayroon na kami niyan.",
       });
-    case "P2003":
+    case "FOREIGN_KEY_CONSTRAINT":
       return badRequestProblem(request, {
         code: "resource-invalid-reference",
         title: "Maling Request",

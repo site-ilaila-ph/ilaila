@@ -16,6 +16,7 @@ import { ErrorAlert } from "@/components/ui/error-alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, ApiProblemError } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
+import { Business } from "@/entities";
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error instanceof ApiProblemError) return error.problem.detail || error.problem.title || fallback;
@@ -69,7 +70,7 @@ export default function BusinessProfilePage({ params }: { params: Promise<{ id: 
   const [reviewImages, setReviewImages] = useState<ReviewImageDraft[]>([]);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
 
-  const businessQuery = useQuery({
+  const businessQuery = useQuery<Business>({
     queryKey: ["business", id],
     queryFn: () => fetchBusiness(id),
   });

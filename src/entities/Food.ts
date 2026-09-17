@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { BusinessFood } from "./BusinessFood";
-import { FoodImage } from "./FoodImage";
+import { Image } from "./Image";
 
 @Entity("foods", { schema: "app" })
 export class Food {
@@ -34,6 +34,6 @@ export class Food {
   @OneToMany(() => BusinessFood, (bf) => bf.food)
   businesses!: BusinessFood[];
 
-  @OneToMany(() => FoodImage, (fi) => fi.food)
-  images!: FoodImage[];
+  @OneToMany(() => Image, (img) => img.parentId, { createForeignKeyConstraints: false })
+  images!: Image[];
 }

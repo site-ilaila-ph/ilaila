@@ -6,7 +6,7 @@
 		"node": "24.x"
 	},
 	"scripts": {
-		"typegen": "pnpm exec prisma generate && pnpm exec next typegen",
+		"typegen": "pnpm exec next typegen",
 		"lint": "pnpm exec eslint --cache",
 		"dev": "pnpm exec next dev",
 		"build": "pnpm exec next build",
