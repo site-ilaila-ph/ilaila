@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
 import { Image } from "@/entities";
 import { acquireStorageManager } from "@/lib/storage";
@@ -7,7 +6,7 @@ import { ImageRepository } from "@/repositories/image-repository";
 
 @injectable()
 export class ImageService {
-  constructor(@inject(TYPES.ImageRepository) private repo: ImageRepository) {}
+  constructor(@inject("ImageRepository") private repo: ImageRepository) {}
 
   async listImagesService(parentType?: string, parentId?: string) {
     return this.repo.listImages(parentType, parentId);

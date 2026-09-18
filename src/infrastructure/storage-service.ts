@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { joinKey } from "@/lib/cache/utils";
 
 export type StorageKey = string | string[];
@@ -70,7 +69,7 @@ export interface StorageManager {
 @injectable()
 export class StorageService implements StorageManager {
   constructor(
-    @inject(TYPES.StorageProvider) private layers: StorageProvider[],
+    @inject("StorageProvider") private layers: StorageProvider[],
   ) {}
 
   private formatKey(key: StorageKey): string {

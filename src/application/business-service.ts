@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import type { ListOptions } from "@/lib/api/list-options";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
 import { BusinessRepository } from "@/repositories/business-repository";
@@ -10,8 +9,8 @@ import { Business } from "@/entities";
 @injectable()
 export class BusinessService {
   constructor(
-    @inject(TYPES.BusinessRepository) private repo: BusinessRepository,
-    @inject(TYPES.UserRepository) private userRepo: UserRepository,
+    @inject("BusinessRepository") private repo: BusinessRepository,
+    @inject("UserRepository") private userRepo: UserRepository,
   ) {}
 
   async listBusinessesService(options: ListOptions, opts?: { includeUnpublished?: boolean }) {

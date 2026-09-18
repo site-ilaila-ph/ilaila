@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { ValidationError } from "@/lib/api/domain-errors";
 import { FoodRepository } from "@/repositories/food-repository";
 import { uploadImages, assertImagesMatchFiles, cleanupUploadedImages, collectEntityStorageKeys, deleteStorageKeys } from "./image-upload-service";
@@ -7,7 +6,7 @@ import { Food, Image } from "@/entities";
 
 @injectable()
 export class FoodService {
-  constructor(@inject(TYPES.FoodRepository) private repo: FoodRepository) {}
+  constructor(@inject("FoodRepository") private repo: FoodRepository) {}
 
   async listFoodsService() {
     return this.repo.listFoods();

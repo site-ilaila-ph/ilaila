@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { ValidationError, UnauthorizedError } from "@/lib/api/domain-errors";
 import { ReviewRepository } from "@/repositories/review-repository";
 import { AppReviewRepository } from "@/repositories/app-review-repository";
@@ -9,10 +8,10 @@ import { ManagementRepository } from "@/repositories/management-repository";
 @injectable()
 export class ManagementService {
   constructor(
-    @inject(TYPES.ReviewRepository) private reviewRepo: ReviewRepository,
-    @inject(TYPES.AppReviewRepository) private appReviewRepo: AppReviewRepository,
-    @inject(TYPES.UserRepository) private userRepo: UserRepository,
-    @inject(TYPES.ManagementRepository) private mgmtRepo: ManagementRepository,
+    @inject("ReviewRepository") private reviewRepo: ReviewRepository,
+    @inject("AppReviewRepository") private appReviewRepo: AppReviewRepository,
+    @inject("UserRepository") private userRepo: UserRepository,
+    @inject("ManagementRepository") private mgmtRepo: ManagementRepository,
   ) {}
 
   async listAllReviewsService() {

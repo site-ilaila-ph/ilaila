@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { joinKey } from "@/utils/join-key";
 import { after } from "next/server";
 import { LRUCache } from "lru-cache";
@@ -54,8 +53,8 @@ export class MemoryCacheService implements CacheLayer {
 @injectable()
 export class CacheService implements CacheManager {
   constructor(
-    @inject(TYPES.MemoryCache) private l1: CacheLayer,
-    @inject(TYPES.UpstashCache) private l2: CacheLayer | null,
+    @inject("MemoryCache") private l1: CacheLayer,
+    @inject("UpstashCache") private l2: CacheLayer | null,
   ) {}
 
   private formatKey(key: CacheKey): string {

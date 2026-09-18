@@ -1,5 +1,4 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { ValidationError, NotFoundError } from "@/lib/api/domain-errors";
 import { Resource } from "@/entities";
 import { acquireStorageManager } from "@/lib/storage";
@@ -7,7 +6,7 @@ import { ResourceRepository } from "@/repositories/resource-repository";
 
 @injectable()
 export class ResourceService {
-  constructor(@inject(TYPES.ResourceRepository) private repo: ResourceRepository) {}
+  constructor(@inject("ResourceRepository") private repo: ResourceRepository) {}
 
   async listResourcesService() {
     return this.repo.listResources();

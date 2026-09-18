@@ -1,11 +1,10 @@
 import { injectable, inject } from "inversify";
-import { TYPES } from "@/lib/types";
 import { ValidationError } from "@/lib/api/domain-errors";
 import { ReviewRepository } from "@/repositories/review-repository";
 
 @injectable()
 export class ReviewService {
-  constructor(@inject(TYPES.ReviewRepository) private repo: ReviewRepository) {}
+  constructor(@inject("ReviewRepository") private repo: ReviewRepository) {}
 
   async listReviewsService(businessId?: string) {
     if (businessId) {
