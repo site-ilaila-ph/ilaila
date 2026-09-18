@@ -1,60 +1,113 @@
-import { acquireDatabase } from "@/lib/database";
 import { AppReview } from "@/entities";
+import { injectable } from "inversify";
+import { DataSource } from "typeorm";
 
-export async function listAppReviews() {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  return repo.find({ order: { createdAt: "DESC" } });
-}
+@injectable()
+export class AppReviewRepository {
+  public constructor(
+    private readonly db: DataSource,
+  ) { }
 
-export async function createAppReview(input: { userId?: string; userName?: string; email?: string; rating: number; text: string }) {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  await repo.insert({ id: crypto.randomUUID(), ...input });
-}
+  private get repo() {
+    return this.db.getRepository(AppReview);
+  }
 
-export async function updateAppReviewStatus(id: string, isApproved: boolean) {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  return repo.update({ id }, { isApproved });
-}
+  async listAppReviews() {
+    return this.repo.find({
+      order: {
+        createdAt: "DESC",
+      },
+    });
+  }
 
-export async function deleteAppReview(id: string) {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  await repo.delete({ id });
-  return { success: true };
-}
+  async createAppReview(input: {
+    userId?: string;
+    userName?: string;
+    email?: string;
+    rating: number;
+    text: string;
+  }) {
+    return this.repo.insert({
+      id: crypto.randomUUID(),
+      ...input,
+    });
+  }
 
-export async function getAppReviewStats() {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  const [total, approved, pending, avg] = await Promise.all([
-    repo.count(),
-    repo.count({ where: { isApproved: true } }),
-    repo.count({ where: { isApproved: false } }),
-    repo.createQueryBuilder("appReview").select("AVG(appReview.rating)", "avg").getRawOne(),
-  ]);
-  return {
-    total,
-    approved,
-    pending,
-    averageRating: avg?.avg ?? 0,
-  };
-}
+  async updateAppReviewStatus(
+    id: string,
+    isApproved: boolean,
+  ) {
+    return this.repo.update(
+      { id },
+      { isApproved },
+    );
+  }
 
-export async function getAllAppReviews() {
-  return listAppReviews();
-}
+  async deleteAppReview(id: string) {
+    await this.repo.delete({ id });
 
-export async function getApprovedAppReviews() {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  return repo.find({ where: { isApproved: true }, order: { createdAt: "DESC" } });
-}
+    return {
+      success: true,
+    };
+  }
 
-export async function getPendingAppReviews() {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(AppReview);
-  return repo.find({ where: { isApproved: false }, order: { createdAt: "DESC" } });
+  async getAppReviewStats() {
+    const [total, approved, pending, avg] =
+      await Promise.all([
+        this.repo.count(),
+
+        this.repo.count({
+          where: {
+            isApproved: true,
+          },
+        }),
+
+        this.repo.count({
+          where: {
+            isApproved: false,
+          },
+        }),
+
+        this.repo
+          .createQueryBuilder("appReview")
+          .select(
+            "AVG(appReview.rating)",
+            "avg",
+          )
+          .getRawOne<{ avg: string | null }>(),
+      ]);
+
+    return {
+      total,
+      approved,
+      pending,
+      averageRating: avg?.avg ?? 0,
+    };
+  }
+
+  async getAllAppReviews() {
+    return this.listAppReviews();
+  }
+
+  async getApprovedAppReviews() {
+    return this.repo.find({
+      where: {
+        isApproved: true,
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
+  }
+
+  async getPendingAppReviews() {
+    return this.repo.find({
+      where: {
+        isApproved: false,
+      },
+      order: {
+        createdAt: "DESC",
+      },
+    });
+  }
 }

@@ -4,12 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Route } from "next";
 import { Search } from "lucide-react";
-import { ManagementHeader } from "@/components/management-header";
-import { BusinessForm, type BusinessFormData, type BusinessFormImage } from "@/components/business-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ErrorAlert } from "@/components/ui/error-alert";
-import { Input } from "@/components/ui/input";
+import { ManagementHeader } from "@/presentation/management-header";
+import { BusinessForm, type BusinessFormData, type BusinessFormImage } from "@/presentation/business-form";
+import { Button } from "@/presentation/ui/button";
+import { Card, CardContent } from "@/presentation/ui/card";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
+import { Input } from "@/presentation/ui/input";
 import { readProblemMessage } from "@/lib/api/client";
 
 interface Business {
@@ -47,7 +47,7 @@ export default function ManageBusinesses() {
 
   const [formImages, setFormImages] = useState<BusinessFormImage[]>([]);
 
-  
+
   const loadBusinesses = useCallback(async function() {
     try {
       const url = searchQuery

@@ -1,10 +1,9 @@
 
 import { withLogging } from "@/lib/logging";
 import { withUnhandledApiErrorHandling } from "@/lib/api/errors";
-import { acquireDatabase } from "@/lib/infra";
 import { badRequestProblem, conflictProblem, notFoundProblem, ok } from "@/lib/api/responses";
 import { QueryFailedError } from "typeorm";
-import { Review } from "@/entities";
+import { updateReviewService, deleteReviewService } from "@/services/review-service";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -96,24 +95,7 @@ async function patchReview(req: NextRequest) {
 
     const { id, upvote, ...reviewFields } = body;
 
-    // TypeORM transaction handling
-    const db = await acquireDatabase();
-    const data = await db.transaction(async (tx) => {
-      const reviewRepo = tx.getRepository(Review);
-      const reviewData: Partial<Review> = {
-        ...(upvote ? { upvotes: (await reviewRepo.findOne({ where: { id } }))?.upvotes ? (await reviewRepo.findOne({ where: { id } }))!.upvotes + 1 : 1 } : {}),
-        ...(reviewFields.text !== undefined ? { text: reviewFields.text } : {}),
-        ...(reviewFields.foodQuality !== undefined ? { foodQuality: reviewFields.foodQuality } : {}),
-        ...(reviewFields.service !== undefined ? { service: reviewFields.service } : {}),
-        ...(reviewFields.ambiance !== undefined ? { ambiance: reviewFields.ambiance } : {}),
-        ...(reviewFields.value !== undefined ? { value: reviewFields.value } : {}),
-      };
-
-      await reviewRepo.update({ id }, reviewData);
-      const updatedReview = await reviewRepo.findOne({ where: { id } });
-      return updatedReview;
-    });
-
+    const data = await updateReviewService(id, upvote ? { upvote: true } : (reviewFields as Partial<{ text?: string; foodQuality?: number; service?: number; ambiance?: number; value?: number; upvote?: boolean }>));
     return ok(data);
   } catch (error: unknown) {
     return mapReviewDetailError(req, error);
@@ -125,9 +107,7 @@ async function deleteReview(req: NextRequest) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return badRequestProblem(req, { code: "review-id-required", detail: "A review id is required." });
-    const db = await acquireDatabase();
-
-    await db.getRepository(Review).delete({ id });
+    await deleteReviewService(id);
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: unknown) {
     return mapReviewDetailError(req, error);
@@ -136,4 +116,4 @@ async function deleteReview(req: NextRequest) {
 
 export const PATCH = withLogging(withUnhandledApiErrorHandling(patchReview), "patchReview");
 export const DELETE = withLogging(withUnhandledApiErrorHandling(deleteReview), "deleteReview");
-export type BusinessReviewUncheckedUpdateInput = Partial<Omit<Review, "id" | "businessId" | "userId" | "createdAt" | "updatedAt">>;
+export type BusinessReviewUncheckedUpdateInput = Partial<Omit<import("@/entities").Review, "id" | "businessId" | "userId" | "createdAt" | "updatedAt">>;

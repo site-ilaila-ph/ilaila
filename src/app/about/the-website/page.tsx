@@ -1,7 +1,7 @@
 'use client';
 
-import { AboutShell } from "@/components/about-shell";
-import { WebsitePoints } from "@/components/website-points";
+import { AboutShell } from "@/presentation/about-shell";
+import { WebsitePoints } from "@/presentation/website-points";
 
 const websitePoints = [
   {

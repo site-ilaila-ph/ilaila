@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
-import { ManagementHeader } from "@/components/management-header";
-import { ManagementSearchBar } from "@/components/management-search-bar";
-import { ManagementReviewCard, type ManagementReviewItem } from "@/components/management-review-card";
-import { Card, CardContent } from "@/components/ui/card";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { ManagementHeader } from "@/presentation/management-header";
+import { ManagementSearchBar } from "@/presentation/management-search-bar";
+import { ManagementReviewCard, type ManagementReviewItem } from "@/presentation/management-review-card";
+import { Card, CardContent } from "@/presentation/ui/card";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
 export default function ManageReviews() {

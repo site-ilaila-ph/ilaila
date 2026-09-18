@@ -1,31 +1,34 @@
-import { acquireDatabase } from "@/lib/database";
+import { injectable } from "inversify";
+import { DataSource } from "typeorm";
 import { Resource } from "@/entities";
 
-export async function listResources() {
-  const db = await acquireDatabase();
-  return db.getRepository(Resource).find({ order: { createdAt: "DESC" } });
-}
+@injectable()
+export class ResourceRepository {
+  public constructor(private readonly db: DataSource) {}
 
-export async function findResourceById(id: string) {
-  const db = await acquireDatabase();
-  return db.getRepository(Resource).findOne({ where: { id } });
-}
+  private get repo() {
+    return this.db.getRepository(Resource);
+  }
 
-export async function createResource(input: Partial<Resource> & { id?: string }) {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(Resource);
-  return repo.save({ ...input, id: input.id ?? crypto.randomUUID() });
-}
+  async listResources() {
+    return this.repo.find({ order: { createdAt: "DESC" } });
+  }
 
-export async function updateResource(id: string, input: Partial<Resource>) {
-  const db = await acquireDatabase();
-  const repo = db.getRepository(Resource);
-  await repo.update({ id }, input);
-  return repo.findOne({ where: { id } });
-}
+  async findResourceById(id: string) {
+    return this.repo.findOne({ where: { id } });
+  }
 
-export async function deleteResourceById(id: string) {
-  const db = await acquireDatabase();
-  await db.getRepository(Resource).delete({ id });
-  return { success: true };
+  async createResource(input: Partial<Resource> & { id?: string }) {
+    return this.repo.save({ ...input, id: input.id ?? crypto.randomUUID() });
+  }
+
+  async updateResource(id: string, input: Partial<Resource>) {
+    await this.repo.update({ id }, input);
+    return this.repo.findOne({ where: { id } });
+  }
+
+  async deleteResourceById(id: string) {
+    await this.repo.delete({ id });
+    return { success: true };
+  }
 }

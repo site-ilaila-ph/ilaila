@@ -3,12 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { MoreHorizontal, Trash2, Utensils } from "lucide-react";
-import { ManagementHeader } from "@/components/management-header";
-import { ManagementSearchBar } from "@/components/management-search-bar";
-import { FoodForm, type FoodFormData, type FoodFormImage } from "@/components/food-form";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { ManagementHeader } from "@/presentation/management-header";
+import { ManagementSearchBar } from "@/presentation/management-search-bar";
+import { FoodForm, type FoodFormData, type FoodFormImage } from "@/presentation/food-form";
+import { Button } from "@/presentation/ui/button";
+import { Card, CardContent } from "@/presentation/ui/card";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
 interface Food {

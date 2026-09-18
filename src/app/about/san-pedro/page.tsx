@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
-import { AboutShell } from "@/components/about-shell";
-import { SanPedroStats } from "@/components/san-pedro-stats";
-import { SanPedroMilestones } from "@/components/san-pedro-milestones";
-import { SanPedroCulture } from "@/components/san-pedro-culture";
-import { SanPedroBarangays } from "@/components/san-pedro-barangays";
+import { AboutShell } from "@/presentation/about-shell";
+import { SanPedroStats } from "@/presentation/san-pedro-stats";
+import { SanPedroMilestones } from "@/presentation/san-pedro-milestones";
+import { SanPedroCulture } from "@/presentation/san-pedro-culture";
+import { SanPedroBarangays } from "@/presentation/san-pedro-barangays";
 
 const stats = [
   { label: "Lawak ng lupa", value: "24.05 km²" },
@@ -49,7 +49,7 @@ const milestones = [
 export default function SanPedroPage() {
   useEffect(() => {
     const images = document.querySelectorAll('.scroll-fade');
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

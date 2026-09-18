@@ -1,10 +1,10 @@
 "use client";
 
-import LandingCta from "@/components/cta";
-import LandingFeatures from "@/components/features";
-import LandingHero from "@/components/hero";
-import LandingNav from "@/components/nav";
-import LandingWhy from "@/components/why";
+import LandingCta from "@/presentation/cta";
+import LandingFeatures from "@/presentation/features";
+import LandingHero from "@/presentation/hero";
+import LandingNav from "@/presentation/nav";
+import LandingWhy from "@/presentation/why";
 import { useEffect } from "react";
 
 const revealSelector = ".landing-reveal";

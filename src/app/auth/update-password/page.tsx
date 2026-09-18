@@ -1,5 +1,5 @@
-import { AuthLayout } from "@/components/auth-layout";
-import { UpdatePasswordForm } from "@/components/update-password-form";
+import { AuthLayout } from "@/presentation/auth-layout";
+import { UpdatePasswordForm } from "@/presentation/update-password-form";
 
 export default function Page() {
   return (

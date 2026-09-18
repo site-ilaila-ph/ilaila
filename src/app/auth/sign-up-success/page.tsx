@@ -1,5 +1,5 @@
-import { AuthLayout } from "@/components/auth-layout";
-import { Button } from "@/components/ui/button";
+import { AuthLayout } from "@/presentation/auth-layout";
+import { Button } from "@/presentation/ui/button";
 import {
   Card,
   CardAction,
@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/presentation/ui/card";
 import Link from "next/link";
 
 export default function Page() {

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AppNav } from "@/components/app-nav";
-import { AppReviewForm } from "@/components/app-review-form";
-import { Card, CardContent } from "@/components/ui/card";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { AppNav } from "@/presentation/app-nav";
+import { AppReviewForm } from "@/presentation/app-review-form";
+import { Card, CardContent } from "@/presentation/ui/card";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { api } from "@/lib/api/client";
 
 export default function AppReviewsPage() {

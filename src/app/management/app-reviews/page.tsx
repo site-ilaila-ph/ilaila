@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { Button } from "@/presentation/ui/button";
+import { Card, CardContent } from "@/presentation/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/ui/tabs";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
 interface AppReview {
@@ -192,7 +192,7 @@ export default function ManageAppReviews() {
                               </span>
                               <span className="text-muted-foreground">/5</span>
                             </div>
-                            <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold" 
+                            <div className="inline-block rounded-full px-3 py-1 text-xs font-semibold"
                               style={{
                                 backgroundColor: review.isApproved ? "var(--color-success)" : "var(--color-warning)",
                                 color: "white"

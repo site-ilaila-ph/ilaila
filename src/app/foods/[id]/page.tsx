@@ -3,11 +3,11 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { AppNav } from "@/components/app-nav";
-import { FoodHero } from "@/components/food-hero";
-import { FoodGallery } from "@/components/food-gallery";
-import { ImageLightbox, type LightboxImage } from "@/components/image-lightbox";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { AppNav } from "@/presentation/app-nav";
+import { FoodHero } from "@/presentation/food-hero";
+import { FoodGallery } from "@/presentation/food-gallery";
+import { ImageLightbox, type LightboxImage } from "@/presentation/image-lightbox";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { api, ApiProblemError } from "@/lib/api/client";
 import { FoodWithRelations } from "../types";
 

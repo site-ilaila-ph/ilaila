@@ -1,5 +1,5 @@
-import { AuthLayout } from "@/components/auth-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuthLayout } from "@/presentation/auth-layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/ui/card";
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ error: string }> }) {
   const params = await searchParams;

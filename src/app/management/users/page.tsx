@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
-import { ManagementHeader } from "@/components/management-header";
-import { ManagementSearchBar } from "@/components/management-search-bar";
-import { UsersTable, FilterButton, type ManagementUser } from "@/components/users-table";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { ManagementHeader } from "@/presentation/management-header";
+import { ManagementSearchBar } from "@/presentation/management-search-bar";
+import { UsersTable, FilterButton, type ManagementUser } from "@/presentation/users-table";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
 export default function ManageUsers() {

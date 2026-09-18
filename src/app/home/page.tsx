@@ -3,10 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { AppNav } from "@/components/app-nav";
-import { HomeCategoryCards } from "@/components/home-category-cards";
-import { HomeLearnMore } from "@/components/home-learn-more";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { AppNav } from "@/presentation/app-nav";
+import { HomeCategoryCards } from "@/presentation/home-category-cards";
+import { HomeLearnMore } from "@/presentation/home-learn-more";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import type { BusinessListItem } from "@/app/businesses/types";
 import type { FoodListItem } from "@/app/foods/types";

@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Utensils } from "lucide-react";
-import { AppNav } from "@/components/app-nav";
-import { FoodCard } from "@/components/food-card";
-import { Input } from "@/components/ui/input";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { AppNav } from "@/presentation/app-nav";
+import { FoodCard } from "@/presentation/food-card";
+import { Input } from "@/presentation/ui/input";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 import type { FoodListItem } from "./types";
 

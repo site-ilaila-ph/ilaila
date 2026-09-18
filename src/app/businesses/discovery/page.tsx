@@ -4,15 +4,15 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
-import { AppNav } from "@/components/app-nav";
-import { BusinessCard, ratingFor } from "@/components/business-card";
+import { AppNav } from "@/presentation/app-nav";
+import { BusinessCard, ratingFor } from "@/presentation/business-card";
 
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/presentation/ui/skeleton";
 import { api, ApiProblemError } from "@/lib/api/client";
 import type { BusinessListItem } from "../types";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/presentation/ui/input-group";
 
 async function fetchBusinesses(): Promise<BusinessListItem[]> {
   return api<BusinessListItem[]>("/api/businesses");

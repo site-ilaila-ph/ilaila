@@ -1,11 +1,11 @@
 "use client";
-import { ManagementCard } from "@/components/management-card";
-import { ManagementHeader } from "@/components/management-header";
-import { StatCard } from "@/components/stat-card";
-import { SummaryStat } from "@/components/summary-stat";
+import { ManagementCard } from "@/presentation/management-card";
+import { ManagementHeader } from "@/presentation/management-header";
+import { StatCard } from "@/presentation/stat-card";
+import { SummaryStat } from "@/presentation/summary-stat";
 import { CircleUserRound, Users, Store, Utensils, MessageSquareText, ClipboardList, CheckCircle2, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { ErrorAlert } from "@/components/ui/error-alert";
+import { ErrorAlert } from "@/presentation/ui/error-alert";
 import { readProblemMessage } from "@/lib/api/client";
 
 export default function Page() {
