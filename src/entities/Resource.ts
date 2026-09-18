@@ -5,24 +5,24 @@ export class Resource {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "text" })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   pathname!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   url!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   contentType!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "int", nullable: true })
   size!: number | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp" })
   updatedAt!: Date;
 }

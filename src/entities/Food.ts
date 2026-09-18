@@ -7,7 +7,7 @@ export class Food {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "text" })
   name!: string;
 
   @Column({ type: "text" })
@@ -28,7 +28,7 @@ export class Food {
   @Column({ type: "boolean" })
   isHeritage!: boolean;
 
-  @Column("simple-array", { nullable: true })
+  @Column({ type: "text", array: true, nullable: true })
   tags!: string[];
 
   @OneToMany(() => BusinessFood, (bf) => bf.food)

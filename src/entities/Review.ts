@@ -31,10 +31,10 @@ export class Review {
   @Column({ type: "int", default: 0 })
   upvotes!: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp" })
   updatedAt!: Date;
 
   @ManyToOne(() => Business, (b) => b.reviews)

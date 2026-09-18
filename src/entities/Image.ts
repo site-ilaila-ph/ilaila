@@ -5,13 +5,13 @@ export class Image {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "text" })
   description!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   url!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   parentType!: string | null;
 
   @Column({ type: "uuid", nullable: true })

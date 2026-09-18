@@ -5,7 +5,6 @@ export { BusinessFood } from "./BusinessFood";
 export { Food } from "./Food";
 export { MenuItem } from "./MenuItem";
 export { Review } from "./Review";
-export { User } from "./User";
+export { User, UserRoleEnum } from "./User";
 export { Image } from "./Image";
 export { Resource } from "./Resource";
-export { UserData, UserRoleEnum } from "./UserData";

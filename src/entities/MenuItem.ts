@@ -9,10 +9,10 @@ export class MenuItem {
   @Column({ type: "uuid" })
   businessId!: string;
 
-  @Column()
+  @Column({ type: "text" })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   description!: string | null;
 
   @Column({ type: "decimal" })

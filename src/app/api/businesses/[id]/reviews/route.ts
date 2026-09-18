@@ -6,6 +6,7 @@ import { acquireDatabase } from "@/lib/infra";
 import { createClient } from "@/lib/supabase/server";
 import { badRequestProblem, conflictProblem, created, notFoundProblem, unauthorizedProblem } from "@/lib/api/responses";
 import { QueryFailedError } from "typeorm";
+import { Review, User } from "@/entities";
 
 export const runtime = "nodejs";
 
@@ -104,10 +105,9 @@ async function postReview(req: NextRequest) {
   }
 
   const db = await acquireDatabase();
-  const reviewer = await db.userData.findFirst({
-    select: { id: true },
-    where: { authId: authUser.sub },
-  });
+  const repo = db.getRepository(User);
+  const reviewer = await repo.findOne({ where: { id: authUser.sub } });
+
   if (!reviewer) {
     return badRequestProblem(req, {
       code: "review-user-required",
@@ -119,19 +119,19 @@ async function postReview(req: NextRequest) {
   const reviewId = crypto.randomUUID();
 
   try {
-    const review = await db.businessReview.create({
-      data: {
-        id: reviewId,
-        businessId,
-        userId: reviewerId,
-        text,
-        foodQuality,
-        service,
-        ambiance,
-        value,
-        upvotes: 0,
-      },
+    const reviewRepo = db.getRepository(Review);
+    const review = reviewRepo.create({
+      id: reviewId,
+      businessId,
+      userId: reviewerId,
+      text,
+      foodQuality,
+      service,
+      ambiance,
+      value,
+      upvotes: 0,
     });
+    await reviewRepo.insert(review);
 
     return created(review);
   } catch (error: unknown) {

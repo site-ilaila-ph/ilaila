@@ -10,7 +10,7 @@ export class Business {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "text" })
   name!: string;
 
   @Column({ type: "text" })
@@ -25,7 +25,7 @@ export class Business {
   @Column({ type: "uuid" })
   createdById!: string;
 
-  @Column()
+  @Column({ type: "text" })
   address!: string;
 
   @Column({ type: "float" })
@@ -34,16 +34,16 @@ export class Business {
   @Column({ type: "float" })
   longitude!: number;
 
-  @Column()
+  @Column({ type: "text" })
   hours!: string;
 
-  @Column("simple-array", { nullable: true })
+  @Column({ type: "text", array: true, nullable: true })
   tags!: string[];
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp" })
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp" })
   updatedAt!: Date;
 
   @OneToMany(() => BusinessBookmark, (b) => b.business)

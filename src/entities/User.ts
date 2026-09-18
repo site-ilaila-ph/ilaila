@@ -1,4 +1,9 @@
-import { ViewEntity, ViewColumn } from "typeorm";
+import { ViewEntity, ViewColumn, PrimaryColumn } from "typeorm";
+
+export enum UserRoleEnum {
+  viewer = "viewer",
+  admin = "admin",
+}
 
 @ViewEntity({
   name: "user_view",
@@ -6,13 +11,14 @@ import { ViewEntity, ViewColumn } from "typeorm";
 })
 export class User {
   @ViewColumn()
+  @PrimaryColumn("uuid")
+  id!: string;
+
+  @ViewColumn()
   authId!: string;
 
   @ViewColumn()
   email!: string | null;
-
-  @ViewColumn()
-  id!: string | null;
 
   @ViewColumn()
   role!: string | null;

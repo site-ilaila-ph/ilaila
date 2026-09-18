@@ -8,10 +8,10 @@ export class AppReview {
   @Column({ type: "uuid", nullable: true })
   userId!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   userName!: string | null;
 
-  @Column({ nullable: true })
+  @Column({ type: "text", nullable: true })
   email!: string | null;
 
   @Column({ type: "int", default: 5 })

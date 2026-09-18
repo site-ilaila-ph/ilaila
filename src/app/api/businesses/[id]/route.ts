@@ -13,12 +13,12 @@ import {
   notFoundProblem,
   ok,
 } from "@/lib/api/responses";
-import { Business, BusinessImage } from "@/entities";
+import { Business, Image } from "@/entities";
 import { QueryFailedError } from "typeorm";
 
-type BusinessImageUpdate = Partial<Omit<BusinessImage, "id" | "businessId">>;
+type BusinessImageUpdate = Partial<Omit<Image, "id" | "businessId">>;
 
-type BusinessImageRowToCreate = Omit<BusinessImage, "business">;
+type BusinessImageRowToCreate = Omit<Image, "business">;
 
 type PatchImageInput = BusinessImageUpdate & {
   id: string;
@@ -159,7 +159,7 @@ async function patchBusiness(req: NextRequest, { params }: { params: Promise<{ i
     // touching storage/DB.
     const referencedIds = [...toUpdate, ...toRemove].map((img) => img.id);
     if (referencedIds.length > 0) {
-      const imageRepo = (await acquireDatabase()).getRepository(BusinessImage);
+      const imageRepo = (await acquireDatabase()).getRepository(Image);
     const existingImages = await imageRepo.find({
       where: { id: { in: referencedIds }, businessId: businessId },
       select: { id: true },
